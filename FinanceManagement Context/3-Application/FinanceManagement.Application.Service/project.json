@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "FinanceManagement.Domain": "1.0.0-*",
+    "FinanceManagement.Web.Model": "1.0.0-*",
+    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0-rc2-final",
+    "NETStandard.Library": "1.5.0-rc2-24027",
+    "System.Domain": "1.0.0-*",
+    "System.Infrastructure.CrossCutting": "1.0.0-*",
+    "System.Infrastructure.Crosscutting.Framework": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "netstandard1.5": {
+      "imports": "dnxcore50"
+    }
+  }
+}
