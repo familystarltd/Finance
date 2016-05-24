@@ -192,39 +192,6 @@ namespace FinanceManagement.WebAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.InnerException != null ? ex.InnerException : ex);
             }
         }
-
-        //[HttpPost]
-        //[Route("UploadBankHolidayFile")]
-        //public HttpResponseMessage UploadBankHolidayFile()
-        //{
-        //    try
-        //    {
-        //        foreach (string fileName in this.ActionContext.HttpContext.Request.Files)
-        //        {
-        //            System.Web.HttpPostedFile file = this.ActionContext.HttpContext.Request.Files[fileName];
-        //            if (file == null) break;
-        //            if (file.FileName.IndexOf(".ics") != -1)
-        //            {
-        //                var fileSavePath = FinanceManagement.Application.Service.Settings.AppSetting.BankHolidayOfflineSourceFile;
-        //                if (!string.IsNullOrEmpty(fileSavePath) && fileSavePath.Contains("|DataDirectory|"))
-        //                {
-        //                    fileSavePath = fileSavePath.Replace("|DataDirectory|", string.Format("{0}/", AppDomain.CurrentDomain.GetData("DataDirectory").ToString()));
-        //                }
-        //                else
-        //                {
-        //                    string.Format("{0}/{1}", AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), file.FileName);
-        //                }
-        //                // Save the uploaded file to "UploadedFiles" folder
-        //                file.SaveAs(fileSavePath);
-        //            }
-        //        }
-        //        return Request.CreateResponse(HttpStatusCode.OK);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.InnerException != null ? ex.InnerException : ex);
-        //    }
-        //}
         #endregion
 
         #region COMPANY

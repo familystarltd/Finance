@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using Microsoft.Data.Entity.Metadata.Internal;
 
 namespace System.Infrastructure.Data
 {

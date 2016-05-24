@@ -6,7 +6,7 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>e3b90b44-29d9-442f-bdfc-42cadac4dbbe</ProjectGuid>
+    <ProjectGuid>7f1da34e-e7f0-4829-bc26-1c2c6a16f609</ProjectGuid>
     <RootNamespace>FinanceManagement.WebAPI</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
@@ -16,9 +16,4 @@
     <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DotNet.Web\Microsoft.DotNet.Web.targets" Condition="'$(VSToolsPath)' != ''" />
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties appsettings_1json__JSONSchema="sett" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

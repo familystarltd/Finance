@@ -54,7 +54,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "FinanceManagement.WebAPIPro
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "FinanceManagement.Application.Service", "FinanceManagement Context\3-Application\FinanceManagement.Application.Service\FinanceManagement.Application.Service.xproj", "{5AE09981-EBFE-4807-ADAC-7EC8BA637E34}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "FinanceManagement.WebAPI", "FinanceManagement Context\2-Distributed Services\FinanceManagement.WebAPI\FinanceManagement.WebAPI.xproj", "{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "FinanceManagement.WebAPI", "FinanceManagement Context\2-Distributed Services\FinanceManagement.WebAPI\FinanceManagement.WebAPI.xproj", "{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -106,10 +106,10 @@ Global
 		{5AE09981-EBFE-4807-ADAC-7EC8BA637E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AE09981-EBFE-4807-ADAC-7EC8BA637E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AE09981-EBFE-4807-ADAC-7EC8BA637E34}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +136,6 @@ Global
 		{DA86719E-F64E-47BC-B187-5D69D93A8552} = {39747AA2-6B8E-407D-8FAF-7CBC9251F9CB}
 		{01838379-1218-4D80-A403-097A76FD7F24} = {39747AA2-6B8E-407D-8FAF-7CBC9251F9CB}
 		{5AE09981-EBFE-4807-ADAC-7EC8BA637E34} = {228DB2C2-3054-4CEE-B34B-D865785E76C1}
-		{E3B90B44-29D9-442F-BDFC-42CADAC4DBBE} = {FED90B4B-C4FE-44A5-AE55-4454448F509A}
+		{7F1DA34E-E7F0-4829-BC26-1C2C6A16F609} = {3EC995BC-6FCE-4F44-9F4E-26645D487141}
 	EndGlobalSection
 EndGlobal
