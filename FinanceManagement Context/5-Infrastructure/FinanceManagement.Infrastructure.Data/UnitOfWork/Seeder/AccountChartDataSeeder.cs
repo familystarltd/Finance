@@ -7,8 +7,8 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork
 {
     class AccountChartDataSeeder
     {
-        FinanceManagementContext context;
-        public AccountChartDataSeeder(FinanceManagementContext context)
+        FinanceManagementDbContext context;
+        public AccountChartDataSeeder(FinanceManagementDbContext context)
         {
             this.context = context;
         }

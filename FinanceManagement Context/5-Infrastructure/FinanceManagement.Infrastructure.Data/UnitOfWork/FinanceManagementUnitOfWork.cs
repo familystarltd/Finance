@@ -13,9 +13,10 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
     using System.Reflection;
-    public class FinanceManagementContext : DbContext, IQueryableUnitOfWork
+    public class FinanceManagementDbContext : DbContext, IQueryableUnitOfWork
     {
-        public FinanceManagementContext(DbContextOptions<FinanceManagementContext> options) : base(options)
+        public string ConnectionString { get; set; }
+        public FinanceManagementDbContext(DbContextOptions<FinanceManagementDbContext> options) : base(options)
         {
             
         }

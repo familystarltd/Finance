@@ -6,8 +6,8 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork
 {
     class ExpensesDataSeeder
     {
-        FinanceManagementContext context;
-        public ExpensesDataSeeder(FinanceManagementContext context)
+        FinanceManagementDbContext context;
+        public ExpensesDataSeeder(FinanceManagementDbContext context)
         {
             this.context = context;
         }

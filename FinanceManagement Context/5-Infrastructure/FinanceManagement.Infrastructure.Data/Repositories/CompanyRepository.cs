@@ -18,10 +18,10 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public CompanyRepository(FinanceManagementContext unitOfWork) : base(unitOfWork) { }
+        public CompanyRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
         public override void Merge(Company persisted, Company current)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementContext;
+            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
             
             if (persisted == null || current == null)
                 return;
@@ -29,14 +29,14 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public IEnumerable<Company> GetCompanies()
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             return uow.Companies;
         }
         public Company GetCompanyById(Guid companyId)
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 return uow.Companies.Where(c => c.Id == companyId).SingleOrDefault();
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 return uow.Companies.Where(c => c.Name == companyName).SingleOrDefault();
             }
             catch (Exception ex)

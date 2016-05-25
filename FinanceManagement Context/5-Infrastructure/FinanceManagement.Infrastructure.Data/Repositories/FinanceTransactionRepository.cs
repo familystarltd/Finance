@@ -17,7 +17,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public FinanceTransactionRepository(FinanceManagementContext unitOfWork) : base(unitOfWork) { }
+        public FinanceTransactionRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
         public override void Merge(FinancialTransaction persisted, FinancialTransaction current)
         {
             base.Merge(persisted, current);
@@ -27,7 +27,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 DateTime? maxProcessedDate = uow.FinancialTransactions.OfType<TEntity>().Max(inv => (DateTime?)inv.ProcessedDate);
                 return maxProcessedDate;
             }
@@ -40,7 +40,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 return uow.FinancialTransactions.OfType<TEntity>().Where(trans => trans.Id == TransactionId).SingleOrDefault();
             }
             catch (Exception ex)
@@ -52,7 +52,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TEntity entity = uow.FinancialTransactions.OfType<TEntity>().Where(trans => trans.TransactionRef == TransactionNo).SingleOrDefault();
                 return entity;
             }
@@ -63,13 +63,13 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public int GetNewTransactionRefNo<TEntity>() where TEntity : FinancialTransaction
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             int? maxTransactionRefNo = uow.FinancialTransactions.OfType<TEntity>().Max(tr => (int?)tr.TransactionRef);
             return !maxTransactionRefNo.HasValue || maxTransactionRefNo <= 1000 ? 1001 : maxTransactionRefNo.Value + 1;
         }
         public int GetNewTransactionRefNo<TEntity>(DateTime ProcessedDate) where TEntity : FinancialTransaction
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             if (uow.FinancialTransactions.OfType<TEntity>().Count(tr => DbFunctions.TruncateTime(tr.ProcessedDate) <= ProcessedDate.Date && DbFunctions.TruncateTime(tr.ProcessedDate) >= ProcessedDate.Date) > 0)
                 return -1;
             int? maxTransactionRefNo = uow.FinancialTransactions.OfType<TEntity>().Max(tr => (int?)tr.TransactionRef);
@@ -79,7 +79,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.Count(tr =>
                     ((FromDate.HasValue && ToDate.HasValue) &&
                     DbFunctions.TruncateTime(tr.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(tr.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value))
@@ -102,7 +102,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public IEnumerable<TEntity> GetTransactions<TEntity>(DateTime ProcessedDate, int pageIndex, int pageSize, out int TotalRowCount) where TEntity : FinancialTransaction
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             TotalRowCount = uow.FinancialTransactions.OfType<TEntity>().Count(tr => DbFunctions.TruncateTime(tr.ProcessedDate) == DbFunctions.TruncateTime(ProcessedDate));
             return uow.FinancialTransactions.OfType<TEntity>()
                 .Where(tr => DbFunctions.TruncateTime(tr.ProcessedDate) == DbFunctions.TruncateTime(ProcessedDate))
@@ -114,7 +114,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<TEntity>().Count(tr =>
                     ((FromDate.HasValue && ToDate.HasValue) &&
                     DbFunctions.TruncateTime(tr.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(tr.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value))
@@ -138,7 +138,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public IEnumerable<TEntity> GetTransactions<TEntity>(string FunderName, string CustomerName, int CustomerNo, DateTime? FromDate, DateTime? ToDate, int pageIndex, int pageSize, out int TotalRowCount) where TEntity : FinancialTransaction
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             //if(!string.IsNullOrEmpty(CustomerName))
             //    CustomerName = CustomerName.Trim().Replace(" ", ", ");
             TotalRowCount = uow.FinancialTransactions.OfType<TEntity>()
@@ -183,7 +183,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<FeeInvoice>().Count(tr => tr.Funder.Id == FunderId
                             && (DbFunctions.TruncateTime(tr.ProcessedDate) <= DbFunctions.TruncateTime(ToDate)));
 
@@ -203,7 +203,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<TEntity>().Count(tr =>
                     ((FromDate.HasValue && ToDate.HasValue) && tr.CustomerId == CustomerId &&
                     DbFunctions.TruncateTime(tr.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(tr.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value))
@@ -228,7 +228,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<TEntity>().Count(tr =>
                     ((FromDate.HasValue && ToDate.HasValue) && tr.FunderId == FunderId &&
                     DbFunctions.TruncateTime(tr.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(tr.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value))
@@ -253,7 +253,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<CreditNote>().Count(tr =>
                     tr.FunderId == FunderId &&
                     (tr.Amount - ((tr as CreditNote).Receipts.Sum(r => (decimal?)r.Amount) ?? 0) > 0) &&

@@ -19,10 +19,10 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public FunderRepository(FinanceManagementContext unitOfWork) : base(unitOfWork) { }
+        public FunderRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
         public override void Merge(Funder persisted, Funder current)
         {
-             var currentUOW = this.UnitOfWork as FinanceManagementContext;
+             var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
             
             if (persisted == null || current == null)
                 return;
@@ -74,7 +74,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 return uow.Funders
                     .Include(f => f.PersonalContact)
                     .Include(f=>f.Fees)
@@ -89,7 +89,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 TotalRowCount = uow.Funders
                     .Include(f => f.PersonalContact)
                     .Include(f => f.Fees)
@@ -115,7 +115,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public IEnumerable<Funder> GetFundersWithFees(DateTime FeeDate, int pageIndex, int pageSize, out int TotalRowCount)
         {
-            var uow = this.UnitOfWork as FinanceManagementContext;
+            var uow = this.UnitOfWork as FinanceManagementDbContext;
             TotalRowCount = uow.Funders.Count(f => uow.Fees.Any(fee => fee.FunderId == f.Id && !fee.ClosingDate.HasValue || (fee.ClosingDate.HasValue && DbFunctions.TruncateTime(fee.ClosingDate) >= FeeDate.Date)));
             IEnumerable<Funder> Funders = uow.Funders
                 .Where(f =>  uow.Fees.Any(fee=>fee.FunderId == f.Id && !fee.ClosingDate.HasValue || (fee.ClosingDate.HasValue && DbFunctions.TruncateTime(fee.ClosingDate) >= FeeDate.Date)))
@@ -166,7 +166,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementContext;
+                var uow = this.UnitOfWork as FinanceManagementDbContext;
                 return uow.Funders
                     .Include(f => f.PersonalContact)
                     .Include(f => f.FeeInvoiceBillingContact)
@@ -182,7 +182,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public void RemoveContact(Contact contact)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementContext;
+            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
             currentUOW.Set<Contact>().Remove(contact);
         }
     }
