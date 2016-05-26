@@ -8,7 +8,7 @@
         /// Set the current type adapter factory
         /// </summary>
         /// <param name="adapterFactory">The adapter factory to set</param>
-        public static void SetCurrent(ITypeAdapterFactory adapterFactory)
+        public static void SetAdapter(ITypeAdapterFactory adapterFactory)
         {
             _currentTypeAdapterFactory = adapterFactory;
         }

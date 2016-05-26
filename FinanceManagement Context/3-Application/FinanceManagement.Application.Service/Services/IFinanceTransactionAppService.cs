@@ -25,7 +25,7 @@ namespace FinanceManagement.Application.Service
             where TEntityDTO : FinancialTransactionModel, new();
         int CreateReceipt(ReceiptModel receipt);
         int CreateCreditNote(CreditNoteModel creditNote);
-        CreditNoteModel CreateCreditNote(DateTime ProcessedDate, decimal Amount, string Description, Guid FunderId, Guid? CustomerId, Guid? ReceiptId, InvoiceModel invoice);
+        CreditNoteModel CreateCreditNote(DateTime ProcessedDate, decimal Amount, string Description, Guid? FunderId, Guid? CustomerId, Guid? ReceiptId, InvoiceModel invoice);
         IEnumerable<CreditNoteModel> GetCreditNotesForReceiptsByFunder(Guid FunderId, DateTime ToDate, int PageIndex, int PageSize, out int TotalRowCount);
 
     }

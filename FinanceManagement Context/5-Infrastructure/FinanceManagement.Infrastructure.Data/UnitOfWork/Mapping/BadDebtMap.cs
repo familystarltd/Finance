@@ -10,8 +10,8 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
     {
         public override void Map(EntityTypeBuilder<BadDebt> e)
         {
-            e.HasKey(rd => rd.Id);
-            e.HasOne(bd => bd.Invoice).WithOne(inv => inv.BadDebt).IsRequired(false).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+            //e.HasKey(rd => rd.Id);
+            e.HasOne(bd => bd.Invoice).WithOne(inv => inv.BadDebt).IsRequired(false).HasForeignKey<Invoice>(a => a.BadDebtId);//.OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
             e.ToTable("BadDebt");
         }
     }

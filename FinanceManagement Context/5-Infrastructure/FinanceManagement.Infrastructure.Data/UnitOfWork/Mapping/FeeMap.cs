@@ -46,5 +46,37 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
             b.ToTable("Rate");
         }
     }
+    class WeeklyRateMap : EntityMappingConfiguration<WeeklyRate>
+    {
+        public override void Map(EntityTypeBuilder<WeeklyRate> b)
+        {
+            //b.HasKey(r => r.Id);
+            b.ToTable("Rate");
+        }
+    }
+    class DailyRateMap : EntityMappingConfiguration<DailyRate>
+    {
+        public override void Map(EntityTypeBuilder<DailyRate> b)
+        {
+            //b.HasKey(r => r.Id);
+            b.ToTable("Rate");
+        }
+    }
+    class MonthlyRateMap : EntityMappingConfiguration<MonthlyRate>
+    {
+        public override void Map(EntityTypeBuilder<MonthlyRate> b)
+        {
+            //b.HasKey(r => r.Id);
+            b.ToTable("Rate");
+        }
+    }
+    class HourlyRateMap : EntityMappingConfiguration<HourlyRate>
+    {
+        public override void Map(EntityTypeBuilder<HourlyRate> b)
+        {
+            //b.HasKey(r => r.Id);
+            b.ToTable("Rate");
+        }
+    }
     #endregion
 }

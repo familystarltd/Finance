@@ -13,8 +13,12 @@ using System.Linq;
 
 namespace FinanceManagement.Application.Service.MappingProfile
 {
-    public class DomainToViewModelMapper : Profile, IDomainProfileMapper
+    public class DomainToViewModelMapper : Profile
     {
+        public DomainToViewModelMapper()
+        {
+
+        }
         public T Map<T>(object source)
         {
             return this.Map<T>(source);
@@ -64,8 +68,12 @@ namespace FinanceManagement.Application.Service.MappingProfile
             CreateMap<CustomerDisbursementFunder, CustomerDisbursementFunderModel>().ReverseMap();            
         }
     }
-    public class ViewModelToDomainMapper : Profile, IDomainProfileMapper
+    public class ViewModelToDomainMapper : Profile
     {
+        public ViewModelToDomainMapper()
+        {
+
+        }
         public T Map<T>(object source)
         {
             return this.Map<T>(source);

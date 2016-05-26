@@ -63,7 +63,7 @@ namespace FinanceManagement.Domain.Aggregates.FinancialTransactionAgg
         /// Get or Set the Funder which is relates this Transaction.
         /// </summary>
         public virtual Funder Funder { get; set; }
-        public Guid FunderId { get; set; }
+        public Guid? FunderId { get; set; }
         /// <summary>
         /// Get or Set the associated Customer for this Fee Invoice
         /// </summary>

@@ -1,17 +1,6 @@
-﻿using System.Web.Http;
-using Microsoft.Practices.Unity;
-using Newtonsoft.Json.Serialization;
+﻿using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using System.Net.Http.Formatting;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Net;
-using System.Infrastructure.CrossCutting.Logging;
-using System.Infrastructure.CrossCutting.Validator;
 using System.Infrastructure.CrossCutting.Adapter;
-using System.Infrastructure.CrossCutting.Framework.Logging;
-using System.Infrastructure.CrossCutting.Framework.Validator;
 using System.Infrastructure.CrossCutting.Framework.Adapter;
 using FinanceManagement.Domain.Aggregates.CustomerAgg;
 using FinanceManagement.Infrastructure.Data.Repositories;
@@ -19,18 +8,18 @@ using FinanceManagement.Infrastructure.Data.UnitOfWork;
 using FinanceManagement.Domain.Aggregates.FeeAgg;
 using FinanceManagement.Domain.Aggregates.FinancialTransactionAgg;
 using FinanceManagement.Application.Service;
-using FinanceManagement.Application.Service.MappingProfile;
-using FinanceManagement.Web.Model;
-using System.DistributedServices.WebApi;
 using FinanceManagement.Domain;
-using System;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
+using AutoMapper;
+using FinanceManagement.Application.Service.MappingProfile;
+using System.IO;
 
 namespace FinanceManagement.WebAPI
 {
+
     //public class ApplicationPreload : System.Web.Hosting.IProcessHostPreloadClient
     //{
     //    public void Preload(string[] parameters)
@@ -70,6 +59,16 @@ namespace FinanceManagement.WebAPI
             services.AddScoped<ITypeAdapterFactory, AutomapperTypeAdapterFactory>();
             return services;
         }
+        public static IServiceCollection RegisterAutomapperProfiles(this IServiceCollection services)
+        {
+            MapperConfiguration MapperConfiguration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new DomainToViewModelMapper());
+                cfg.AddProfile(new ViewModelToDomainMapper());
+            });
+            services.AddSingleton<IMapper>(sp => MapperConfiguration.CreateMapper());
+            return services;
+        }
         public static JsonOutputFormatter JsonFormatter()
         {
             return new JsonOutputFormatter
@@ -81,18 +80,21 @@ namespace FinanceManagement.WebAPI
                 }
             };
         }
-        public static string CreateDataSourceConnectionString(string CompanyName)
+        public static string CreateDataSourceConnectionString(string CompanyName, Microsoft.AspNetCore.Hosting.IHostingEnvironment HostEnvironment, IOptions<AppSettings> AppSettings)
         {
-            IOptions<AppSettings> AppSettings = HttpContent;
             string dbName = CompanyName.Replace(" ", string.Empty);
-            return string.Format(@"{0}; AttachDbFilename=|DataDirectory|Finance.{1}.mdf; Initial Catalog=Finance.{2}; Integrated Security=True; MultipleActiveResultSets=True", AppSettings.Value.DataSource, dbName, dbName);
+            if (AppSettings.Value.DataSource.Contains("FileName"))// SQLite
+                return $"FileName={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.db";
+            else
+               // return $"{AppSettings.Value.DataSource};AttachDbFilename={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.mdf;Initial Catalog=Finance.{dbName};Integrated Security=True; MultipleActiveResultSets=True;";
+            return string.Format(@"{0}; Database=Finance.{2}; Integrated Security=True; MultipleActiveResultSets=True;", AppSettings.Value.DataSource, dbName, dbName);
         }
-        public static void ConfigureUnitOfWork(HttpContext context,string CompanyName)
+        public static void ConfigureUnitOfWork(HttpContext context, Microsoft.AspNetCore.Hosting.IHostingEnvironment HostEnvironment, IOptions<AppSettings> AppSettings, string CompanyName)
         {
-            FinanceManagementDbContext dbContext = context.RequestServices.GetService<FinanceManagementDbContext>();
+            IFinanceDbContext dbContext = context.RequestServices.GetService<IFinanceDbContext>();
             if (dbContext != null)
             {
-                dbContext.ConnectionString = WebApiConfig.CreateDataSourceConnectionString(CompanyName);
+                //dbContext.ConnectionString = WebApiConfig.CreateDataSourceConnectionString(CompanyName, HostEnvironment, AppSettings);
             }
         }
     }

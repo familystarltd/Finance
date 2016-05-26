@@ -12,7 +12,7 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
         {
             b.HasKey(a => a.Id);
             b.HasIndex(a => a.Name).IsUnique(true);
-            b.HasMany(a => a.ContraAccounts).WithOne(a => a.ContraOffsetAccount).IsRequired(false).HasForeignKey(a => a.ContraOffsetAccountId).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+            b.HasMany(a => a.ContraAccounts).WithOne(a => a.ContraOffsetAccount).IsRequired(false).HasForeignKey(a => a.ContraOffsetAccountId);//.OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
             b.ToTable("Account");
         }
     }
@@ -22,7 +22,7 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
         {
             b.HasKey(a => a.Id);
             b.HasIndex(a => a.Name).IsUnique(true);
-            b.HasMany(a => a.AccountGroups).WithOne(a => a.AccountGroupParent).IsRequired(false).HasForeignKey(a => a.AccountGroupParentId).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+            b.HasMany(a => a.AccountGroups).WithOne(a => a.AccountGroupParent).IsRequired(false).HasForeignKey(a => a.AccountGroupParentId);//.OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
             b.ToTable("AccountGroup");
         }
     }

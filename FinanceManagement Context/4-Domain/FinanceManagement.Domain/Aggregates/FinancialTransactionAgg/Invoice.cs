@@ -77,6 +77,7 @@ namespace FinanceManagement.Domain.Aggregates.FinancialTransactionAgg
         public virtual ICollection<ReceiptInvoice> ReceiptInvoices { get; set; }
         public virtual ICollection<CreditNote> CreditNotes { get; set; }
         public virtual ICollection<InvoiceAdjustment> Adjustments { get; set; }
+        public Guid? BadDebtId { get; set; }
         public virtual BadDebt BadDebt { get; set; }
         public DateTime? LogDate { get; set; }
 

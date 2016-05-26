@@ -19,8 +19,8 @@
     "FinanceManagement.Web.Model": "1.0.0-*",
     "System.WebAPIProxy": "1.0.0-*",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-final",
-    "System.DistributedServices": "1.0.0-*"},
-
+    "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
+  },
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": {
       "version": "1.0.0-preview1-final",

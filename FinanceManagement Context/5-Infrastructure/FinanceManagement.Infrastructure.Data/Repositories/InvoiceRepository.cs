@@ -17,7 +17,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public InvoiceRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
+        public InvoiceRepository(IFinanceDbContext unitOfWork) : base(unitOfWork) { }
         public override void Merge(Invoice persisted, Invoice current)
         {
             if (current == null || persisted == null)
@@ -27,7 +27,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
             foreach (var invD in deletedInvoiceDetails)
             {
                 persisted.InvoiceDetails.Remove(invD);
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 uow.Set<InvoiceDetail>().Remove(invD);
             }
             // Edit Invoice Details
@@ -60,7 +60,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 if (IsPaid)
                 {
                     TotalRowCount = uow.FinancialTransactions.OfType<Invoice>().Count(inv =>
@@ -102,7 +102,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 TotalRowCount = uow.FinancialTransactions.OfType<Invoice>().Count((inv =>
                                  ((FromDate.HasValue && ToDate.HasValue) && inv.InvoiceStatus == invoiceStatus && (DbFunctions.TruncateTime(inv.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(inv.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value)))
                                  ||
@@ -125,7 +125,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.FinancialTransactions.OfType<FeeInvoice>()
                     .Where(inv => inv.Fee.Id == FeeId
                             && (DbFunctions.TruncateTime(inv.ProcessedDate) >= DbFunctions.TruncateTime(FromDate.Value) && DbFunctions.TruncateTime(inv.ProcessedDate) <= DbFunctions.TruncateTime(ToDate.Value)))
@@ -140,7 +140,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.FinancialTransactions.OfType<Invoice>()
                     .Where(inv => inv.FunderId == FunderId
                             && (DbFunctions.TruncateTime(inv.ProcessedDate) <= DbFunctions.TruncateTime(ToDate)))
@@ -156,7 +156,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.FinancialTransactions.OfType<Invoice>()
                     .Where(inv => inv.FunderId == FunderId && (inv.TransactionStatus != TransactionStatus.Void || inv.TransactionStatus == TransactionStatus.Processed)
                             && (DbFunctions.TruncateTime(inv.ProcessedDate) <= DbFunctions.TruncateTime(ProcessedDate)))
@@ -173,7 +173,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 New = uow.FinancialTransactions.OfType<Invoice>().Count(inv => inv.InvoiceStatus == InvoiceStatus.Draft);
                 Deleted = uow.FinancialTransactions.OfType<Invoice>().Count(inv => inv.InvoiceStatus == InvoiceStatus.Void);
                 Cancelled = uow.FinancialTransactions.OfType<Invoice>().Count(inv => inv.InvoiceStatus == InvoiceStatus.Cancel);
@@ -194,7 +194,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 TotalRowCount = uow.InvoiceArticleTemplates.Count();
                 return uow.InvoiceArticleTemplates.OrderBy(t => t.Name)
                                  .Skip(pageIndex * pageSize)
@@ -209,7 +209,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 TotalRowCount = uow.InvoiceArticleTemplates.Count(t => t.Name.ToLower().Contains(TemplateName.ToLower()) || string.IsNullOrEmpty(TemplateName.Trim()));
                 return uow.InvoiceArticleTemplates
                     .Where(t => t.Name.ToLower().Contains(TemplateName.ToLower()) || string.IsNullOrEmpty(TemplateName.Trim()))
@@ -226,7 +226,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.InvoiceArticleTemplates.FirstOrDefault(t => t.Id == TemplateId);
             }
             catch (Exception ex)
@@ -243,7 +243,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
                 {
                     invoiceArticleTemplate = new InvoiceArticleTemplate();
                     invoiceArticleTemplate.Id = Guid.NewGuid();
-                    var uow = this.UnitOfWork as FinanceManagementDbContext;
+                    var uow = this.UnitOfWork as IFinanceDbContext;
                     uow.InvoiceArticleTemplates.Add(invoiceArticleTemplate);
                 }
                 invoiceArticleTemplate.Name = Template.Name;
@@ -260,7 +260,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 uow.InvoiceArticleTemplates.Remove(this.GetInvoiceArticleTemplate(TemplateId));
                 this.UnitOfWork.SaveChanges();
                 return true;

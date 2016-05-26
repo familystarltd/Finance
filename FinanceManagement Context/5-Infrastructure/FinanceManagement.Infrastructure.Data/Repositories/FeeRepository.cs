@@ -19,7 +19,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public FeeRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
+        public FeeRepository(IFinanceDbContext unitOfWork) : base(unitOfWork) { }
 
         public override void Merge(Fee persisted, Fee current)
         {
@@ -34,7 +34,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 IEnumerable<Fee> fees = uow.Fees
                     .Include(f => f.Customer.PersonalInfo)
                     .Include(f => f.Funder)
@@ -85,7 +85,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 IEnumerable<Fee> fees = uow.Fees
                     .Include(f => f.Customer)
                     .Include(f => f.Notes)
@@ -133,7 +133,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public Fee GetFeeForEdit(Guid FeeId)
         {
-             var uow = this.UnitOfWork as FinanceManagementDbContext;
+             var uow = this.UnitOfWork as IFinanceDbContext;
              return uow.Fees
                      .Include(f => f.Customer).ThenInclude(f=>f.PersonalInfo)
                      .Include(f => f.Funder).ThenInclude(f=>f.PersonalContact)
@@ -147,7 +147,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
 
                 Fee fee = uow.Fees
                     .Include(f => f.Customer).ThenInclude(f => f.PersonalInfo)
@@ -199,7 +199,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.FeeRates
                     .Include(fr => fr.Rates)
                     .Include(fr => fr.Fee)
@@ -216,22 +216,22 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public void MergeFeeRate(FeeRate feeRatePersistence, FeeRate feeRateCurrent)
         {
-            var financeContext = this.UnitOfWork as FinanceManagementDbContext;
+            var financeContext = this.UnitOfWork as IFinanceDbContext;
             financeContext.ApplyCurrentValues(feeRatePersistence, feeRateCurrent);
         }
         public void AddFeeRate(FeeRate feeRate)
         {
-            var financeContext = this.UnitOfWork as FinanceManagementDbContext;
+            var financeContext = this.UnitOfWork as IFinanceDbContext;
             financeContext.FeeRates.Add(feeRate);
         }
         public void AddRate(Rate rate)
         {
-            var financeContext = this.UnitOfWork as FinanceManagementDbContext;
+            var financeContext = this.UnitOfWork as IFinanceDbContext;
             financeContext.Rates.Add(rate);
         }
         public void RemoveRate(Rate rate)
         {
-            var financeContext = this.UnitOfWork as FinanceManagementDbContext;
+            var financeContext = this.UnitOfWork as IFinanceDbContext;
             financeContext.Rates.Remove(rate);
         }
     }

@@ -13,6 +13,7 @@ namespace FinanceManagement.Domain.Aggregates.FinancialTransactionAgg
             get { return FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
             set { value = FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
         }
+        public Guid? InvoiceId { get; set; }
         public virtual Invoice Invoice { get; set; }
     }
 }

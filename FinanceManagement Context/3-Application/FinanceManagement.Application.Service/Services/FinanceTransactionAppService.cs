@@ -211,7 +211,7 @@ namespace FinanceManagement.Application.Service
                 throw new Exception(ex.InnerException != null ? ex.InnerException.Message : ex.Message);
             }
         }
-        public CreditNoteModel CreateCreditNote(DateTime ProcessedDate, decimal Amount, string Description, Guid FunderId, Guid? CustomerId, Guid? ReceiptId, InvoiceModel invoice)
+        public CreditNoteModel CreateCreditNote(DateTime ProcessedDate, decimal Amount, string Description, Guid? FunderId, Guid? CustomerId, Guid? ReceiptId, InvoiceModel invoice)
         {
             try
             {

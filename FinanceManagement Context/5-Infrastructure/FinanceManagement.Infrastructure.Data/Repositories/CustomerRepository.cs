@@ -21,12 +21,12 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public CustomerRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
+        public CustomerRepository(IFinanceDbContext unitOfWork) : base(unitOfWork) { }
         public Customer GetCustomer(Guid customerId)
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 Customer customer = uow.Customers
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -48,7 +48,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public override void Merge(Customer persisted, Customer current)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;
             
             if (persisted == null || current == null)
                 return;
@@ -60,7 +60,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.Customers.Distinct()
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -76,7 +76,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 TotalRowCount = uow.Customers.Distinct()
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -99,7 +99,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.Customers
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -118,7 +118,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
                 DateTime invoiceFromDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddMonths(-11).Date;
                 DateTime invoiceToDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).Date;
                 DateTime feeDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month + 1, 1).Date.AddDays(-1);
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 IEnumerable<Customer> customers = uow.Customers
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -174,7 +174,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public IEnumerable<Customer> GetCustomersWithFees(DateTime FeeDate, int pageIndex, int pageSize, out int TotalRowCount)
         {
-            var uow = this.UnitOfWork as FinanceManagementDbContext;
+            var uow = this.UnitOfWork as IFinanceDbContext;
             //DateTime FeeDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month + 1, 1).Date.AddDays(-1);
             TotalRowCount = uow.Customers.Count(c => !c.Deactive || (c.Deactive && DbFunctions.TruncateTime(c.DeactiveDate) >= FeeDate.Date)); 
                   
@@ -234,7 +234,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
             try
             {
                 DateTime feeDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month+1, 1).Date.AddDays(-1);
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.Customers
                     .Include(c => c.PersonalInfo)
                     .Include(c => c.Company)
@@ -268,22 +268,22 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         #region DISBURSEMENTS
         public IEnumerable<Expense> GetExpenses()
         {
-            var uow = this.UnitOfWork as FinanceManagementDbContext;
+            var uow = this.UnitOfWork as IFinanceDbContext;
             return uow.Expenses;
         }
         public IEnumerable<Expense> GetExpenses(string search)
         {
-            var UOW = this.UnitOfWork as FinanceManagementDbContext;
+            var UOW = this.UnitOfWork as IFinanceDbContext;
             return UOW.Expenses.Where(e => e.Name.ToLower().Contains(search.ToLower()) || string.IsNullOrEmpty(search.Trim()));
         }
         public IEnumerable<Disbursement> GetDisbursements(DateTime FromDate, DateTime ToDate)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;            
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;            
             return currentUOW.Disbursements.Include(e => e.Expense).Include(e => e.Funder).Where(c => c.DisbursementDate >= FromDate && c.DisbursementDate <= ToDate);
         }
         public IEnumerable<Disbursement> GetDisbursements(Guid CustomerID, DateTime FromDate, DateTime ToDate)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;            
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;            
             //DateTime dtFromExp = new DateTime(DisbursementsDate.Year, DisbursementsDate.Month, 1);
             //DateTime dtToExp = new DateTime(DisbursementsDate.Year, DisbursementsDate.Month, DateTime.DaysInMonth(DisbursementsDate.Year, DisbursementsDate.Month));
             return currentUOW.Disbursements
@@ -292,7 +292,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public Disbursement GetDisbursement(Guid Id)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;
             
             return currentUOW.Disbursements
                              .Where(c => c.Id == Id)
@@ -300,17 +300,17 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         }
         public void AddDisbursement(Disbursement Disbursement)
         {
-            var currentUOW = this.UnitOfWork as FinanceManagementDbContext;
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;
             currentUOW.Disbursements.Add(Disbursement);
         }
         public void DeleteDisbursement(Disbursement Disbursement)
         {
-            var uow = this.UnitOfWork as FinanceManagementDbContext;
+            var uow = this.UnitOfWork as IFinanceDbContext;
             uow.Disbursements.Remove(Disbursement);
         }
         public DateTime? GetMaxFeeSetupDate(Guid CustomerId)
         {
-            var uow = this.UnitOfWork as FinanceManagementDbContext;
+            var uow = this.UnitOfWork as IFinanceDbContext;
             List<DateTime?> MaxFeeSetupDates = new List<DateTime?>();
             MaxFeeSetupDates.Add(uow.FinancialTransactions.OfType<FeeInvoice>().Where(inv => inv.CustomerId == CustomerId && inv.InvoiceStatus != InvoiceStatus.Cancel && inv.InvoiceStatus != InvoiceStatus.Void).Max(inv => (DateTime?)inv.ProcessedDate));
             //MaxFeeSetupDates.Add(uow.CustomerPays.Where(c=>c.CustomerId == CustomerId).Max(cf => (DateTime?)cf.ActiveDate));

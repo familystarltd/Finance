@@ -13,12 +13,58 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
     using System.Reflection;
-    public class FinanceManagementDbContext : DbContext, IQueryableUnitOfWork
+    using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+    using Microsoft.EntityFrameworkCore.Metadata;
+    public class ConnectionStringDatabase
     {
         public string ConnectionString { get; set; }
-        public FinanceManagementDbContext(DbContextOptions<FinanceManagementDbContext> options) : base(options)
+    }
+    public interface IFinanceDbContext: IQueryableUnitOfWork
+    {
+        #region IDBSET MEMBERS
+        //DbSet properties, this means that every POCO class is transferred to a database table.
+        DbSet<Company> Companies { get; set; }
+        DbSet<AppLog> AppLogs { get; set; }
+        DbSet<AccountGroup> AccountGroups { get; set; }
+        DbSet<Account> Accounts { get; set; }
+        DbSet<Customer> Customers { get; set; }
+        DbSet<Funder> Funders { get; set; }
+        DbSet<CustomerDisbursementFunder> CustomerDisbursementFunders { get; set; }
+        DbSet<Fee> Fees { get; set; }
+        DbSet<FeeRate> FeeRates { get; set; }
+        DbSet<Rate> Rates { get; set; }
+        DbSet<Expense> Expenses { get; set; }
+        DbSet<Disbursement> Disbursements { get; set; }
+        DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+        DbSet<InvoiceArticleTemplate> InvoiceArticleTemplates { get; set; }
+        #endregion
+        DbSet<TEntity> Set<TEntity>() where TEntity : class;
+    }
+    public class FinanceDbContext : DbContext, IFinanceDbContext
+    {
+        public string ConnectionString { get; set; }
+        public FinanceDbContext(ConnectionStringDatabase ConnectionStringDatabase)
         {
-            
+            ConnectionString = ConnectionStringDatabase.ConnectionString;
+            //Database.EnsureCreated();
+            if (Database.EnsureCreated())
+            {
+                Database.Migrate();
+            }
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            if (ConnectionString.Contains("FileName"))// SQLite
+            {
+                optionsBuilder.UseSqlite(ConnectionString);
+            }
+            else
+            {
+                optionsBuilder.UseSqlServer(ConnectionString);
+            }
+
+
         }
 
         //public FinanceManagementContext(string connection) : base(connection)
@@ -40,30 +86,21 @@
         //     * */
         //    Database.SetInitializer(new MigrateDatabaseToLatestVersion<FinanceManagementContext, FinanceManagementContextDBConfiguration>(useSuppliedContext:true));
         //}
+
         #region DbContext Overrides
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            /*
+             * Type per Hierachy(TPH) | N / A
+             * Type per Type(TPT) | N / A
+             * Type per Concrete Class (TPC) | Ok(Beta8)
+             * Many to Many(Shadow) | No(Beta8)
+             */
             modelBuilder.AddEntityConfigurationsFromAssembly(GetType().GetTypeInfo().Assembly);
         }
         #endregion
 
-        #region IDBSET MEMBERS
-        //DbSet properties, this means that every POCO class is transferred to a database table.
-        public DbSet<Company> Companies { get; set; }
-        public DbSet<AppLog> AppLogs { get; set; }
-        public DbSet<AccountGroup> AccountGroups { get; set; }
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Funder> Funders { get; set; }
-        public DbSet<CustomerDisbursementFunder> CustomerDisbursementFunders { get; set; }
-        public DbSet<Fee> Fees { get; set; }
-        public DbSet<FeeRate> FeeRates { get; set; }
-        public DbSet<Rate> Rates { get; set; }
-        public DbSet<Expense> Expenses { get; set; }
-        public DbSet<Disbursement> Disbursements { get; set; }
-        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
-        public DbSet<InvoiceArticleTemplate> InvoiceArticleTemplates { get; set; }
-        #endregion
+
 
         #region IQUERYABLEUNITOFWORK MEMBERS
         public DbSet<TEntity> CreateSet<TEntity>() where TEntity : class
@@ -202,6 +239,58 @@
             //}
         }
         public bool IsTransactionInUse { get; set; }
+
+        public DbSet<Company> Companies
+        {
+            get; set;
+        }
+
+        public DbSet<AppLog> AppLogs
+        {
+            get; set;
+        }
+
+        public DbSet<AccountGroup> AccountGroups
+        {
+            get; set;
+        }
+
+        public DbSet<Account> Accounts
+        {
+            get; set;
+        }
+
+        public DbSet<Customer> Customers
+        {
+            get; set;
+        }
+
+        public DbSet<Funder> Funders
+        {
+            get; set;
+        }
+
+        public DbSet<CustomerDisbursementFunder> CustomerDisbursementFunders
+        {
+            get; set;
+        }
+
+        public DbSet<Fee> Fees
+        {
+            get; set;
+        }
+
+        public DbSet<FeeRate> FeeRates { get; set; }
+
+        public DbSet<Rate> Rates { get; set; }
+
+        public DbSet<Expense> Expenses { get; set; }
+
+        public DbSet<Disbursement> Disbursements { get; set; }
+
+        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+        public DbSet<InvoiceArticleTemplate> InvoiceArticleTemplates { get; set; }
         #endregion
     }
+
 }

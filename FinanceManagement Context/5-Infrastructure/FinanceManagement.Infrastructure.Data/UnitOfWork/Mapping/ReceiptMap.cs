@@ -10,9 +10,9 @@ namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
     {
         public override void Map(EntityTypeBuilder<Receipt> b)
         {
-            b.HasKey(fi => fi.Id);
-            b.HasMany(r => r.ReceiptInvoices).WithOne(rinv => rinv.Receipt).IsRequired(true).HasForeignKey(rinv => rinv.ReceiptId).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
-            b.HasOne(r => r.CreditNote).WithMany(cr => cr.Receipts).IsRequired(false).HasForeignKey(r => r.CreditNoteId).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
+            //b.HasKey(fi => fi.Id);
+            b.HasMany(r => r.ReceiptInvoices).WithOne(rinv => rinv.Receipt).IsRequired(true).HasForeignKey(rinv => rinv.ReceiptId).OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Restrict);
+            b.HasOne(r => r.CreditNote).WithMany(cr => cr.Receipts).IsRequired(false).HasForeignKey(r => r.CreditNoteId);//.OnDelete(Microsoft.EntityFrameworkCore.Metadata.DeleteBehavior.Cascade);
             b.ToTable("Receipt");
         }
     }

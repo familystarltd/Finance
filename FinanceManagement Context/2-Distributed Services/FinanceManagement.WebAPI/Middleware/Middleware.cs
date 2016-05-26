@@ -1,32 +1,35 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using System.Threading;
+﻿using System.Threading.Tasks;
 using System.Net;
 using FinanceManagement.Application.Service;
 using FinanceManagement.Web.Model;
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
-using System.DistributedServices.WebApi;
-using FinanceManagement.Infrastructure.Data.UnitOfWork;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Hosting;
 
 namespace FinanceManagement.WebAPI
 {
     // Company Setting HTTP Middleware
-    public class CompanySettingHttpMiddleware
+    public class CompanySettingMiddleware
     {
         private readonly RequestDelegate _next;
-        public CompanySettingHttpMiddleware(RequestDelegate next)
+        public CompanySettingMiddleware(RequestDelegate next)
         {
             _next = next;
         }
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IOptions<AppSettings> AppSettings, Infrastructure.Data.UnitOfWork.ConnectionStringDatabase Connection)
         {
-            CompanyModel company = FinanceManagement.Application.Service.Settings.AppSetting.Company;
-            if (company != null && !string.IsNullOrEmpty(company.Name))
+            if (context.Request.Method.ToLower() == "get")
             {
-                
-                WebApiConfig.ConfigureUnitOfWork(context,company.Name);
+                CompanyModel company = FinanceManagement.Application.Service.Settings.AppSetting.Company;
+                Random r = new Random();
+                company.Name = "Test" + r.Next(1, 10);
+                if (company != null && !string.IsNullOrEmpty(company.Name))
+                {
+                    IHostingEnvironment host = context.RequestServices.GetService<IHostingEnvironment>();
+                    Connection.ConnectionString = WebApiConfig.CreateDataSourceConnectionString(company.Name, host, AppSettings);
+                }
             }
             await _next.Invoke(context);
         }
@@ -41,20 +44,19 @@ namespace FinanceManagement.WebAPI
         }
         public async Task Invoke(HttpContext context)
         {
-            IAppLogService LogService = context.RequestServices.GetService<IAppLogService>();
-            //IAppLogService LogService = (IAppLogService)GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IAppLogService));
-            if (LogService != null && (context.Request.Method == "Delete" || context.Request.Method == "Post" || context.Request.Method == "Put"))
+            if (context.Request.Method.ToLower() == "get")//(context.Request.Method.ToLower() == "delete" || context.Request.Method.ToLower() == "post" || context.Request.Method.ToLower() == "put")
             {
+                IAppLogService _LogService = context.RequestServices.GetService<IAppLogService>();
                 AppLogModel appLog = new AppLogModel
                 {
                     CompanyName = FinanceManagement.Application.Service.Settings.AppSetting.Company == null ? string.Empty : FinanceManagement.Application.Service.Settings.AppSetting.Company.Name,
                     LogUser = FinanceManagement.Application.Service.Settings.AppSetting.User.Name,
                     LogDateTime = DateTime.Now,
                     Request = context.Request.Path.ToUriComponent(),
-                    RequestFrom = context.Request.GetClientIPAddress(),
+                    RequestFrom = context.Connection.RemoteIpAddress.ToString(),
                     RequestMethod = context.Request.Method
                 };
-                LogService.Log(appLog);
+                _LogService.Log(appLog);
             }
             await _next.Invoke(context);
         }
@@ -67,10 +69,10 @@ namespace FinanceManagement.WebAPI
             return string.Format("{0}-{1}", controllerName, actionName);
         }
     }
-    public class OptionsHttpMiddleware
+    public class OptionsSettingMiddleware
     {
         private readonly RequestDelegate _next;
-        public OptionsHttpMiddleware(RequestDelegate next)
+        public OptionsSettingMiddleware(RequestDelegate next)
         {
             _next = next;
         }

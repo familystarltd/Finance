@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using FinanceManagement.Domain.Aggregates.CustomerAgg;
-using FinanceManagement.Domain.Aggregates.FeeAgg;
-using FinanceManagement.Domain.Aggregates.FinancialTransactionAgg;
-using FinanceManagement.Domain;
-using FinanceManagement.Infrastructure.Data.Repositories;
-using FinanceManagement.Application.Service;
-using System.Infrastructure.CrossCutting.Adapter;
-using System.Infrastructure.CrossCutting.Framework.Adapter;
 using Microsoft.AspNetCore.Mvc;
 using FinanceManagement.Infrastructure.Data.UnitOfWork;
+using Microsoft.AspNetCore.Http;
+using System.Infrastructure.CrossCutting.Adapter;
+using AutoMapper;
 
 namespace FinanceManagement.WebAPI
 {
@@ -52,27 +43,37 @@ namespace FinanceManagement.WebAPI
             services.AddMvc();
             services.AddOptions();
             services.AddCors();
-            services.Configure<AppSettings>(a => Configuration.GetSection("AppSettings"));
+            services.Configure<AppSettings>(options => Configuration.GetSection("AppSettings").Bind(options));
             services.Configure<MvcOptions>(config =>
             {
                 config.OutputFormatters.Clear();
                 config.OutputFormatters.Add(WebApiConfig.JsonFormatter());
             });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<Application.Service.Settings.AppSetting>();
+            services.AddSingleton(typeof(ConnectionStringDatabase));
+            
+            services.AddEntityFrameworkSqlServer().AddTransient<IFinanceDbContext, FinanceDbContext>();//.AddTransient(typeof(IFinanceDbContext));
             services.RegisterAppServices();
             services.RegisterRepositoryServices();
             services.RegisterAdapterServices();
-            services.AddTransient(typeof(FinanceManagementDbContext));
+            services.RegisterAutomapperProfiles();
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ITypeAdapterFactory AdapterFactory)
         {
-            app.UseMiddleware<CompanySettingHttpMiddleware>();
+            // Always first middleware (CompanySettingHttpMiddleware) to set Company Settings
+            app.UseMiddleware<CompanySettingMiddleware>();
+            app.UseMiddleware<OptionsSettingMiddleware>();
             app.UseMiddleware<UserSettingHttpMiddleware>();
-            app.UseMiddleware<OptionsHttpMiddleware>();
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
+            // Adapter Factory DTO -> Model & Model -> DTO
+            TypeAdapterFactory.SetAdapter((ITypeAdapterFactory)AdapterFactory);
+            //Logger Factory
+            if (env.IsDevelopment())
+            {
+                loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+                loggerFactory.AddDebug();
+            }
             app.UseMvc();
         }
     }

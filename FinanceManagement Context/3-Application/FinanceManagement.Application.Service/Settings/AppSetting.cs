@@ -9,21 +9,12 @@ using Microsoft.Extensions.Primitives;
 
 namespace FinanceManagement.Application.Service.Settings
 {
-    public class HttpWebContext : IHttpContextAccessor
+    public class AppSetting
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public HttpWebContext(IHttpContextAccessor httpContextAccessor)
+        public AppSetting(IHttpContextAccessor httpContextAccessor)
         {
-            this.httpContextAccessor = httpContextAccessor;
-            AppSetting.HttpContext = this.httpContextAccessor.HttpContext;
+            HttpContext = httpContextAccessor.HttpContext;
         }
-        public HttpContext HttpContext
-        {
-            get;set;
-        }
-    }
-    public static class AppSetting
-    {
         public static HttpContext HttpContext;
         public static UserModel User
         {

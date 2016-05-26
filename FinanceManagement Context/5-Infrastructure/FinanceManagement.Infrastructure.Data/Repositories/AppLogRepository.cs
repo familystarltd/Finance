@@ -18,13 +18,13 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         /// Create a new instance
         /// </summary>
         /// <param name="unitOfWork">Associated unit of work</param>
-        public AppLogRepository(FinanceManagementDbContext unitOfWork) : base(unitOfWork) { }
+        public AppLogRepository(IFinanceDbContext unitOfWork) : base(unitOfWork) { }
 
         public IEnumerable<AppLog> GetLogs()
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.AppLogs;
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.AppLogs.Where(a=> 
                 DbFunctions.TruncateTime(a.LogDateTime)>= DbFunctions.TruncateTime(FromLogDate)
                 &&
@@ -52,7 +52,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.AppLogs.Where(a => string.Equals(a.LogUser == User, StringComparison.OrdinalIgnoreCase));
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         {
             try
             {
-                var uow = this.UnitOfWork as FinanceManagementDbContext;
+                var uow = this.UnitOfWork as IFinanceDbContext;
                 return uow.AppLogs.Where(a => string.Equals(a.LogUser == User, StringComparison.OrdinalIgnoreCase)
                 &&
                 DbFunctions.TruncateTime(a.LogDateTime) >= DbFunctions.TruncateTime(FromLogDate)
