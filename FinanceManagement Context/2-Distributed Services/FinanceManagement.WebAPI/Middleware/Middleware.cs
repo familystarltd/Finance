@@ -74,13 +74,11 @@ namespace FinanceManagement.WebAPI
         }
         public async Task Invoke(HttpContext context)
         {
-            // Test
             if (context.Request.Method == "Options")
             {
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
             }
             await _next.Invoke(context);
-            // Modified
         }
     }
 }
