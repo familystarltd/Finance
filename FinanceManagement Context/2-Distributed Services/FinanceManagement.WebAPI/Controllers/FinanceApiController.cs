@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using System.Web.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
+using System.Net.Http.Formatting;
 
 namespace FinanceManagement.WebAPI.Controllers
 {
@@ -33,7 +34,7 @@ namespace FinanceManagement.WebAPI.Controllers
         #endregion
 
         #region CTOR
-        public FinanceApiController(IOptions<AppSettings> AppSettings,ICompanyAppService CompanyAppService, ICustomerAppService CustomerAppService, IFunderAppService FunderAppService, IFeeAppService FeeAppService, IInvoiceAppService InvoiceAppService, IFinanceTransactionAppService FinanceTransactionAppService)
+        public FinanceApiController( IOptions<AppSettings> AppSettings,ICompanyAppService CompanyAppService, ICustomerAppService CustomerAppService, IFunderAppService FunderAppService, IFeeAppService FeeAppService, IInvoiceAppService InvoiceAppService, IFinanceTransactionAppService FinanceTransactionAppService)
         {
             if (_CompanyAppService == null)
                 this._CompanyAppService = CompanyAppService;

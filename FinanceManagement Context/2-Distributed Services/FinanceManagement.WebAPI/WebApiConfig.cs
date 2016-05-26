@@ -4,54 +4,54 @@ using System.Infrastructure.CrossCutting.Adapter;
 using System.Infrastructure.CrossCutting.Framework.Adapter;
 using FinanceManagement.Domain.Aggregates.CustomerAgg;
 using FinanceManagement.Infrastructure.Data.Repositories;
-using FinanceManagement.Infrastructure.Data.UnitOfWork;
 using FinanceManagement.Domain.Aggregates.FeeAgg;
 using FinanceManagement.Domain.Aggregates.FinancialTransactionAgg;
 using FinanceManagement.Application.Service;
 using FinanceManagement.Domain;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
 using AutoMapper;
 using FinanceManagement.Application.Service.MappingProfile;
 using System.IO;
-
+using FinanceManagement.Web.Model;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
+public class AppSettings
+{
+    public string ApplicationName { get; set; } = "My Great Application";
+    public int MaxItemsPerList { get; set; } = 15;
+    public string Service { get; set; }
+    public string DataSource { get; set; }
+    public string CompanyAPIService { get; set; }
+    public string BankHolidaySourceFileOnline { get; set; }
+    public string BankHolidaySourceFileOffline { get; set; }
+}
 namespace FinanceManagement.WebAPI
 {
-
-    //public class ApplicationPreload : System.Web.Hosting.IProcessHostPreloadClient
-    //{
-    //    public void Preload(string[] parameters)
-    //    {
-    //        WebApiBootstrapper.Instance.Start();
-    //    }
-    //}
     public static class WebApiConfig
     {
         public static IServiceCollection RegisterAppServices(this IServiceCollection services)
         {
             //-> Application Services
-            services.AddScoped<ICompanyAppService, CompanyAppService>();
-            services.AddScoped<ICustomerAppService, CustomerAppService>();
-            services.AddScoped<IFunderAppService, FunderAppService>();
-            services.AddScoped<IFeeAppService, FeeAppService>();
-            services.AddScoped<IFinanceTransactionAppService, FinanceTransactionAppService>();
-            services.AddScoped<IInvoiceAppService, InvoiceAppService>();
-            services.AddScoped<IAppLogService, AppLogService>();
+            services.AddTransient<ICompanyAppService, CompanyAppService>();
+            services.AddTransient<ICustomerAppService, CustomerAppService>();
+            services.AddTransient<IFunderAppService, FunderAppService>();
+            services.AddTransient<IFeeAppService, FeeAppService>();
+            services.AddTransient<IFinanceTransactionAppService, FinanceTransactionAppService>();
+            services.AddTransient<IInvoiceAppService, InvoiceAppService>();
+            services.AddTransient<IAppLogService, AppLogService>();
 
             return services;
         }
         public static IServiceCollection RegisterRepositoryServices(this IServiceCollection services)
         {
             //-> Repositories
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
-            services.AddScoped<ICompanyRepository, CompanyRepository>();
-            services.AddScoped<IFunderRepository, FunderRepository>();
-            services.AddScoped<IFeeRepository, FeeRepository>();
-            services.AddScoped<IFinanceTransactionRepository, FinanceTransactionRepository>();
-            services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-            services.AddScoped<IAppLogRepository, AppLogRepository>();
+            services.AddTransient<ICompanyRepository, CompanyRepository>();
+            services.AddTransient<ICustomerRepository, CustomerRepository>();
+            services.AddTransient<IFunderRepository, FunderRepository>();
+            services.AddTransient<IFeeRepository, FeeRepository>();
+            services.AddTransient<IFinanceTransactionRepository, FinanceTransactionRepository>();
+            services.AddTransient<IInvoiceRepository, InvoiceRepository>();
+            services.AddTransient<IAppLogRepository, AppLogRepository>();
             return services;
         }
         public static IServiceCollection RegisterAdapterServices(this IServiceCollection services)
@@ -69,9 +69,9 @@ namespace FinanceManagement.WebAPI
             services.AddSingleton<IMapper>(sp => MapperConfiguration.CreateMapper());
             return services;
         }
-        public static JsonOutputFormatter JsonFormatter()
+        public static System.Net.Http.Formatting.JsonMediaTypeFormatter JsonFormatter()
         {
-            return new JsonOutputFormatter
+            return new System.Net.Http.Formatting.JsonMediaTypeFormatter
             {
                 SerializerSettings = new JsonSerializerSettings
                 {
@@ -80,21 +80,36 @@ namespace FinanceManagement.WebAPI
                 }
             };
         }
-        public static string CreateDataSourceConnectionString(string CompanyName, Microsoft.AspNetCore.Hosting.IHostingEnvironment HostEnvironment, IOptions<AppSettings> AppSettings)
+        public static void SetDataSourceConnectionString(string CompanyName, System.IServiceProvider Services, AppSettings AppSettings)
         {
+            IHostingEnvironment HostEnvironment = Services.GetService<IHostingEnvironment>();
+            Infrastructure.Data.UnitOfWork.ConnectionStringDatabase Connection = Services.GetService<Infrastructure.Data.UnitOfWork.ConnectionStringDatabase>();
             string dbName = CompanyName.Replace(" ", string.Empty);
-            if (AppSettings.Value.DataSource.Contains("FileName"))// SQLite
-                return $"FileName={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.db";
+            if (AppSettings.DataSource.Contains("FileName"))// SQLite
+                Connection.ConnectionString= $"FileName={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.db";
             else
-               // return $"{AppSettings.Value.DataSource};AttachDbFilename={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.mdf;Initial Catalog=Finance.{dbName};Integrated Security=True; MultipleActiveResultSets=True;";
-            return string.Format(@"{0}; Database=Finance.{2}; Integrated Security=True; MultipleActiveResultSets=True;", AppSettings.Value.DataSource, dbName, dbName);
+                // return $"{AppSettings.Value.DataSource};AttachDbFilename={Path.Combine(HostEnvironment.ContentRootPath, "App_Data", $"Finance.{dbName}")}.mdf;Initial Catalog=Finance.{dbName};Integrated Security=True; MultipleActiveResultSets=True;";
+                Connection.ConnectionString= string.Format(@"{0}; Database=Finance.{2}; Integrated Security=True; MultipleActiveResultSets=True;", AppSettings.DataSource, dbName, dbName);
         }
-        public static void ConfigureUnitOfWork(HttpContext context, Microsoft.AspNetCore.Hosting.IHostingEnvironment HostEnvironment, IOptions<AppSettings> AppSettings, string CompanyName)
+        public static void ConfigureCompany(System.IServiceProvider Services, AppSettings AppSettings)
         {
-            IFinanceDbContext dbContext = context.RequestServices.GetService<IFinanceDbContext>();
-            if (dbContext != null)
+            var deseralizeSettings = new JsonSerializerSettings
             {
-                //dbContext.ConnectionString = WebApiConfig.CreateDataSourceConnectionString(CompanyName, HostEnvironment, AppSettings);
+                NullValueHandling = NullValueHandling.Ignore,
+                TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple,
+                TypeNameHandling = TypeNameHandling.Auto,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            CompanyApiProxy CompanyApiProxy = new CompanyApiProxy(AppSettings.CompanyAPIService, null, new System.WebAPIProxy.Serialization.JsonNetSerialization(deseralizeSettings));
+            IEnumerable<CompanyModel> companies = CompanyApiProxy.GetCompanies(AppSettings.Service);
+            foreach (CompanyModel company in companies)
+            {
+                SetDataSourceConnectionString(company.Name, Services, AppSettings);
+                Application.Service.ICompanyAppService _CompanyAppService = Services.GetService<Application.Service.ICompanyAppService>();
+                if (_CompanyAppService != null)
+                {
+                    _CompanyAppService.SetupCompany(company);
+                }
             }
         }
     }

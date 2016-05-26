@@ -1,8 +1,6 @@
 ﻿using FinanceManagement.Domain.Aggregates.FinancialTransactionAgg;
 using System.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
 
 namespace FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping
 {

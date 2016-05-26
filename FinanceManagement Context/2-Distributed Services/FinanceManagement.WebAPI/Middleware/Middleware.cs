@@ -6,7 +6,6 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Hosting;
 
 namespace FinanceManagement.WebAPI
 {
@@ -18,17 +17,14 @@ namespace FinanceManagement.WebAPI
         {
             _next = next;
         }
-        public async Task Invoke(HttpContext context, IOptions<AppSettings> AppSettings, Infrastructure.Data.UnitOfWork.ConnectionStringDatabase Connection)
+        public async Task Invoke(HttpContext context, Application.Service.Settings.AppSetting AppSetting, IOptions<AppSettings> AppSettings)
         {
-            if (context.Request.Method.ToLower() == "get")
+            if (context.Request.Method.ToLower() != "debug")
             {
                 CompanyModel company = FinanceManagement.Application.Service.Settings.AppSetting.Company;
-                Random r = new Random();
-                company.Name = "Test" + r.Next(1, 10);
                 if (company != null && !string.IsNullOrEmpty(company.Name))
                 {
-                    IHostingEnvironment host = context.RequestServices.GetService<IHostingEnvironment>();
-                    Connection.ConnectionString = WebApiConfig.CreateDataSourceConnectionString(company.Name, host, AppSettings);
+                    WebApiConfig.SetDataSourceConnectionString(company.Name, context.RequestServices, AppSettings.Value);
                 }
             }
             await _next.Invoke(context);
@@ -44,7 +40,7 @@ namespace FinanceManagement.WebAPI
         }
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Method.ToLower() == "get")//(context.Request.Method.ToLower() == "delete" || context.Request.Method.ToLower() == "post" || context.Request.Method.ToLower() == "put")
+            if (context.Request.Method.ToLower() == "delete" || context.Request.Method.ToLower() == "post" || context.Request.Method.ToLower() == "put")
             {
                 IAppLogService _LogService = context.RequestServices.GetService<IAppLogService>();
                 AppLogModel appLog = new AppLogModel

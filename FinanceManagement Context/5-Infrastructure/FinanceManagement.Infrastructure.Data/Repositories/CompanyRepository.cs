@@ -21,8 +21,7 @@ namespace FinanceManagement.Infrastructure.Data.Repositories
         public CompanyRepository(IFinanceDbContext unitOfWork) : base(unitOfWork) { }
         public override void Merge(Company persisted, Company current)
         {
-            var currentUOW = this.UnitOfWork as IFinanceDbContext;
-            
+            var currentUOW = this.UnitOfWork as IFinanceDbContext;            
             if (persisted == null || current == null)
                 return;
             currentUOW.ApplyCurrentValues(persisted, current);

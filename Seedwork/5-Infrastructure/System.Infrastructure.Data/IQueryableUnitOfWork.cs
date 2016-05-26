@@ -1,6 +1,7 @@
 ﻿namespace System.Infrastructure.Data
 {
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
     using System.Domain;
 
     /// <summary>
@@ -24,7 +25,7 @@
         /// </summary>
         /// <typeparam name="TValueObject">The type of entity</typeparam>
         /// <param name="item">The item <</param>
-        void Attach<TEntity>(TEntity item) where TEntity : class;
+        EntityEntry<TEntity> Attach<TEntity>(TEntity item) where TEntity : class;
 
         /// <summary>
         /// Set object as modified

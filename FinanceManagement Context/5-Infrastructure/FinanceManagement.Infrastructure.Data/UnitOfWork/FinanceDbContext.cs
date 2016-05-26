@@ -4,17 +4,17 @@
     using System.Linq;
     using System.Collections.Generic;
     using System.Infrastructure.Data;
-    using FinanceManagement.Infrastructure.Data.UnitOfWork.Mapping;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
+    using System.Reflection;
+    using Microsoft.EntityFrameworkCore.Metadata;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
     using FinanceManagement.Domain.Aggregates.CustomerAgg;
     using FinanceManagement.Domain.Aggregates.FeeAgg;
     using FinanceManagement.Domain.Aggregates.DisbursementAgg;
     using FinanceManagement.Domain.Aggregates.FinancialTransactionAgg;
     using Domain;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
-    using System.Reflection;
-    using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-    using Microsoft.EntityFrameworkCore.Metadata;
+
     public class ConnectionStringDatabase
     {
         public string ConnectionString { get; set; }
@@ -46,15 +46,36 @@
         public FinanceDbContext(ConnectionStringDatabase ConnectionStringDatabase)
         {
             ConnectionString = ConnectionStringDatabase.ConnectionString;
-            //Database.EnsureCreated();
             if (Database.EnsureCreated())
             {
                 Database.Migrate();
             }
         }
+
+        #region DBCONTEXT OVERRIDES
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
+
+            #region NOT SUPPORTED YET BY ENTITY FRAMEWORK CORE (26/05/2016) --- HAVE TO BE CHANGED
+            //    //The Lazy Loading property enables loading the sub-objects of model up front
+            //    this.Configuration.ProxyCreationEnabled = false;
+
+            //    /*The Proxy Creation property is used in conjugation with Lazy Loading property, 
+            //     * so if is set to false the “ResidentManagerUnitOfWork” won’t load sub-objects unless Include method is called. * */
+            //    this.Configuration.LazyLoadingEnabled = false;
+            //    /*
+            //     * Configured the initialization and migration strategy of the database to migrate to latest version 
+            //     * if a model has changed (i.e. new property has been added). 
+            //     * To implement this need to add new class called “FinanceManagementContextDBConfiguration” 
+            //     * which derives from class “System.Data.Entity.Migrations.DbMigrationsConfiguration<TContext>”.
+
+            //     * useSuppliedContext:If set to true the initializer is run using the connection information from the context that triggered initialization.
+            //     * Otherwise, the connection information will be taken from a context constructed using the default constructor or registered factory if applicable.
+            //     * */
+            //    Database.SetInitializer(new MigrateDatabaseToLatestVersion<FinanceManagementContext, FinanceManagementContextDBConfiguration>(useSuppliedContext:true));
+            #endregion
+
             if (ConnectionString.Contains("FileName"))// SQLite
             {
                 optionsBuilder.UseSqlite(ConnectionString);
@@ -63,65 +84,34 @@
             {
                 optionsBuilder.UseSqlServer(ConnectionString);
             }
-
-
         }
-
-        //public FinanceManagementContext(string connection) : base(connection)
-        //{
-        //    //The Lazy Loading property enables loading the sub-objects of model up front
-        //    this.Configuration.ProxyCreationEnabled = false;
-
-        //    /*The Proxy Creation property is used in conjugation with Lazy Loading property, 
-        //     * so if is set to false the “ResidentManagerUnitOfWork” won’t load sub-objects unless Include method is called. * */
-        //    this.Configuration.LazyLoadingEnabled = false;
-        //    /*
-        //     * Configured the initialization and migration strategy of the database to migrate to latest version 
-        //     * if a model has changed (i.e. new property has been added). 
-        //     * To implement this need to add new class called “FinanceManagementContextDBConfiguration” 
-        //     * which derives from class “System.Data.Entity.Migrations.DbMigrationsConfiguration<TContext>”.
-
-        //     * useSuppliedContext:If set to true the initializer is run using the connection information from the context that triggered initialization.
-        //     * Otherwise, the connection information will be taken from a context constructed using the default constructor or registered factory if applicable.
-        //     * */
-        //    Database.SetInitializer(new MigrateDatabaseToLatestVersion<FinanceManagementContext, FinanceManagementContextDBConfiguration>(useSuppliedContext:true));
-        //}
-
-        #region DbContext Overrides
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             /*
-             * Type per Hierachy(TPH) | N / A
-             * Type per Type(TPT) | N / A
-             * Type per Concrete Class (TPC) | Ok(Beta8)
-             * Many to Many(Shadow) | No(Beta8)
+             * Type per Hierachy(TPH) --- Currently supports TPH, but Have to change to TPT - 26/05/2016
+             * Type per Type(TPT) | N/A --- Need to be impelemented when is compeleted by Microsoft Entityframework Team
+             * Type per Concrete Class (TPC) --
              */
             modelBuilder.AddEntityConfigurationsFromAssembly(GetType().GetTypeInfo().Assembly);
         }
         #endregion
 
-
-
         #region IQUERYABLEUNITOFWORK MEMBERS
-        public DbSet<TEntity> CreateSet<TEntity>() where TEntity : class
-        {
-            return base.Set<TEntity>();
-        }
-        public void Attach<TEntity>(TEntity item) where TEntity : class
-        {
-            //attach and set as unchanged
-            base.Entry<TEntity>(item).State = EntityState.Unchanged;
-        }
-        public void SetModified<TEntity>(TEntity item) where TEntity : class
-        {
-            //this operation also attach item in object state manager
-            base.Entry<TEntity>(item).State = EntityState.Modified;
-        }
+        public DbSet<TEntity> CreateSet<TEntity>() where TEntity : class => base.Set<TEntity>();
+        public override EntityEntry<TEntity> Attach<TEntity>(TEntity entity) => base.Attach<TEntity>(entity); 
+        public void SetModified<TEntity>(TEntity item) where TEntity : class => base.Entry<TEntity>(item).State = EntityState.Modified;
         public void ApplyCurrentValues<TEntity>(TEntity original, TEntity current) where TEntity : class
         {
             //if it is not attached, attach original and set current values
-            this.Update<TEntity>(current);
-            //base.Entry<TEntity>(original).CurrentValues.SetValues(current);
+            foreach(IProperty property in base.Entry(original).Metadata.GetProperties())
+            {
+                PropertyEntry originalProperty = base.Entry<TEntity>(original).Property(property.Name);
+                if(!property.IsKey())
+                {
+                    originalProperty.IsModified = true;
+                    originalProperty.CurrentValue = base.Entry<TEntity>(current).Property(property.Name).CurrentValue;
+                }
+            }
         }
         public void Commit()
         {
@@ -135,19 +125,18 @@
                 }
             }
             catch { }
-            //catch (DbEntityValidationException e)
+            //catch (DbEntityValidationException ex)
             //{
-            //    foreach (var eve in e.EntityValidationErrors)
-            //    {
-            //        Console.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:",
-            //            eve.Entry.Entity.GetType().Name, eve.Entry.State);
-            //        foreach (var ve in eve.ValidationErrors)
-            //        {
-            //            Console.WriteLine("- Property: \"{0}\", Error: \"{1}\"",
-            //                ve.PropertyName, ve.ErrorMessage);
-            //        }
-            //    }
-            //    throw;
+            //    // Retrieve the error messages as a list of strings.
+            //    var errorMessages = ex.EntityValidationErrors
+            //            .SelectMany(x => x.ValidationErrors)
+            //            .Select(x => x.ErrorMessage);
+            //    // Join the list to a single string.
+            //    var fullErrorMessage = string.Join("; ", errorMessages);
+            //    // Combine the original exception message with the new one.
+            //    var exceptionMessage = string.Concat(ex.Message, " The validation errors are: ", fullErrorMessage);
+            //    // Throw a new DbEntityValidationException with the improved exception message.
+            //    throw new Exception(exceptionMessage);
             //}
         }
         public void CommitExecuteCommandTransaction()
@@ -161,7 +150,6 @@
         public void CommitAndRefreshChanges()
         {
             bool saveFailed = false;
-
             do
             {
                 try
@@ -196,7 +184,7 @@
         public IEnumerable<TEntity> ExecuteQuery<TEntity>(string sqlQuery, params object[] parameters)
         {
             throw new NotImplementedException();
-            //return base.Database.ExecuteSqlCommand.SqlQuery<TEntity>(sqlQuery, parameters);
+            //return base.Database.SqlQuery<TEntity>(sqlQuery, parameters);
         }
         public int ExecuteCommand(string sqlCommand, params object[] parameters)
         {
@@ -239,55 +227,42 @@
             //}
         }
         public bool IsTransactionInUse { get; set; }
-
         public DbSet<Company> Companies
         {
             get; set;
         }
-
         public DbSet<AppLog> AppLogs
         {
             get; set;
         }
-
         public DbSet<AccountGroup> AccountGroups
         {
             get; set;
         }
-
         public DbSet<Account> Accounts
         {
             get; set;
         }
-
         public DbSet<Customer> Customers
         {
             get; set;
         }
-
         public DbSet<Funder> Funders
         {
             get; set;
         }
-
         public DbSet<CustomerDisbursementFunder> CustomerDisbursementFunders
         {
             get; set;
         }
-
         public DbSet<Fee> Fees
         {
             get; set;
         }
-
         public DbSet<FeeRate> FeeRates { get; set; }
-
         public DbSet<Rate> Rates { get; set; }
-
         public DbSet<Expense> Expenses { get; set; }
-
         public DbSet<Disbursement> Disbursements { get; set; }
-
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<InvoiceArticleTemplate> InvoiceArticleTemplates { get; set; }
         #endregion
