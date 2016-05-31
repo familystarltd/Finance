@@ -17,7 +17,7 @@
     "Finance.Domain": "1.0.0-*",
     "Finance.Infrastructure.Data": "1.0.0-*",
     "Finance.Web.Model": "1.0.0-*",
-    "System.WebAPIProxy": "1.0.0-*",
+    "System.Presentation.WebAPIProxy": "1.0.0-*",
     "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.0-rc2-final",
     "Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
   },

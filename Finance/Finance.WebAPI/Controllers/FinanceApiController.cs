@@ -8,7 +8,7 @@ using Finance.Application.Service;
 using System.Infrastructure.CrossCutting.Framework;
 using Newtonsoft.Json;
 using Finance.Domain.Aggregates.FinancialTransactionAgg;
-using System.WebAPIProxy.Serialization;
+using System.Presentation.WebAPIProxy.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.WebApiCompatShim;
 using System.Web.Http;

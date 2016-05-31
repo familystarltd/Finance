@@ -100,7 +100,7 @@ namespace Finance.WebAPI
                 TypeNameHandling = TypeNameHandling.Auto,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
-            CompanyApiProxy CompanyApiProxy = new CompanyApiProxy(AppSettings.CompanyAPIService, null, new System.WebAPIProxy.Serialization.JsonNetSerialization(deseralizeSettings));
+            CompanyApiProxy CompanyApiProxy = new CompanyApiProxy(AppSettings.CompanyAPIService, null, new System.Presentation.WebAPIProxy.Serialization.JsonNetSerialization(deseralizeSettings));
             IEnumerable<CompanyModel> companies = CompanyApiProxy.GetCompanies(AppSettings.Service);
             foreach (CompanyModel company in companies)
             {

@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.WebAPIProxy;
-using System.WebAPIProxy.Serialization;
+using System.Presentation.WebAPIProxy;
+using System.Presentation.WebAPIProxy.Serialization;
 using Finance.Web.Model;
 using Microsoft.AspNetCore.Http;
 
