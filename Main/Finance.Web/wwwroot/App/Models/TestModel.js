@@ -1,0 +1,1 @@
+"use strict";var Product=function(){function t(){}return t}();exports.Product=Product;

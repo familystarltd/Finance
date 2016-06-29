@@ -47,17 +47,11 @@ namespace Finance.WebAPI
                 //    }
                 //});
                 #endregion
-                //Output formater //as part of get/post request, set the header Accept = application/json or application/xml 
-                options.OutputFormatters.Clear();
-                options.OutputFormatters.Add(new JsonOutputFormatter
-                {
-                    SerializerSettings = new JsonSerializerSettings
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                        DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                    }
-                });
+            })
+            .AddJsonOptions(options => {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             }).AddWebApiConventions();
             #endregion
             services.AddOptions();
