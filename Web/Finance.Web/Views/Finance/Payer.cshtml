@@ -1,0 +1,207 @@
+﻿@model Finance.Web.Model.PayerModel
+@using Finance.Web.Helpers.ExtensionMethods
+<script src="~/lib/dist/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
+<h3><img src="~/images/payer.png" style="margin-right:5px;" class="ico-sm" />Payers</h3>
+@if (Model.Payers != null && Model.Payers.Count() > 0)
+{
+    <div class="row">
+        <div class="col-md-12" style="">
+            <div id="dialog-confirm" class="dialog-confirm" title="Delete Payer?" style="display:none;">
+                <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This payer will be permanently deleted and cannot be recovered. Are you sure?</p>
+            </div>
+            <table border="1" style="border: 1px solid #027ff4;width:100%;">
+                <thead class="header" style="border: 1px solid #027ff4;margin:0px;padding:0px;">
+                    <tr>
+                        <td style="width:25%">
+                            <a href="@Url.Action("Payer", "Finance", new { Id = Guid.Empty })"><h5 style="float:left;margin-right:3px;">Payer</h5> <img alt="edit-block bed service" src="~/images/add-plus.png" style="width:16px;height:16px;float:left;margin-top:12px;" /> </a>
+                        </td>
+                        <td style="width:35%">Invoice Billing</td>
+                        <td style="width:35%">Disbursement Billing</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody class="content-sub" style="border: 1px solid #027ff4;text-align:left;vertical-align:top;">
+                    @foreach (Finance.Web.Model.PayerModel payer in Model.Payers)
+                    {
+                        <tr>
+                            <td>
+                                @payer.Name
+                            </td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        @Html.Raw(payer.FeeInvoiceBillingContact == null? string.Empty : string.Format("{0}{1}", string.IsNullOrEmpty(payer.FeeInvoiceBillingContact.ContactReference) ? string.Empty : payer.FeeInvoiceBillingContact.ContactReference + "<br/>", payer.FeeInvoiceBillingContact.Address.Replace(Environment.NewLine, "<br>")))
+                                    </div>
+                                    <div class="col-md-6">
+                                        @Html.Raw(payer.FeeInvoiceDeliveryContact == null ? string.Empty : string.Format("{0}{1}", string.IsNullOrEmpty(payer.FeeInvoiceDeliveryContact.ContactReference) ? string.Empty : payer.FeeInvoiceDeliveryContact.ContactReference + "<br/>",payer.FeeInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>")))
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        @Html.Raw(payer.DisbursementInvoiceBillingContact == null ? string.Empty : string.Format("{0}{1}", string.IsNullOrEmpty(payer.DisbursementInvoiceBillingContact.ContactReference)?string.Empty: payer.DisbursementInvoiceBillingContact.ContactReference + "<br/>", payer.DisbursementInvoiceBillingContact.Address.Replace(Environment.NewLine, "<br>")))
+                                    </div>
+                                    <div class="col-md-6">
+                                        @Html.Raw(payer.DisbursementInvoiceDeliveryContact == null ? string.Empty : string.Format("{0}{1}", string.IsNullOrEmpty(payer.DisbursementInvoiceDeliveryContact.ContactReference) ? string.Empty : payer.DisbursementInvoiceDeliveryContact.ContactReference + "<br/>", payer.DisbursementInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>")))
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a style="text-decoration:none;font-weight:bold;cursor:pointer;" href="@Url.Action("Payer", "Finance", new { Id = payer.Id })"> <img alt="edit-payer" src="~/images/edit.png" style="width:24px;height:24px;" /> </a>
+                                @if (payer.Fees.Count() <= 0)
+                                {
+                                    <img id="payerDelete" class="payerDelete" alt="delete-payer" src="~/images/delete.png" style="width:24px;height:24px;cursor:pointer;" />
+                                    @*<input type="image" id="payerDelete" class="payerDelete" data-app-id="@payer.Id" value="delete" style="width:24px;height:24px;" alt="delete-block bed" src="~/images/delete.png" />*@
+                                }
+                            </td>                            
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    using (Html.BeginForm("Payer", "Finance", FormMethod.Post, new { @id = "payerform", @class = "form-horizontal", @role = "form" }))
+    {
+        Model.PersonalContact.EnableValidation = true;
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => Model.Id)
+        <div id="tabs" style="font-size:small;">
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="row form-group">
+                        @Html.LabelFor(model => model.Name, "Payer Name", new { @class = "col-md-3 control-label", style = "text-align: left;" })
+                        <div class="col-md-6">
+                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row" style="margin-right: 0px; margin-top: 0px; margin-bottom: 0px;float:right;">
+                        <div class="col-md-12">
+                            <input class="ico-sm" type="image" src="~/images/save.png" alt="save" style="float: left; margin-right: 5px; " />
+                            <a href="@Url.Action("Payer", "Finance", new { id = Guid.Empty })" style="float: left; margin-right: 5px; ">
+                                <img class="ico-sm" alt="add" src="~/images/add-plus.png" />
+                            </a>
+                            <a href="~/finance/Payer" style="float:left;">
+                                <img class="ico-sm" alt="cancel" src="~/images/cancel.png" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ul>
+                <li>
+                    <a onclick="return false;" href="#tabs-payer">
+                        @if (Model.Id != Guid.Empty)
+                        {@Model.Name}
+                        else
+                        {<span>New Payer</span>}
+                    </a>
+                </li>
+                <li><a onclick="return false;" href="#tabs-FeeInvoiceContact">Fee Invoice Contact</a></li>
+                <li><a onclick="return false;" href="#tabs-ExpensesInvoiceContact">Expenses Invoice Contact</a></li>
+            </ul>
+            <div id="tabs-payer" style="">
+                <div class="row form-group">
+                    <div class="col-md-9">
+                        <section id="PersonalContact">
+                            @{Html.ViewData.TemplateInfo.HtmlFieldPrefix = "PersonalContact";}
+                            @Html.Partial("_ContactNonPersonal", Model.PersonalContact, new ViewDataDictionary(Html.ViewData))
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-FeeInvoiceContact" style="">
+                <div class="row form-group">
+                    <div class="col-md-6">
+                        <h3 style="margin:0px;padding:0px;font-size:large;margin-bottom:5px;"><u>Billing To - Fee Invoice</u></h3>
+                        <section id="FeeInvoiceBillingContact">
+                            @{Html.ViewData.TemplateInfo.HtmlFieldPrefix = "FeeInvoiceBillingContact";}
+                            @Html.Partial("_ContactNonPersonal", Model.FeeInvoiceBillingContact, new ViewDataDictionary(Html.ViewData))
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 style="margin:0px;padding:0px;font-size:large;margin-bottom:5px;"><u>Ship To - Fee Invoice</u></h3>
+                        <section id="FeeInvoiceDeliveryContact">
+                            @{Html.ViewData.TemplateInfo.HtmlFieldPrefix = "FeeInvoiceDeliveryContact";}
+                            @Html.Partial("_ContactNonPersonal", Model.FeeInvoiceDeliveryContact, new ViewDataDictionary(Html.ViewData))
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-ExpensesInvoiceContact" style="">
+                <div class="row form-group">
+                    <div class="col-md-6">
+                        <h3 style="margin:0px;padding:0px;font-size:large;margin-bottom:5px;"><u>Billing To - Expenses Invoice</u></h3>
+                        <section id="DisbursementInvoiceBillingContact">
+                            @{Html.ViewData.TemplateInfo.HtmlFieldPrefix = "DisbursementInvoiceBillingContact";}
+                            @Html.Partial("_ContactNonPersonal", Model.DisbursementInvoiceBillingContact, new ViewDataDictionary(Html.ViewData))
+                        </section>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 style="margin:0px;padding:0px;font-size:large;margin-bottom:5px;"><u>Ship To - Expenses Invoice</u></h3>
+                        <section id="DisbursementInvoiceDeliveryContact">
+                            @{Html.ViewData.TemplateInfo.HtmlFieldPrefix = "DisbursementInvoiceDeliveryContact";}
+                            @Html.Partial("_ContactNonPersonal", Model.DisbursementInvoiceDeliveryContact, new ViewDataDictionary(Html.ViewData))
+                        </section>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    }
+}
+@Html.Partial("_DataLoader")
+<script>
+    $(document).ready(function () {
+        $(".dialog-confirm").hide();
+        $(function () {
+            $("#tabs").tabs();
+        });
+
+        $(".payerDelete").click(function (e) {
+            e.preventDefault();
+            var id = $(this).attr("data-app-id")
+            $(".dialog-confirm").dialog({
+                resizable: false,
+                height: 200,
+                width: 500,
+                modal: true,
+                buttons: {
+                    "Delete Payer": function () {
+                        //Call Web API function
+                        @{System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                            sb.Append("'");
+                            sb.Append(ViewBag.FinanceApiService);
+                            sb.Append("/FinanceApi/Payer/Delete/");
+                            sb.Append("'");
+                        }
+                        var deletePayerUrl = @Html.Raw(sb.ToString()) +id
+                        $.ajax({
+                            url: deletePayerUrl,
+                            type: 'DELETE',
+                            cache: false,
+                            success: function () {
+                                // call autocomplete callback method with results
+                                window.location = "/Finance/Payer";
+                            },
+                            error: function (xmlHttpRequest, textStatus, errorThrown) {
+                                alert(textStatus);
+                                console.log('some error occured', textStatus, errorThrown);
+                            }
+                        });
+                        $(this).dialog("close");
+                    },
+                    Cancel: function () { $(this).dialog("close"); }
+                }
+            });
+        });
+
+    });
+</script>

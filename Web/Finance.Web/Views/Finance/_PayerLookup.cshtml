@@ -1,0 +1,199 @@
+﻿<style>
+    table.payerLookup {
+        border: none;
+    }
+
+        table.payerLookup tr {
+            border: none;
+        }
+
+        table.payerLookup td {
+            border: none;
+        }
+
+        table.payerLookup th {
+            border: none;
+        }
+</style>
+<div class="payer-lookup-dialog" id="payer-lookup-dialog" title="Payers" style="display: none;">
+    <input type="text" id="txtPayerSearch" style="width:300px;" /><input type="image" id="getPayerSearch" name="getPayerSearch" src="~/images/search.png" style="height:32px;cursor:pointer;padding-top:8px;margin-top:15px;vertical-align:bottom;" />
+    <table style="border:none;" class="payerLookup">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkPayerPrev"><img style="width:16px; height:16px;" src="~/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblPayersPagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkPayerNext"><img style="width:16px; height:16px;" src="~/images/pagingNext.png" /></a></th>
+            </tr>
+        </thead>
+    </table>
+    <table id="tblPayerList" style="width:100%; border:1px;" class="payerLookup">
+        <thead>
+            <tr class="header">
+                <th style="width:60%;">Name</th>
+                <th style="width:40%;">Personal Contact</th>
+                @*<th>D.O.A</th>
+                <th>Business</th>
+                <th style="text-align:center;">IsActive</th>*@
+            </tr>
+        </thead>
+        <tbody id="tblPayersBody"></tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbGetNewInvoices = new System.Text.StringBuilder();
+            sbGetNewInvoices.Append("'");
+            sbGetNewInvoices.Append(ViewData["FinanceApiService"]);
+            sbGetNewInvoices.Append("/FinanceApi/PayersBySearch?searchText=");
+            sbGetNewInvoices.Append("'");}
+        var getPayersUrl =   @Html.Raw(sbGetNewInvoices.ToString()) + '';
+        function clearPayerForm() {
+            $("#tblPayersBody").empty();
+            $("#tblPayersPagingNos").empty();
+            $("#lnkPayerPrev").removeAttr('href');
+            $("#lnkPayerNext").removeAttr('href');
+        }
+        function clearData() {
+            $(".payer-lookup-dialog").data("SearchText", "");
+        }
+        $(".payer-lookup-dialog").dialog({ modal: true, resizable: false, width: 800, height: 500, zindex: 30000, autoOpen: false, position: { my: 'top', at: 'top+160' } });
+        $(".payer-lookup-dialog").on("dialogopen", function (event, ui) {
+            $(".payer-lookup-dialog").data("SearchText");
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".payer-lookup-dialog").dialog("moveToTop");
+        });
+        function loadPayers(Payers, Pagination) {
+            if (Payers) {
+                if (Payers.length > 0) {
+                    clearPayerForm();
+                    var tableBody = "";
+                    $.each(Payers, function (c, payer) {
+                        tableBody += "<tr>"
+                        +
+                        "<td> <a class='payerSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;' data-app-id='" + payer.id + "'" + "data-app-name='" + payer.name + "'" + ">" + payer.name + " </a></td>"
+                        +
+                        "<td><a class='' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;'  data-app-id='" + payer.personalContact.fullName + "' >" + payer.personalContact.fullName + "</a></td>"
+                        + "</tr>";
+                    });
+                    if (tableBody != "") {
+                        $("#tblPayersBody").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkPayerPrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkPayerPrev').stop().fadeTo('slow', 1);
+                            $("#lnkPayerPrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkPayerPrev").removeAttr('href');
+                            $('#lnkPayerPrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkPayerPrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkPayerNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkPayerNext').stop().fadeTo('slow', 1);
+                            $("#lnkPayerNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkPayerNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkPayerNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkPayerNext").attr('style', "cursor:none;");
+                        }
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblPayersPagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblPayersPagingNos").empty(); $("#lnkPayerPrev").removeAttr('href'); $("#lnkPayerNext").removeAttr('href'); }
+                }
+                else { alert("Payers have not been found! Please try again later.") }
+            }
+        };
+        $('#txtPayerSearch').keypress(function (e) {
+            var key = e.which;
+            if (key == 13)  // the enter key code
+            {
+                $('input[name = getPayerSearch]').click();
+                return false;
+            }
+        });
+        $("#getPayerSearch").click(function (e) {
+            var URL = getPayersUrl + $("#txtPayerSearch").val() + '&pageIndex=0&pageSize=10';
+            var requestPayer = $.ajax({
+                type: "GET",
+                url: URL,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (payers) {
+                    if (!$.isNullOrEmpty(payers)) {
+                        loadPayers(payers, JSON.parse(requestPayer.getResponseHeader('X-Pagination')));
+                    }
+                }
+            });
+            requestPayer.fail(function (jqxhr, textStatus, error) {
+                alert("List of Payers Request failed: " + textStatus);
+            });
+        });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            if (url) {
+                var requestPayer = $.getJSON(url, function (payers) {
+                    loadPayers(payers, JSON.parse(requestPayer.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of payers Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('click', 'a.payerSelect', function (e) {
+            e.preventDefault();
+            var payerId = $(this).attr("data-app-id");
+            var payerName = $(this).attr("data-app-name");
+            if (payerName) {
+                $(".payer-lookup-dialog").data({ "payerName": payerName });
+                $(".payer-lookup-dialog").data({ "payerId": payerId });
+                $(".payer-lookup-dialog").dialog("close");
+            }
+        });
+        $("#lnkPayerPrev").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkPayerPrev").attr('href');
+            if (url) {
+                var requestPayers = $.getJSON(url, function (payers) {
+                    loadPayers(payers, JSON.parse(requestPayers.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Payers Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkPayerNext").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkPayerNext").attr('href');
+            if (url) {
+                var requestPayers = $.getJSON(url, function (payers) {
+                    loadPayers(payers, JSON.parse(requestPayers.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Payers Request failed! Please try again later. "); })
+            }
+        });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) { clearPayerForm(); });
+    });
+</script>
+

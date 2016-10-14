@@ -1,0 +1,205 @@
+﻿<style>
+    table.creditNoteLookup {
+        border: none;
+    }
+
+        table.creditNoteLookup tr {
+            border: none;
+        }
+
+        table.creditNoteLookup td {
+            border: none;
+        }
+
+        table.creditNoteLookup th {
+            border: none;
+        }
+</style>
+<div class="creditNote-lookup-dialog" id="creditNote-lookup-dialog" title="Credit Notes" style="display: none;">
+    <input type="text" id="txtCreditNoteSearch" style="width:300px;" /><input type="image" id="getCreditNoteSearch" src="~/images/search.png" style="height:32px;cursor:pointer;vertical-align:bottom;" />
+    <table style="border:none;" class="creditNoteLookup">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkCreditNotePrev"><img style="width:16px; height:16px;" src="~/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblCreditNotesPagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkCreditNoteNext"><img style="width:16px; height:16px;" src="~/images/pagingNext.png" /></a></th>
+            </tr>
+        </thead>
+    </table>
+    <table id="tblCreditNoteList" style="width:100%; border:1px;" class="creditNoteLookup">
+        <thead>
+            <tr class="header">
+                <th style="width:20%;">Credit Note</th>
+                <th style="width:20%;">Date</th>
+                <th style="width: 30%; text-align: right;">Amount</th>
+                <th style="width:30%;text-align:right;">Credit Available</th>
+            </tr>
+        </thead>
+        <tbody id="tblCreditNotesBody" class="content-sub"></tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+        var seacrhText = "";
+        var CreditNote_PayerId;
+        var CreditNote_PayDate;
+        var CreditNotes;
+        function clearCreditNoteForm() {
+            $("#tblCreditNotesBody").empty();
+            $("#tblCreditNotesPagingNos").empty();
+            $("#lnkCreditNotePrev").removeAttr('href');
+            $("#lnkCreditNoteNext").removeAttr('href');
+        }
+        function clearData() {
+            $(".creditNote-lookup-dialog").data("SearchText", null);
+            $(".creditNote-lookup-dialog").data("PayerId", null);
+            $(".creditNote-lookup-dialog").data("PayDate", null);
+            $(".creditNote-lookup-dialog").data("CreditNoteNo", null);
+            seacrhText = "";
+            CreditNote_PayerId = "";
+            CreditNote_PayDate = "";
+            CreditNotes = "";
+        }
+        function loadCreditNotesForReceipt()
+        {
+             @{System.Text.StringBuilder sbGetCreditNotes = new System.Text.StringBuilder();
+                 sbGetCreditNotes.Append("'");
+                 sbGetCreditNotes.Append(ViewBag.FinanceApiService);
+                 sbGetCreditNotes.Append("/FinanceApi/CreditNotesForReceipt?PayerId=");
+                 sbGetCreditNotes.Append("'");}
+            var getCreditNotesUrl =   @Html.Raw(sbGetCreditNotes.ToString()) + CreditNote_PayerId + '&ReceiptDate=' + CreditNote_PayDate + '&PageIndex=0&PageSize=20';
+            var requestCreditNote = $.ajax({
+                type: "GET",
+                url: getCreditNotesUrl,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (creditNotes) {
+                    if (!$.isNullOrEmpty(creditNotes)) {
+                        CreditNotes = creditNotes;
+                        loadCreditNotes(creditNotes, JSON.parse(requestCreditNote.getResponseHeader('X-Pagination')));
+                    }
+                }
+            });
+            requestCreditNote.fail(function (jqxhr, textStatus, error) {
+                alert("List of CreditNotes Request failed: " + textStatus);
+            });
+        }
+        function loadCreditNotes(CreditNotes, Pagination) {
+            if (CreditNotes) {
+                if (CreditNotes.length > 0) {
+                    clearCreditNoteForm();
+                    var tableBody = "";
+                    $.each(CreditNotes, function (c, creditNote) {
+
+                        tableBody += "<tr>"
+                        + "<td> <a class='creditNoteSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;' data-app-id='" + creditNote.transactionRef + "'" + "data-app-name='" + creditNote.transactionRef + "'" + ">" + creditNote.refPrefix + creditNote.transactionRef + " </a></td>"
+                        +"<td>" + $.datepicker.formatDate('dd/mm/yy', new Date(creditNote.processedDate)) + "</td>"
+                        + "<td style='text-align:right;'>" + $.formatCurrency(creditNote.amount, "£") + "</td>"
+                        + "<td style='text-align:right;'>" + $.formatCurrency(creditNote.creditAvailable, "£") + "</td>"
+                        + "</tr>";
+                    });
+                    if (tableBody != "") {
+                        $("#tblCreditNotesBody").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkCreditNotePrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkCreditNotePrev').stop().fadeTo('slow', 1);
+                            $("#lnkCreditNotePrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkCreditNotePrev").removeAttr('href');
+                            $('#lnkCreditNotePrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkCreditNotePrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkCreditNoteNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkCreditNoteNext').stop().fadeTo('slow', 1);
+                            $("#lnkCreditNoteNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkCreditNoteNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkCreditNoteNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkCreditNoteNext").attr('style', "cursor:none;");
+                        }
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblCreditNotesPagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblCreditNotesPagingNos").empty(); $("#lnkCreditNotePrev").removeAttr('href'); $("#lnkCreditNoteNext").removeAttr('href'); }
+                }
+                else { alert("Credit Notes have not been found!!!") }
+            }
+        };
+        $(".creditNote-lookup-dialog").dialog({ modal: true, resizable: false, width: 800, height: 500, zindex: 30000, autoOpen: false, position: { my: 'top', at: 'top+160' } });
+        $(".creditNote-lookup-dialog").on("dialogopen", function (event, ui) {
+            seacrhText = $(".creditNote-lookup-dialog").data("SearchText");
+            CreditNote_PayerId = $(".creditNote-lookup-dialog").data("PayerId");
+            CreditNote_PayDate = $(".creditNote-lookup-dialog").data("PayDate");
+            loadCreditNotesForReceipt();
+
+        });
+        $(".creditNote-lookup-dialog").on("dialogclose", function (event, ui) { clearCreditNoteForm(); clearData(); });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            if (url) {
+                var requestCreditNote = $.getJSON(url, function (creditNotes) {
+                    loadCreditNotes(creditNotes, JSON.parse(requestCreditNote.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of creditNotes Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('click', 'a.creditNoteSelect', function (e) {
+            e.preventDefault();
+            var creditNoteId = $(this).attr("data-app-id");
+            if (creditNoteId) {
+                $(".creditNote-lookup-dialog").data("CreditNote", $.getJsonObject(CreditNotes, { "creditNoteNo": creditNoteId }));
+                $(".creditNote-lookup-dialog").dialog("close");
+            }
+        });
+        $("#getCreditNoteSearch").click(function (e) {
+            loadCreditNotesForReceipt();
+        });
+        $("#lnkCreditNotePrev").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkCreditNotePrev").attr('href');
+            if (url) {
+                var requestCreditNotes = $.getJSON(url, function (creditNotes) {
+                    loadCreditNotes(creditNotes, JSON.parse(requestCreditNotes.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of CreditNotes Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkCreditNoteNext").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkCreditNoteNext").attr('href');
+            if (url) {
+                var requestCreditNotes = $.getJSON(url, function (creditNotes) {
+                    loadCreditNotes(creditNotes, JSON.parse(requestCreditNotes.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of CreditNotes Request failed! Please try again later. "); })
+            }
+        });
+    });
+</script>
+

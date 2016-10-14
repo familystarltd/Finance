@@ -1,0 +1,365 @@
+﻿@Scripts.Render("~/bundles/app/Finance/Model/FinancialTransaction")
+<style>
+    table#creditNoteInvoice {
+        border: none;
+    }
+
+        table#creditNoteInvoice tr {
+            border: none;
+        }
+
+        table#creditNoteInvoice td {
+            border: none;
+        }
+
+        table#creditNoteInvoice th {
+            border: none;
+        }
+</style>
+@Html.Partial("_PayerLookup", new ViewDataDictionary(Html.ViewData))
+@Html.Partial("_CreditNoteView", new ViewDataDictionary(Html.ViewData))
+@Html.Partial("_InvoiceLookup", new ViewDataDictionary(Html.ViewData))
+<div class="creditNote-create-dialog" id="creditNote-create" title="Credit Note" style="margin:0px;padding:0px; display:none;font-size:small;white-space:nowrap;">
+    <div id="Errorwrap_CreditNote" class="row" style="margin:0px;padding:0px;margin-bottom:5px;color:red;width:auto;height:auto;"></div>
+    <form id="creditNoteForm" class="form-inline" role="form" style="margin:0px;padding:0px;">
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="CreditNotePayerName">Payer</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <input type="text" id="CreditNotePayerName" name="CreditNotePayerName" style="width: 270px; color: black;" class="creditNotePayerName form-control" readonly="readonly" />
+                <button type="button" id="btnCreditNotePayerNameLookup" class="btn btn-default" style="font-weight:bold;">...</button>
+                <label for="CreditNoteDate">Date</label>
+                <input type="text" class="form-control" value="" id="CreditNoteDate" name="CreditNoteDate" style="width:100px;" />
+                <label for="txtCreditNoteRef">Ref</label>
+                <input type="text" id="txtCreditNoteRef" value="---NEW---" style="width: 100px; color: black;" class="form-control" readonly="readonly" />
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="CreditNoteAmount">Amount</label>
+            </div>
+            <div class="form-group col-md-10 form-group">
+                <input type="text" class="form-control currency" value="" id="CreditNoteAmount" name="CreditNoteAmount" style="text-align:right;width:150px;" />
+            </div>
+        </div>        
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="creditNotePayInvoice">Invoice</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <table id="creditNoteInvoice" style="width: 98%;">
+                    <tr class="header">
+                        <th style="width:19%;">Invoice</th>
+                        <th style="width:13%;">Date</th>
+                        <th style="width:22%;text-align:right;">Total</th>
+                        <th style="width: 22%; text-align: right;">Due</th>
+                        <th style="width: 22%; text-align: right;">Credit Amount</th>
+                    </tr>
+                </table>
+                <div style="height:100px;overflow-y:scroll;" class="content-sub">
+                    <table id="creditNoteInvoice" style="width: 100%;">
+                        <tbody id="tblBodycreditNoteInvoices" class="content-sub"></tbody>
+                    </table>
+                </div>
+                <table id="creditNoteInvoice" style="width: 98%;" class="no-border content-sub">
+                    <tr>
+                        <td>
+                            <button type="button" id="btnCreditNoteInvoiceLookup" class="btn btn-default" style="font-weight:bold;height:32px;vertical-align:middle;">...</button>
+                        </td>
+                        <td colspan="3" style="text-align: right;">Total Outstanding / Credit:<input type="text" id="creditNoteInvoiceTotalDueAmount" disabled="disabled" style="font-weight:bold; width:130px;text-align:right;" /> </td>
+                        <td style="width: 22%; text-align: right;"><input type="text" id="creditNoteInvoiceAllocated" disabled="disabled" style="font-weight: bold; width: 140px; text-align: right;" /> </td>
+                    </tr>
+                </table>
+                <hr />
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="CreditNoteDesc">Description</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <textarea cols="70" rows="3" class="form-control" id="CreditNoteDesc" name="CreditNoteDesc"></textarea>
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+
+            </div>
+            <div class="col-md-5" style="margin-top:15px;">
+                <input type="image" id="creditNoteSave" src="~/Content/Images/Save.png" style="width:32px;height:32px;" />
+                <input type="image" id="creditNoteReset" src="~/Content/images/reset.png" style="height:32px;width:32px;cursor:pointer;" />
+                <img src="~/Content/images/exit.png" id="exit" class="exit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbCreditNoteNew = new System.Text.StringBuilder();
+            sbCreditNoteNew.Append("'");
+            sbCreditNoteNew.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbCreditNoteNew.Append("/FinanceApi/CreditNote");
+            sbCreditNoteNew.Append("'");}
+        var creditNoteNewUrl = @Html.Raw(sbCreditNoteNew.ToString()) + '';
+        @{System.Text.StringBuilder sbGetInvoiceByInvoice = new System.Text.StringBuilder();
+            sbGetInvoiceByInvoice.Append("'");
+            sbGetInvoiceByInvoice.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbGetInvoiceByInvoice.Append("/FinanceApi/Invoice?InvoiceNo=");
+            sbGetInvoiceByInvoice.Append("'");}
+        var invoiceUrl = @Html.Raw(sbGetInvoiceByInvoice.ToString()) + '';
+        var InvoiceDate;
+        var PayerName;
+        var PayerId;
+        var InvoiceId;
+        var creditNoteDate = new Date();
+        var MODE;
+        var CreditNote_Rules;
+        var CreditNote_Messages;
+        var CreditNote_Validator;
+        function clearInvoice()
+        {
+            $("#tblBodycreditNoteInvoices").empty();
+            $("#creditNoteInvoiceTotalDueAmount").val("");
+            $("#creditNoteInvoiceAllocated").val("");
+        }
+        function clearCreditNoteForm() {
+            Mode = "";
+            creditNoteDate = new Date();
+            PayerId = "";
+            PayerName = "";
+            InvoiceId = "";            
+            $("#CreditNotePayerName").val("");
+            $("#txtCreditNoteRef").val("---NEW---");
+            $("#CreditNoteDate").val($.datepicker.formatDate('dd/mm/yy', creditNoteDate));
+            $("#CreditNoteAmount").val("");
+            $("#CreditNoteDesc").val("");
+            clearInvoice();
+        }
+        $.validator.addMethod('regExp', function (value, element, param) {
+            return this.optional(element) || value.match(param); // Compare with regular expression
+        }, 'Please check your data.');
+        function configCreditNoteValidationRules() {
+            CreditNote_Rules = {
+                CreditNotePayerName: { required: true },
+                CreditNoteDesc: { required: true },
+                CreditNoteAmount: { required: true, regExp: "^\£?(?!0.00)(([0-9]{1,3},([0-9]{3},)*)[0-9]{3}|[0-9]{1,3})(\.[0-9]{2})?$" },
+                CreditNoteDate: { required: true }
+            };
+            CreditNote_Messages = {
+                CreditNotePayerName: { required: "Please select Payer for this creditNote" },
+                CreditNoteDesc: { required: "Please enter description" },
+                CreditNoteAmount: { required: "Please enter amount", regExp: "Please enter valid amount" },
+                CreditNoteDate: { required: "Please enter vaid date" }
+            };
+            $('#creditNoteForm').removeData('validator');
+            CreditNote_Validator = new jQueryValidatorWrapper("creditNoteForm",
+                CreditNote_Rules, CreditNote_Messages, "Errorwrap_CreditNote");
+        }
+        function loadInvoice(InvoiceNo) {
+            if (InvoiceNo) {
+                clearInvoice();
+                // Get From Invoice
+                var getInvoiceUrl = invoiceUrl + InvoiceNo + "&PayDate=" + $.datepicker.formatDate('yy-mm-dd', creditNoteDate);
+                var requestInvoice = $.ajax({
+                    type: "GET",
+                    url: getInvoiceUrl,
+                    contentType: "application/json",
+                    datatype: "json",
+                    success: function (InvoiceData) {
+                        if (!$.isNullOrEmpty(InvoiceData)) {
+                            InvoiceDate = new Date(InvoiceData.invoiceDate);
+                            $("#CreditNotePayerName").val(InvoiceData.payer.name);
+                            PayerId = InvoiceData.payer.id;
+                            $("#tblBodycreditNoteInvoices").append(generateInvoice(InvoiceData));
+                            if ($.isNullOrEmpty($("#CreditNoteAmount").val())){
+                                $("#CreditNoteAmount").val($.formatCurrency(InvoiceData.dueAmount, "£"));
+                            }
+                            $("#creditNoteInvoiceTotalDueAmount").val($.formatCurrency(InvoiceData.dueAmount, "£"));
+                        }
+                    },
+                    error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); },
+                });
+                requestInvoice.fail(function (jqxhr, textStatus, error) {
+                    alert("List of Invoice Request failed: " + textStatus);
+                });
+            }
+        }
+        function generateInvoice(Invoice) {
+            var val;
+            if (!$.isNullOrEmpty(InvoiceId)) {
+                val = "value='" + $.formatCurrency(Invoice.dueAmount, "£") + "' ";
+                $("#creditNoteInvoiceAllocated").val($.formatCurrency(Invoice.dueAmount, "£"));
+                $("#CreditNoteDesc").val("Credit Note for Invoice " + InvoiceId);
+            }
+            else {
+                val = "value='' "
+                $("#creditNoteInvoiceAllocated").val("");
+                $("#CreditNoteDesc").val("");
+
+            }
+            return "<tr>"
+                          +
+                          "<td style='width:19%;'> <a target='_blank' style='text-decoration:underline;width:19%;' href='/InvoiceSearchByNo?InvoiceNoSearch=" + Invoice.invoiceNo + "'>" + Invoice.invoiceNo + " </a></td>"
+                          +
+                          "<td style='width:13%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(Invoice.invoiceDate)) + "</td>"
+                          +
+                          "<td style='width:22%; text-align: right;'>" + $.formatCurrency(Invoice.amount, "£") + "</td>"
+                          +
+                          "<td style='width:22%; text-align:right;'>" + $.formatCurrency(Invoice.dueAmount, "£") + "</td>"
+
+                          + "<td style='width:24%; text-align:right;'>"
+                          + "<input type='text' class='currency invoiceCreditNoteAmount' id=''" + val + "style='width:140px; text-align:right;margin-top:3px;'" + "data-app-id='" + Invoice.id + "' " + "data-app='" + $.formatCurrency(Invoice.dueAmount, "£") + "'/>"
+                          + "</td>"
+                          + "</tr>";
+        }
+        function validateCreditNote(creditNoteAmount, totalInvoiceCreditNoteAmount) {
+            if ($.toNumber(creditNoteAmount) < $.toNumber(totalInvoiceCreditNoteAmount)) {
+                var msg = "The Total amount you have allocated to invoices is (" + $.formatCurrency(totalInvoiceCreditNoteAmount, "£") + ") should be less than or equal to amount of the Credit Note " + "(" + $.formatCurrency(creditNoteAmount, "£") + ")"
+                + '\n' + '\n' + "Please allocate the exact credit Note amount to Invoices by typing the amount received for each invoice in the Credit Amount column."
+                alert(msg);
+                return false;
+            }
+            return true;
+        }
+        function createNewCreditNote() {
+            var creditNote = new CreditNote();
+            var creditNoteAmount = $("#CreditNoteAmount").val();
+            creditNote.Id = "";
+            var totalAllocatedToInvoice = 0;
+            $("input[type=text].invoiceCreditNoteAmount").each(function () {
+                totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber($(this).val()));
+                var amount = parseFloat($.toNumber($(this).val()));
+                if (amount > 0) {
+                    creditNote.invoiceId = $(this).attr("data-app-id");
+                    creditNote.invoiceCreditAmount = amount;
+                }
+            });
+            if (!validateCreditNote(creditNoteAmount, totalAllocatedToInvoice)) return;
+            creditNote.id = "";
+            creditNote.payerId = PayerId;
+            var processedDate = $.datepicker.formatDate('yy-mm-dd', $("#CreditNoteDate").datepicker("getDate"));
+            creditNote.processedDate = processedDate;
+            creditNote.amount = $.toNumber($("#CreditNoteAmount").val());
+            creditNote.description = $("#CreditNoteDesc").val();
+            $.ajax({
+                type: "POST", url: creditNoteNewUrl, dataType: "json", data: JSON.stringify(creditNote), contentType: "application/json",
+                success: function (CreditNoteNo) {
+                    if (!$.isNullOrEmpty(CreditNoteNo)) {
+                        $(".creditNote-view-dialog").data("CreditNoteNo", CreditNoteNo);
+                        $(".creditNote-view-dialog").data("Mode", "ADDED");
+                        $(".creditNote-create-dialog").dialog("close");
+                        $(".creditNote-view-dialog").dialog("open");
+                    }
+                    else { alert("New CreditNote has not been created! Please try again later."); }
+                }
+            }).fail(function (jqXHR, textStatus) { alert("Request failed: " + textStatus); });
+        }
+        $('body').on('change', '.invoiceCreditNoteAmount', function (e) {
+            var dueAmount = $.toNumber($(this).attr("data-app"));
+            var creditNoteAmount = $.toNumber($(this).val());
+            if (creditNoteAmount > dueAmount) {
+                var msg = "The Total amount you have allocated to invoice is (" + $.formatCurrency(creditNoteAmount, "£") + ") should be less than or equal to due amount of the invoice " + "(" + $.formatCurrency(dueAmount, "£") + ")"
+                + '\n' + '\n' + "Please allocate the exact creditNote amount to Invoices by typing the amount received for invoice in the CreditNote Amount column."
+                alert(msg);
+                $(this).val($.formatCurrency(0, "£"));
+                return;
+            }
+            var totalAllocatedToInvoice = 0;
+            $("input[type=text].invoiceCreditNoteAmount").each(function () {
+                totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber($(this).val()));
+            });
+            $("#creditNoteInvoiceAllocated").val($.formatCurrency(totalAllocatedToInvoice, "£"));
+        });
+        $('body').on('keypress', '.currency', $.currenciesOnly).on('blur', '.currency', function () { $(this).val($.formatCurrency($(this).val(), "£")) });
+        $("input[type=text].currency").on('keypress', $.currenciesOnly).on('blur', function () { $(this).val($.formatCurrency($(this).val(), "£")) });
+        $(".creditNote-create-dialog").dialog({ modal: true, resizable: false, width: 'auto', height: 'auto', autoOpen: false });
+        $(".creditNote-create-dialog").on("dialogopen", function (event, ui) {
+            clearCreditNoteForm();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".creditNote-create-dialog").dialog("moveToTop");
+            $(".creditNote-create-dialog").data("PayerName");
+            MODE = $(".creditNote-create-dialog").data("Mode");
+            var creditNoteDate = new Date();
+            $("#CreditNoteDate").val($.datepicker.formatDate('dd/mm/yy', creditNoteDate));
+            $("#CreditNoteDate").datepicker("setDate", creditNoteDate);
+            PayerId = $(".creditNote-create-dialog").data("PayerId");
+            InvoiceId = $(".creditNote-create-dialog").data("InvoiceId");
+            if ($.isNullOrEmpty(PayerId) && !$.isNullOrEmpty(InvoiceId)) {
+                loadInvoice(InvoiceId);
+            }
+        });
+        $(".creditNote-create-dialog").on("dialogclose", function (event, ui) { clearCreditNoteForm(); });
+        $("#btnCreditNoteInvoiceLookup").click(function (e) {
+            if ($.isNullOrEmpty(PayerId)) {
+                alert("Please select Payer for this Credit Note");
+                return;
+            }
+            else if ($.isNullOrEmpty(creditNoteDate)) {
+                alert("Please enter date");
+                $("#CreditNoteDate").focus();
+                return;
+            }
+            $(".invoice-lookup-dialog").data("Parent", "CREDIT_NOTE");
+            $(".invoice-lookup-dialog").data("PayerId", PayerId);
+            $(".invoice-lookup-dialog").data("ProcessedDate", $.toJsonDate(creditNoteDate));
+            $(".invoice-lookup-dialog").dialog("open");
+        });
+        $(".invoice-lookup-dialog").on("dialogclose", function (event, ui) {
+            var InvoiceNo = $(".invoice-lookup-dialog").data("InvoiceNo");
+            if (!$.isNullOrEmpty(InvoiceNo)) {
+                loadInvoice(InvoiceNo);
+            }
+        });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) {
+            if ($(".payer-lookup-dialog").data("Parent") == "Create_CreditNote") {
+                $(".payer-lookup-dialog").data("Parent", null);
+                $(".creditNotePayerName").val($(".payer-lookup-dialog").data("payerName"));
+                PayerId = ($(".payer-lookup-dialog").data("payerId"));
+            }
+        });
+        $("#btnCreditNotePayerNameLookup").click(function (e) {
+            $(".payer-lookup-dialog").data("Parent", "Create_CreditNote");
+            $(".payer-lookup-dialog").dialog("open");
+        });
+        $('#CreditNotePayerName').on('change', function (e) {
+            alert($(".payer-lookup-dialog").data("payerId"));
+        });
+        $("#CreditNoteDate").datepicker({ dateFormat: 'dd/mm/yy' }).on("change", function (e) {
+            creditNoteDate = $(this).datepicker("getDate");
+            $(this).blur();
+            $("#CreditNoteAmount").focus();
+            if (!$.isNullOrEmpty(InvoiceDate))
+            {
+                if (new Date(InvoiceDate) > new Date(creditNoteDate))
+                {
+                    $("#tblBodycreditNoteInvoices").empty();
+                    InvoiceDate = null;
+                }
+            }            
+        });
+        $("#creditNoteSave").click(function (e) {
+            e.preventDefault();
+            configCreditNoteValidationRules();
+            if (!CreditNote_Validator.validate()) return;
+            switch (MODE) {
+                case "New":
+                case "NEW":
+                    createNewCreditNote()
+                    break;
+                case "Edit":
+                case "EDIT":
+                    alert("To Update CreditNote please contact I.T Support ");
+                    break;
+                case "Delete":
+                case "DELETE":
+                    alert("To Delete CreditNote please contact I.T Support ");
+                    break;
+
+            }
+        });
+        $("#creditNoteReset").click(function (e) { e.preventDefault(); clearCreditNoteForm(); });
+        $("#exit").click(function () { clearCreditNoteForm(); $(".creditNote-create-dialog").dialog("close"); });
+    })
+</script>

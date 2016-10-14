@@ -1,0 +1,224 @@
+﻿<div class="invoice-article-template-lookup-dialog" id="invoice-article-template-lookup-dialog" title="Invoice Article Templates" style="display: none;">
+    <input type="text" id="txtInvoiceArticleSearch" class="form-control" style="width:300px;float:left;" /><input type="image" id="getInvoiceArticleSearch" src="~/images/search.png" style="height:32px;cursor:pointer;margin-right:5px;margin-left:3px;float:left;" /><input type="image" id="addInvoiceArticleTemplate" alt="add invoice article" src="~/images/add-plus.png" style="width:32px;height:32px;cursor:pointer;" />
+    <br />
+    <table style="border:none;float:left;">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkInvoiceArticlePrev"><img style="width:16px; height:16px;" src="~/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblInvoiceArticlePagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkInvoiceArticleNext"><img style="width:16px; height:16px;" src="~/images/pagingNext.png" /></a></th>
+            </tr>
+        </thead>
+    </table>
+    <table id="tblInvoiceArticleList" style="width:100%; border:1px;">
+        <thead>
+            <tr>
+                <th colspan="1">Name</th>
+                <th>Template</th>
+            </tr>
+        </thead>
+        <tbody id="tblInvoiceArticlesBody"></tbody>
+    </table>
+</div>
+@Html.Partial("_InvoiceArticleTemplate", new Finance.Web.Models.HtmlEditor(), new ViewDataDictionary(Html.ViewData))
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbGetInvoiceArticleTemplate = new System.Text.StringBuilder();
+          sbGetInvoiceArticleTemplate.Append("'");
+            sbGetInvoiceArticleTemplate.Append(ViewBag.FinanceApiService);
+            sbGetInvoiceArticleTemplate.Append("/FinanceApi/InvoiceArticleTemplates?TemplateName=");
+            sbGetInvoiceArticleTemplate.Append("'");}
+        var getInvoiceArticlesUrl =   @Html.Raw(sbGetInvoiceArticleTemplate.ToString()) +'';
+        @{System.Text.StringBuilder sbDeleteInvoiceArticleTemplate = new System.Text.StringBuilder();
+          sbDeleteInvoiceArticleTemplate.Append("'");
+          sbDeleteInvoiceArticleTemplate.Append(ViewBag.FinanceApiService);
+          sbDeleteInvoiceArticleTemplate.Append("/FinanceApi/InvoiceArticleTemplateDelete?TemplateId=");
+          sbDeleteInvoiceArticleTemplate.Append("'");}
+        var deleteInvoiceArticleTemplateUrl =   @Html.Raw(sbDeleteInvoiceArticleTemplate.ToString()) +'';
+        function clearInvoiceArticleForm() {
+            $("#tblInvoiceArticlesBody").empty();
+            $("#tblInvoiceArticlePagingNos").empty();
+            $("#lnkInvoiceArticlePrev").removeAttr('href');
+            $("#lnkInvoiceArticleNext").removeAttr('href');
+        }
+        function clearData() {
+            $(".invoice-article-template-lookup-dialog").data("SearchText", "");
+        }
+        function loadInvoiceArticle(invoiceArticle) {
+            return "<tr>"
+                + "<td style='vertical-align:top;'>"
+                + "<img class='invoiceArticleTemplateDelete' src='/images/delete.png' style='width: 16px; height: 16px;margin-right:3px;cursor:pointer;' " + "data-app-id='" + invoiceArticle.id + "'" + "/>"
+                + "<img class='invoiceArticleTemplateEdit' src='/images/edit.png' style='width: 16px; height: 16px;cursor:pointer;' " + "data-app-id='" + invoiceArticle.id + "'" + "/>"
+                + "<a class='invoiceArticleSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;' data-app-id='" + invoiceArticle.id + "'" + " data-app-name='" + invoiceArticle.articleTemplate + "'" + ">" + invoiceArticle.name + " </a>"
+                + "</td>"
+                + "<td>" + invoiceArticle.articleTemplate + "</td>"
+                + "</tr>";
+        }
+        function loadInvoiceArticles(InvoiceArticles, Pagination) {
+            if (InvoiceArticles) {
+                if (InvoiceArticles.length > 0) {
+                    clearInvoiceArticleForm();
+                    var tableBody = "";
+                    $.each(InvoiceArticles, function (c, invoiceArticle) {
+                        tableBody += loadInvoiceArticle(invoiceArticle)
+                    });
+                    if (tableBody != "") {
+                        $("#tblInvoiceArticlesBody").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkInvoiceArticlePrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkInvoiceArticlePrev').stop().fadeTo('slow', 1);
+                            $("#lnkInvoiceArticlePrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoiceArticlePrev").removeAttr('href');
+                            $('#lnkInvoiceArticlePrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoiceArticlePrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkInvoiceArticleNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceArticleNext').stop().fadeTo('slow', 1);
+                            $("#lnkInvoiceArticleNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoiceArticleNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceArticleNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoiceArticleNext").attr('style', "cursor:none;");
+                        }
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblInvoiceArticlePagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblInvoiceArticlePagingNos").empty(); $("#lnkInvoiceArticlePrev").removeAttr('href'); $("#lnkInvoiceArticleNext").removeAttr('href'); }
+                }
+                else { alert("Invoice article templates have not been found! Please try again later."); $("#tblInvoiceArticlesBody").empty(); $("#tblInvoiceArticlePagingNos").empty(); }
+            }
+        };
+        function loadInvoiceArticleTemplates() {
+            var URL = getInvoiceArticlesUrl + $("#txtInvoiceArticleSearch").val() + '&PageIndex=0&PageSize=10';
+            var requestInvoiceArticle = $.ajax({
+                type: "GET",
+                url: URL,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (invoiceArticles) {
+                    if (!$.isNullOrEmpty(invoiceArticles)) {
+                        loadInvoiceArticles(invoiceArticles, JSON.parse(requestInvoiceArticle.getResponseHeader('X-Pagination')));
+                    }
+                }
+            });
+            requestInvoiceArticle.fail(function (jqxhr, textStatus, error) {
+                alert("List of InvoiceArticles Request failed: " + textStatus);
+            });
+        }
+        $(".invoice-article-template-lookup-dialog").dialog({ modal: true, resizable: false, width: 1000, height: 500, zindex: 30000, autoOpen: false, position: { my: 'top', at: 'top+160' } });
+        $(".invoice-article-template-lookup-dialog").on("dialogopen", function (event, ui) {
+            $(".invoice-article-template-lookup-dialog").data("SearchText");
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".invoice-article-template-lookup-dialog").dialog("moveToTop");
+            $("#txtInvoiceArticleSearch").focus();
+        });
+        $("#getInvoiceArticleSearch").click(function (e) {
+            loadInvoiceArticleTemplates();
+        });
+        $(".exit").click(function () { closeFeeDialog(); });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            if (url) {
+                var requestInvoiceArticle = $.getJSON(url, function (invoiceArticles) {
+                    loadInvoiceArticles(invoiceArticles, JSON.parse(requestInvoiceArticle.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of invoiceArticles Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('click', 'a.invoiceArticleSelect', function (e) {
+            e.preventDefault();
+            var invoiceArticleId = $(this).attr("data-app-id");
+            var invoiceArticleTemplate = $(this).attr("data-app-name");
+            if (invoiceArticleTemplate) {
+                $(".invoice-article-template-lookup-dialog").data({ "InvoiceArticleTemplate": invoiceArticleTemplate, "invoiceArticleId": invoiceArticleId });
+                $(".invoice-article-template-lookup-dialog").dialog("close");
+            }
+        });
+        $('body').on('click', '.invoiceArticleTemplateDelete', function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure to delete this article template?")) {
+                var invoiceArticleId = $(this).attr("data-app-id");
+                var requestInvoiceArticle = $.ajax({
+                    type: "POST",
+                    url: deleteInvoiceArticleTemplateUrl + invoiceArticleId,
+                    contentType: "application/json",
+                    datatype: "json",
+                    success: function (deleted) {
+                        if (deleted) {
+                            clearInvoiceArticleForm();
+                            loadInvoiceArticleTemplates();
+                        }
+                    }
+                });
+                requestInvoiceArticle.fail(function (jqxhr, textStatus, error) {
+                    alert("Delete invoice article template has been failed: " + textStatus);
+                });
+            }
+        });
+        $('body').on('click', '.invoiceArticleTemplateEdit', function (e) {
+            e.preventDefault();
+            $(".invoice-article-template-dialog").data("InvoiceArticleTemplateId", $(this).attr("data-app-id"));
+            $(".invoice-article-template-dialog").dialog("open");
+        });
+        $("#lnkInvoiceArticlePrev").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkInvoiceArticlePrev").attr('href');
+            if (url) {
+                var requestInvoiceArticles = $.getJSON(url, function (invoiceArticles) {
+                    loadInvoiceArticles(invoiceArticles, JSON.parse(requestInvoiceArticles.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of InvoiceArticles Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkInvoiceArticleNext").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkInvoiceArticleNext").attr('href');
+            if (url) {
+                var requestInvoiceArticles = $.getJSON(url, function (invoiceArticles) {
+                    loadInvoiceArticles(invoiceArticles, JSON.parse(requestInvoiceArticles.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of InvoiceArticles Request failed! Please try again later. "); })
+            }
+        });
+        $("#addInvoiceArticleTemplate").click(function () {
+            $(".invoice-article-template-dialog").dialog("open");
+        });
+        $(".invoice-article-template-lookup-dialog").on("dialogclose", function (event, ui) { clearInvoiceArticleForm(); });
+        $(".invoice-article-template-dialog").on("dialogclose", function (event, ui) {
+            var Template = $(".invoice-article-template-dialog").data("Template");
+            $(".invoice-article-template-lookup-dialog").dialog("moveToTop");
+            if (!$.isNullOrEmpty(Template)) {
+                loadInvoiceArticleTemplates();
+                //$("#tblInvoiceArticlesBody").append(loadInvoiceArticle(Template));
+            }
+        });
+    });
+</script>

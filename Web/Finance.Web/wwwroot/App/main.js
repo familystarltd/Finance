@@ -1,0 +1,1 @@
+"use strict";var platform_browser_dynamic_1=require("@angular/platform-browser-dynamic"),app_component_1=require("./Components/app.component");platform_browser_dynamic_1.bootstrap(app_component_1.AppComponent);

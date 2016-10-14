@@ -1,0 +1,115 @@
+﻿@model Finance.Web.Model.InvoiceViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html {
+            font-family: Helvetica;
+            font-size:3px;
+        }
+
+        h1 {
+            color: blue;
+        }
+
+        table {
+            border-spacing: 0px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    @if (Model.Invoices != null && Model.Invoices.Count() > 0)
+    {
+        <table cellpadding="3" cellspacing="0" border="0" style="width:100%; border:none; font-weight:bold;font-size:small;">
+            <thead>
+                <tr style="color:white;background-color:black;">
+                    <th></th>
+                    <th>Invoice No</th>
+                    <th>Invoice Type</th>
+                    <th>Date</th>
+                    <th style="width:30%;">Payer</th>
+                    <th>Customer</th>
+                    <th style="text-align:right;">Total</th>
+                    <th style="text-align:right;">Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Finance.Web.Model.InvoiceModel invoice in Model.Invoices)
+                {
+                    <tr>
+                        <td style="border-bottom:1px solid black;">
+                            @if (invoice.InvoiceType == Finance.Web.Model.InvoiceTypeModel.Manual && (invoice.ReceiptInvoices == null || invoice.ReceiptInvoices.Count == 0))
+                            {
+                                <img class='invoiceSearchInvoiceEdit' src='~/images/edit.png' style='width: 16px; height: 16px;cursor:pointer;' data-app-id='@invoice.InvoiceNo' />
+                            }
+                        </td>
+                        <td style="vertical-align:top;border-bottom:1px solid black;">@invoice.InvoiceNo</td>
+                        <td style="vertical-align:top;border-bottom:1px solid black;">@invoice.Discriminator</td>
+                        <td style="vertical-align:top;border-bottom:1px solid black;">@invoice.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                        <td style="vertical-align: top; padding-bottom: 5px;border-bottom:1px solid black;">
+                            @invoice.Payer.Name
+                            @if (invoice.ReceiptInvoices != null && invoice.ReceiptInvoices.Count > 0)
+                            {
+                                <table cellpadding="3" cellspacing="3" style="width: 100%; margin-bottom: 10px; font-weight: normal;font-size:x-small; border: 1px solid darkgreen;">
+                                    <tr style="color:white;background-color:darkgreen;">
+                                        <th style="width:50%;">Receipt</th>
+                                        <th style="width:20%;">Date</th>
+                                        <th style="width:30%; text-align:right;">Amount</th>
+                                    </tr>
+                                    @foreach (Finance.Web.Model.ReceiptInvoiceModel receiptInvoice in invoice.ReceiptInvoices)
+                                    {
+                                        <tr>
+                                            <td>@receiptInvoice.Receipt.ReceiptNo</td>
+                                            <td>@receiptInvoice.Receipt.ProcessedDate.ToString("dd/MM/yyyy")</td>
+                                            <td style="text-align:right;">@string.Format("{0:c}", receiptInvoice.AmountReceived)</td>
+                                        </tr>
+                                    }
+                                    <tr style="font-weight: bold; border: 1px solid darkgreen;">
+                                        <td colspan="2" style="text-align:left;vertical-align:top;">
+                                            Total
+                                        </td>
+                                        <td style="text-align:right;vertical-align:top;">
+                                            @string.Format("{0:c}", invoice.ReceiptInvoices.Sum(r => r.AmountReceived))
+                                        </td>
+                                    </tr>
+                                </table>
+                            }
+                            @if (invoice.BadDebt != null && invoice.BadDebt.Amount > 0)
+                            {
+                                <table cellpadding="0" cellspacing="0" style="width: 100%; font-weight: normal;font-size:x-small; border: 1px solid darkred; ">
+                                    <tr style="color:white;background-color:darkred;">
+                                        <th style="width:60%;">Bad Debt</th>
+                                        <th style="width:10%;">Date</th>
+                                        <th style="text-align: right; width: 30%;">Amount</th>
+                                    </tr>
+
+                                    <tr>
+                                        <td><p>@invoice.BadDebt.Description</p></td>
+                                        <td>@invoice.BadDebt.ProcessedDate</td>
+                                        <td>@invoice.BadDebt.Amount</td>
+                                    </tr>
+
+                                </table>
+                            }
+                        </td>
+                        <td style="vertical-align:top;border-bottom:1px solid black;">@invoice.Customer.PersonalInfo.FullName</td>
+                        <td style="text-align: right; vertical-align: top;border-bottom:1px solid black;">@string.Format("{0:c}", invoice.Amount)</td>
+                        <td style="text-align: right; vertical-align: top;border-bottom:1px solid black;">@string.Format("{0:c}", invoice.DueAmount)</td>
+                    </tr>
+                }
+            </tbody>
+            @*<tfoot>
+                    <tr>
+                        <td colspan="5">
+                            @Html.Partial("_PaginationFormSubmit", Model.Pagination, new ViewDataDictionary(Html.ViewData) { TemplateInfo = new System.Web.Mvc.TemplateInfo { HtmlFieldPrefix = "Pagination" } })
+                        </td>
+                    </tr>
+                </tfoot>*@
+        </table>
+    }
+</body>
+</html>

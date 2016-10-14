@@ -1,0 +1,267 @@
+﻿@*@model IEnumerable<Finance.Web.Model.FeeInvoiceModel>*@
+<div class="fee-invoice-dialog" id="fee-invoice-list" title="Invoices" style="display: none;">
+    <style>
+        #tblInvoiceList th {
+            padding-left: 3px;
+            padding-right: 3px;
+            border:1px solid black;
+        }
+
+        #tblInvoiceList td {
+            padding-left: 3px;
+            padding-right: 3px;
+            border: 1px solid black;
+        }
+    </style>
+    <table style="border:none;font-size:medium;">
+        <thead>
+            <tr>
+                <th style="border:none;">
+                    <h4 style="margin-top:0px;">
+                        <img src="~/images/invoice.jpg" style="width:64px;height:64px;" /> <span id="invoiceHeading" style="font-weight:bold;text-decoration:underline;" />
+                    </h4>
+                </th>
+                <th style="padding-left: 10px; padding-top: 5px; border: none; ">
+                    Total Invoices <span style="margin-left:40px;">:</span> <label id="lblTotalInvoices"></label>
+                    <br />
+                    Showing currently <span style="margin-left:2px;">:</span> <label id="lblCurrentTotalInvoices"></label>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <table style="border:none;">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkInvoicePrev"><img style="width:16px; height:16px;" src="~/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblInvoicePagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkInvoiceNext"><img style="width:16px; height:16px;" src="~/images/pagingNext.png" /></a></th>
+            </tr>
+        </thead>
+    </table>
+    <div style="overflow-y:auto; height:300px;border:1px;">
+        <table id="tblInvoiceList" style="width:100%; border:none;font-size:small;">
+            <thead>
+                <tr class="header">
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Payer</th>
+                    <th>Customer</th>
+                    <th style='text-align:right;'>Amount</th>
+                    <th style='text-align:right;'>
+                    <span style="float:left;">Credit </span> <span style="float:right;">Receipts</span>
+                    </th>
+                    <th style='text-align:right;'>Due</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tblInvoiceBody" class="content-sub"></tbody>
+        </table>
+    </div>
+</div>
+@Html.Partial("_Receipt", new ViewDataDictionary(Html.ViewData))
+@Html.Partial("_CreditNote", new ViewDataDictionary(Html.ViewData))
+
+<script>
+    $(document).ready(function () {
+        var Current_URL;
+        function clearFeeForm() {
+            $("#tblInvoiceBody").empty();
+            $("#tblInvoicePagingNos").empty();
+            $("#lnkInvoicePrev").removeAttr('href');
+            $("#lnkInvoiceNext").removeAttr('href');
+            $("#lblTotalInvoices").text("");
+            $("#lblCurrentTotalInvoices").text("");
+        }
+        function clearData() {
+            $(".fee-invoice-dialog").data("InvoiceData", "");
+            $(".fee-invoice-dialog").data("Pagination", "");
+        }
+        function generateInvoice(Invoice) {
+            var tableBody = "";
+            tableBody += "<tr>"
+            +
+            "<td style='vertical-align:baseline;'> <a style='text-decoration:underline;' href='/FeeInvoiceSearchByNo?InvoiceNoSearch=" + Invoice.invoiceNo + "'>" + Invoice.invoiceNo + " </a></td>"
+            +
+            "<td style='vertical-align:baseline;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(Invoice.invoiceDate)) + "</td>"
+            +
+            "<td style='vertical-align:baseline;'>" + Invoice.payer.name + "</td>"
+            +
+            "<td style='vertical-align:baseline;'>" + Invoice.customer.personalInfo.fullName + "</td>"
+            +
+            "<td style='text-align:right;vertical-align:baseline;'>" + $.formatCurrency(Invoice.amount, "£") + "</td>"
+             +"<td style='text-align:right;'>"
+            if (!$.isNullOrEmpty(Invoice.receiptInvoices) && Invoice.receiptInvoices.length > 0) {
+                var receipts = "<span style='text-align:right;float:right;font-size:x-small;'>"
+                $(Invoice.receiptInvoices).each(function (index, invoice) {
+                    receipts += $.formatCurrency(invoice.amountReceived, "£") + "<br/>";
+                });
+                receipts += "</span>";
+                tableBody += receipts;
+            }
+            if (!$.isNullOrEmpty(Invoice.creditNotes) && Invoice.creditNotes.length > 0) {
+                var credits = "<span style='text-align:right;float:right;font-size:x-small;'>"
+                $(Invoice.creditNotes).each(function (index, credit) {
+                    credits += $.formatCurrency(invoice.credit, "£") + "<br/>";
+                });
+                credits += "</span>";
+                tableBody += credits;
+            }
+            if (parseFloat($.toNumber(Invoice.dueAmount)) > 0) {
+                tableBody += "<a title='Receipt' onclick='javascript: return false;' class='New_Receipt' style='cursor: pointer; margin: 5px; padding: 0px;' data-app-id='" + Invoice.invoiceNo + "'>"
+                + "<img alt='New Receipt' src='/images/add-plus.png' style='width:16px;height:16px;margin-top:18px;' />"
+                + "</a>"
+                + "<a title='Credit Note' onclick='javascript: return false;' class='New_CreditNote' style='cursor: pointer; margin: 5px; padding: 0px;float:left;' data-app-id='" + Invoice.invoiceNo + "'>"
+                + "<img alt='New Credit Note' src='/images/plus_red.png' style='width:16px;height:16px;margin-top:12px;' />"
+                + "</a>"
+            }
+            tableBody += "</td>"
+            tableBody += "<td style='text-align:right;vertical-align:baseline;'>" + $.formatCurrency(Invoice.dueAmount, "£") + "</td>"
+            +
+            "<td style='vertical-align:baseline;'> <a target='_blank' style='text-decoration:underline;' href='/PrintFeeInvoices?InvoiceNoSearch=" + Invoice.invoiceNo + "'>" + "<img style='width:16px;height:16px;' src='/images/print.png' /> </a>"
+            + "<a target='_blank' style='text-decoration:underline;' href='/PrintPDFFeeInvoices?InvoiceNoSearch=" + Invoice.invoiceNo + "'>" + "<img style='width:16px;height:16px;' src='/images/pdf.gif' /> </a>"
+            + "</td>"
+            + "</tr>";
+            return tableBody;
+        }
+        function loadInvoices(InvoiceData, Pagination) {
+            clearFeeForm();
+            if (InvoiceData) {
+                $("#tblInvoiceBody").empty();
+                if (InvoiceData.length > 0) {
+                    var tableBody = "";                    
+                    $(InvoiceData).each(function (index, invoice) {
+                        tableBody += generateInvoice(invoice);
+                    });
+                    if (tableBody != "") {
+                        $("#tblInvoiceBody").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkInvoicePrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 1);
+                            $("#lnkInvoicePrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoicePrev").removeAttr('href');
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoicePrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkInvoiceNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 1);
+                            $("#lnkInvoiceNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoiceNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoiceNext").attr('style', "cursor:none;");
+                        }
+                        $("#lblTotalInvoices").text(Pagination.TotalCount);
+                        $("#lblCurrentTotalInvoices").text(InvoiceData.length);
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblInvoicePagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblInvoicePagingNos").empty(); $("#lnkInvoicePrev").removeAttr('href'); $("#lnkInvoiceNext").removeAttr('href'); }
+                }
+                else { alert("Invoices have not been found! Please try again later.") }
+            }
+        }
+        $(".fee-invoice-dialog").dialog({ modal: true, resizable: false, width: 1000, height: 500, autoOpen: false, zIndex: 30000, position: { my: 'top', at: 'top+160' }, stack: false });
+        $(".fee-invoice-dialog").on("dialogopen", function (event, ui) {
+            Current_URL = $(".fee-invoice-dialog").data("URL");
+            loadInvoices($(".fee-invoice-dialog").data("InvoiceData"), $(".fee-invoice-dialog").data("Pagination"));
+        });
+        $(".exit").click(function () { closeFeeDialog(); });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            Current_URL = url;
+            if (url) {
+                var requestInvoice = $.getJSON(url, function (invoices) {
+                    loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Invoice Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('click', 'a.New_Receipt', function (e) {
+            e.preventDefault();
+            var invoiceNo = $(this).attr("data-app-id");
+            if (invoiceNo) {
+                e.preventDefault();
+                $(".receipt-create-dialog").data("Mode", "NEW");
+                $(".receipt-create-dialog").data("PayerId", null);
+                $(".receipt-create-dialog").data("InvoiceId", invoiceNo);
+                $(".receipt-create-dialog").dialog("open");
+            }
+        });
+        $('body').on('click', 'a.New_CreditNote', function (e) {
+            e.preventDefault();
+            var invoiceNo = $(this).attr("data-app-id");
+            if (invoiceNo) {
+                $(".creditNote-create-dialog").data("Mode", "NEW");
+                $(".creditNote-create-dialog").data("PayerId", null);
+                $(".creditNote-create-dialog").data("InvoiceId", invoiceNo);
+                $(".creditNote-create-dialog").dialog("open");
+            }
+        });
+        $(".receipt-view-dialog").on("dialogclose", function (event, ui) {
+             if (!$.isNullOrEmpty(Current_URL)) {
+                 var requestInvoice = $.getJSON(Current_URL, function (invoices) {
+                    loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Invoice Request failed! Please try again later. "); })
+            }
+        });
+        $(".creditNote-view-dialog").on("dialogclose", function (event, ui) {
+            if (!$.isNullOrEmpty(Current_URL)) {
+                var requestInvoice = $.getJSON(Current_URL, function (invoices) {
+                    loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Invoice Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkInvoicePrev").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkInvoicePrev").attr('href');
+            Current_URL = url;
+            if (url) {
+                var requestInvoice = $.getJSON(url, function (invoices) {
+                    loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Invoice Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkInvoiceNext").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkInvoiceNext").attr('href');
+            Current_URL = url;
+            if (url) {
+                var requestInvoice = $.getJSON(url, function (invoices) {
+                    loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Invoice Request failed! Please try again later. "); })
+            }
+        });
+        $(".fee-invoice-dialog").on("dialogclose", function (event, ui) { clearFeeForm(); clearData(); location.reload(); });
+    });
+</script>

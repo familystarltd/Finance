@@ -1,0 +1,44 @@
+﻿<input type="text" class="form-control" name="search" id="search" style="width:300px;" value="" />
+<input type="hidden" name=@(ViewData["CustomerValueControlName"] == null ? string.Empty : ViewData["CustomerValueControlName"].ToString()) id="CustomerValueControlId" value="0" />
+<div id="Customer" style="background-color: #fafafa; border: 1px solid #e7e7e7;width:314px;margin-top:-10px;"> 
+    <img src="~/Content/Images/loading.gif" />
+</div>
+<script type="text/javascript">
+    var Url = @Html.Raw(string.Format("'{0}/FinanceApi/Customers?searchText='", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]));
+    var RedirectUrl = @Html.Raw(ViewData["Action"] == null ? string.Empty : string.Format("'/Finance/{0}/'", ViewData["Action"].ToString()));
+    var customerName = @Html.Raw(string.Format("'{0}'", ViewData["CustomerName"].ToString()));
+    var CustomerValueId = @Html.Raw(string.Format("'{0}'", ViewData["CustomerValueId"].ToString()));
+    $(document).ready(function () {
+        $('#CustomerValueControlId').val(CustomerValueId);
+        $('#search').val(customerName);
+        $('#Customer').hide();
+        $('#search').autocomplete({
+            source: function (request, response) {
+                var autocompleteUrl = Url + $("#search").val();
+                var residents = new Array();
+                $('#Customer').show();
+                $.ajax({url: autocompleteUrl,type: 'GET',cache: false,dataType: 'json',
+                    success: function (json) {
+                        $('#Customer').hide();
+                        response($.map(json, function (data, id) {return {label: data.personalInfo.fullName,value: data.id};}));
+                    },
+                    error: function (xmlHttpRequest, textStatus, errorThrown) {$('#Customer').hide();console.log('some error occured', textStatus, errorThrown);}
+                });
+                response(residents);
+            },
+            minLength: 2,
+            open: function(e) {valid = false;},
+            focus: function(event, ui) { event.preventDefault(); $(this).val(ui.item.label);},
+            close: function(e){if (!valid) $(this).val('');},
+            change: function (event, ui) {if (!ui.item) {this.value = '';}else{$(this).val(ui.item.label);$("#CustomerValueControlId").val(ui.item.value);}},
+            select: function (event, ui) {
+                valid=true;
+                $('#search').val(ui.item.label);
+                $("#CustomerValueControlId").val(ui.item.value);
+                if(RedirectUrl)
+                    window.location = RedirectUrl +ui.item.value;
+                return false;
+            }
+        })
+    });
+</script>

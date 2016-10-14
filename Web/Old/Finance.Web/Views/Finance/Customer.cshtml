@@ -1,0 +1,17 @@
+﻿@model FinanceManagement.Web.Model.CustomerViewModel
+@using Finance.Web.Helpers.ExtensionMethods
+@Scripts.Render("~/bundles/jquery/validation")
+@Html.Partial("_DataLoader")
+<h3><img src="~/Content/Images/people.png" style="margin-right:5px;" />Customers</h3>
+@if (Model.Customers != null && Model.Customers.Count() > 0)
+{
+    <div class="row" style="background-color: #fafafa; border: 1px solid #e7e7e7;margin-top:10px;">
+        <div class="col-md-12" style="">
+           
+        </div>
+    </div>
+}
+else if(Model.Customer != null && Model.Customer.Id != Guid.Empty)
+{
+ @Html.Partial("_Customer")
+}

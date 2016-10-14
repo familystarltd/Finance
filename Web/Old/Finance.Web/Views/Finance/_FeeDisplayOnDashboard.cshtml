@@ -1,0 +1,77 @@
+﻿@model FinanceManagement.Web.Model.FeeModel
+@if (Model != null && Model != null)
+{
+    System.Text.StringBuilder rateContent;
+    System.Text.StringBuilder payerContent = new System.Text.StringBuilder("");
+    <div style="width:100%;font:inherit;">
+        @Model.Name<br />
+        @foreach (FinanceManagement.Web.Model.FeeRateModel feeRate in Model.FeeRates)
+        {
+            rateContent = new System.Text.StringBuilder("");
+            switch (feeRate.RateMethod)
+            {
+                case FinanceManagement.Web.Model.RateMethod.Hourly:
+                    rateContent.Append("Hourly Rate ");
+                    break;
+                case FinanceManagement.Web.Model.RateMethod.Daily:
+                    rateContent.Append("Daily Rate ");
+                    break;
+                case FinanceManagement.Web.Model.RateMethod.Weekly:
+                    rateContent.Append("Weekly Rate ");
+                    break;
+                case FinanceManagement.Web.Model.RateMethod.Monthly:
+                    rateContent.Append("Monthly Rate ");
+                    break;
+                default:
+                    break;
+            }
+            <label style="margin-left:10px;text-decoration:underline;font-size:smaller;">@rateContent</label>
+            IEnumerable<FinanceManagement.Web.Model.RateModel> rates = feeRate.Rates.Where(r => !r.ClosingDate.HasValue);
+            if (rates.Count() == 1)
+            {
+                rateContent = new System.Text.StringBuilder("");
+                rateContent.Append("£");
+                rateContent.Append(rates.First().RateAmount);
+                rateContent.Append(" as at from <span>" + rates.First().EffectiveDate.ToString("dd/MM/yyyy") + "</span>");
+                <label style="margin-left:10px;font-size:smaller;">@Html.Raw(rateContent)</label>
+            }
+            else
+            {
+                foreach (FinanceManagement.Web.Model.RateModel rate in rates)
+                {
+                    rateContent = new System.Text.StringBuilder("");
+                    switch (rate.DayPremium)
+                    {
+                        case FinanceManagement.Web.Model.DayPremium.Weekday:
+                            rateContent.Append("Weekday&emsp;&emsp;- " + @"&emsp;");
+                            break;
+                        case FinanceManagement.Web.Model.DayPremium.Weekend:
+                            rateContent.Append("Weekend&emsp;&emsp;- " + @"&emsp;");
+                            break;
+                        case FinanceManagement.Web.Model.DayPremium.Bankholiday:
+                            rateContent.Append("Bank holiday&emsp;- " + @"&emsp;");
+                            break;
+                    }
+                    if (feeRate.RateMethod == FinanceManagement.Web.Model.RateMethod.Hourly)
+                    {
+                        switch (rate.TimePremium)
+                        {
+                            case FinanceManagement.Web.Model.TimePremium.Day:
+                                rateContent.Append("Day&emsp;- " + @"&emsp;");
+                                break;
+                            case FinanceManagement.Web.Model.TimePremium.Night:
+                                rateContent.Append("Night&emsp;- " + @"&emsp;");
+                                break;
+                        }
+                    }
+                    rateContent.Append(string.Format("{0} X {1} = £{2}", rate.NoOfHours > 0 ? rate.NoOfHours.ToString() : string.Empty, rate.RateAmount, rate.RateAmount * (rate.NoOfHours > 0 ? rate.NoOfHours : 1)));
+                    rateContent.Append(" as at from " + rate.EffectiveDate.ToString("dd/MM/yyyy"));
+                    <p style="margin:0px;padding:0px;margin-left:10px;text-align:justify;font-size:smaller;">
+                        @Html.Raw(rateContent)
+                    </p>
+                }
+            }
+            <br />
+        }
+    </div>
+}

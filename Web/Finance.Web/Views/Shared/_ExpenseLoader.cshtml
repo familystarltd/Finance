@@ -1,0 +1,42 @@
+﻿<input type="text" class="search-textbox" name=@ViewData["ExpenceLabelControlName"].ToString() id='ExpenseLoderLabelId' data-val-required="Please enter expense" data-val="true" value="" />
+<input type="hidden" name=@ViewData["ExpenceValueControlName"].ToString() id="ExpenseLoderValueId" value="0" />
+<div id="ExpenseLoader" style="background-color: #fafafa; border: 1px solid #e7e7e7;width:314px;margin-top:-10px;">
+    <img src="~/Content/Images/loading.gif" />
+</div>
+<script type="text/javascript">
+    var ExpenseLoader_name =@Html.Raw(string.Format("'{0}'", ViewData["ExpenseName"].ToString()));
+    var SourceUrl = @Html.Raw(string.Format("'{0}'", ViewData["SourceUrl"].ToString()));
+    $(document).ready(function () {
+        $("#ExpenseLoderLabelId").val(ExpenseLoader_name);
+        $('#ExpenseLoader').hide();
+        $("#ExpenseLoderLabelId").autocomplete({
+            source: function (request, response) {
+                var autocompleteUrl = SourceUrl +$("#ExpenseLoderLabelId").val();
+                var expenses = new Array();
+                $('#ExpenseLoader').show();
+                $.ajax({
+                    url: autocompleteUrl,
+                    type: 'GET',
+                    cache: false,
+                    dataType: 'json',
+                    success: function (json) {
+                        $('#ExpenseLoader').hide();
+                        response($.map(json, function (expense, id) {return {label: expense.name,value: expense.id};}));
+                    },
+                    error: function (xmlHttpRequest, textStatus, errorThrown) {
+                        $('#ExpenseLoader').hide();
+                        console.log('some error occured', textStatus, errorThrown);
+                    }
+                });
+                response(expenses);
+            },
+            minLength: 2,
+            open: function(e) {valid = false;},
+            focus: function(event, ui) { event.preventDefault(); $(this).val(ui.item.label);},
+            select: function(event, ui){valid = true;event.preventDefault();$(this).val(ui.item.label);$("#ExpenseLoderValueId").val(ui.item.value);},
+            close: function(e){if (!valid) $(this).val('');},
+            change: function (event, ui) {if (!ui.item) {this.value = '';}else{$(this).val(ui.item.label);$("#ExpenseLoderValueId").val(ui.item.value);}
+            }
+        });
+    });
+</script>

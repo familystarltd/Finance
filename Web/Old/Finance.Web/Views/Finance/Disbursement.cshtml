@@ -1,0 +1,267 @@
+﻿@using Finance.Web.Helpers.ExtensionMethods
+@using Finance.Web.Models
+@using FinanceManagement.Web.Model
+@model DisbursementViewModel
+@{
+    ViewBag.TitleHeader = "Disbursement";
+    Html.ViewBag._CustomersNameLoaderAction = "Disbursement";
+    string sb = string.Format("'{0}/FinanceAPI/Disbursements/Delete/'", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+    string sbUrl = string.Format("'/Finance/Disbursement/{0}'", Model.Customer.Id);
+    string ResidentDisbursementsDeleteUrl = BusinessManager.IsInService("Finance") ? string.Format("'{0}/ResidentApi/ResidentExpenses/Delete/'", System.Configuration.ConfigurationManager.AppSettings["CareAPIService"]):string.Empty;
+}
+@Scripts.Render("~/bundles/jquery/validation")
+<h3><img src="~/Content/Images/%c2%a3.png" class="ico-sm" />Disbursements for Customers</h3>
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-3">
+        <span style="font-size:large;font-weight:bold;float:left;">Customer</span>@Html.Partial("_CustomersNameLoader", new ViewDataDictionary { { "Action", "Disbursement" }, { "CustomerValueControlName", "DisbursementViewModel.CustomerId" }, { "CustomerValueId", Model.Customer != null ? Model.Customer.Id : Guid.Empty }, { "CustomerName", Model != null ? Model.Customer.PersonalInfo.FullName : string.Empty } })
+    </div>
+    <div class="col-md-9">
+        <div class="header">
+            @Model.Customer.PersonalInfo.FullName
+        </div>
+        @Html.Partial("_Customer", Model.Customer, new ViewDataDictionary(Html.ViewData))
+    </div>
+</div>
+@if (Model.Customer.Id != Guid.Empty)
+{
+    <div class="row">
+        <div id="tabs" style="font-size:small;">
+            <ul>
+                <li><a onclick="return false;" href="#tabs-1">@string.Format("{0}'s Disbursements", Model.Customer.PersonalInfo.FullName)</a></li>
+                <li><a onclick="return false;" href="#tabs-2">Disbursements List</a></li>
+                <li><a onclick="return false;" href="#tabs-3">Funding Setup</a></li>
+            </ul>
+            <div id="tabs-1">
+                <div class="row">
+                    <div class="col-md-5" style="margin:0px;padding:0px;">
+                        @using (Html.BeginForm("Disbursement", "Finance", new { id = Model.Customer.Id }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.HiddenFor(model => Model.Customer.Id)
+                            @*@Html.HiddenFor(model => Model.DisbursementModel.Payer.Id)*@
+                            @Html.HiddenFor(model => Model.Customer);
+                            @Html.HiddenFor(model => Model.DisbursementModel.Id)
+                            <div class="row" style="margin-bottom:10px;">
+                                <div class="col-md-6" style="width: 100px;">
+                                    Funding
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.Partial("_PayerLoader", new ViewDataDictionary { { "PayerControlId", "DisbursementModel.Payer.Name" }, { "PayerValueControlId", "DisbursementModel.Payer.Id" }, { "PayerName", Model.DisbursementModel.Payer != null  ? Model.DisbursementModel.Payer.Name : string.Empty } })
+                                    @Html.ValidationMessageFor(model => Model.DisbursementModel.Payer.Id)
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom:10px;">
+                                <div class="col-md-6" style="width: 100px;">
+                                    Expense
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.Partial("_ExpenseLoader", new ViewDataDictionary { { "SourceUrl", string.Format("{0}/FinanceApi/Expenses?search=", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]) }, { "ExpenceLabelControlName", "DisbursementModel.Expense.Name" }, { "ExpenceValueControlName", "DisbursementModel.Expense.Id" }, { "ExpenseName", Model.DisbursementModel.Expense != null && !string.IsNullOrEmpty(Model.DisbursementModel.Expense.Name) ? Model.DisbursementModel.Expense.Name : string.Empty } })
+                                    @Html.ValidationMessageFor(model => Model.DisbursementModel.Expense.Name)
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom:10px;">
+                                <div class="col-md-6" style="width:100px;">
+                                    Date
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.TextBoxFor(model => Model.DisbursementModel.DisbursementDate, new { @Value = Model.DisbursementModel.DisbursementDate.ToString(true), @class = "datepicker form-control" })
+                                    @Html.ValidationMessageFor(model => Model.DisbursementModel.DisbursementDate)
+                                </div>
+                            </div>
+                                <div class="row" style="margin-bottom:10px;">
+                                    <div class="col-md-6" style="width: 100px;">
+                                        Amount
+                                    </div>
+                                    <div class="col-md-3">
+                                        @Html.TextBoxFor(model => Model.DisbursementModel.Amount, new { @class = "form-control currency" })
+                                        @Html.ValidationMessageFor(model => Model.DisbursementModel.Amount)
+                                    </div>
+                                </div>
+                                        <div class="row" style="margin-bottom:10px;">
+                                            <div class="col-md-6" style="width: 100px;">
+                                                Document
+                                            </div>
+                                            <div class="col-md-6" style="margin-bottom:5px;">
+                                                <input type="file" name="documentUpload" />
+                                            </div>
+                                        </div>
+                                            <div class="row" style="margin-bottom:10px;">
+                                                <div class="col-md-6" style="width: 100px;">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @if (!Model.Customer.Deactive)
+                                                    {<input type="image" alt="addexpense" src="~/Content/Images/save.png" class="ico-sm" />}
+                                                </div>
+                                            </div>
+                        }
+                    </div>
+                    <div class="col-md-7" style="margin:0px;padding:0px;vertical-align:top;">
+                        <table border="1" style="border: 1px solid #027ff4;width:100%;">
+                            <thead style="border: 1px solid #027ff4;" class="header">
+                                <tr class="header">
+                                    <th colspan="6">
+                                        <span style="margin:0px;padding:0px;font-size:medium;">Disbursements for <span style="font-weight:bold;text-decoration:underline;"> @DateTime.Now.ToString("MMMM") - @DateTime.Now.ToString("yyyy")</span> </span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td style="width:100px">
+                                        Date
+                                    </td>
+                                    <td style="min-width:200px">
+                                        Disbursements
+                                    </td>
+                                    <td style="min-width:200px">
+                                        Funding
+                                    </td>
+                                    <td style="width:75px">
+                                        Amount
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody class="content-sub" style="border: 1px solid #027ff4;">
+                                @foreach (FinanceManagement.Web.Model.DisbursementModel disbursement in Model.Customer.Disbursements)
+                                {
+                                    <tr>
+                                        <td>
+                                            @disbursement.DisbursementDate.ToString("dd/MM/yyyy")
+                                        </td>
+                                        <td>
+                                            @disbursement.Expense.Name
+                                        </td>
+                                        <td>
+                                            @string.Format("{0}",disbursement.Payer !=null ? disbursement.Payer.Name:string.Empty)
+                                        </td>
+                                        <td>
+                                            @disbursement.Amount
+                                        </td>
+                                        <td>
+                                            <input type="image" id="btnDoc" class="btnDoc" data-app-id="@Convert.ToBase64String(disbursement.Document != null?disbursement.Document:new byte[0])" value="Doc" style="width:32px;height:32px;" alt="delete-disbursement" src="~/Content/Images/doc.png" />
+                                        </td>
+                                        <td>
+                                            <input type="image" id="btnDelete" class="btnDelete" data-app-id="@disbursement.Id" value="delete" style="width:24px;height:24px;" alt="delete-disbursement" src="~/Content/Images/delete.png" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <div id="dialog-confirm" class="dialog-confirm" title="Delete Disbursement?">
+                            <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This disbursement will be permanently deleted and cannot be recovered. Are you sure?</p>
+                        </div>
+                        <div id="disbursement-dialog" title="Disbursement Document" style="width:auto;height:auto;">
+                            <img id="expenseDoc" src="" alt="document for disbursement" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-2">
+                <div class="row" style="margin-left:0px;">
+                    <div class="content">
+                        <div class="header" style="font-size:medium;font-weight:bold;">
+                            Disbursements
+                        </div>
+                        @foreach (FinanceManagement.Web.Model.DisbursementModel disbursement in Model.Customer.Disbursements)
+                        {
+                            <ul class="content-sub" style="margin:0px;padding:0px;">
+                                <li style="display:inline-block;margin-right:50px;margin-bottom:25px;">
+                                    @disbursement.Expense.Name
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-3">
+                <div class="row" style="margin-left:0px;">
+                    <div class="content">
+                        <div class="header" style="font-size:medium;font-weight:bold;">
+                            Funding Setup
+                        </div>
+                        @foreach (FinanceManagement.Web.Model.DisbursementModel disbursement in Model.Customer.Disbursements)
+                        {
+                            <ul class="content-sub" style="margin:0px;padding:0px;">
+                                <li style="display:inline-block;margin-right:50px;margin-bottom:25px;">
+                                    @disbursement.Expense.Name
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+@Html.Partial("_DataLoader")
+<script>
+    var expencesURL =  @Html.Raw(sbUrl.ToString());
+    var deleteDisbursementUrl = @Html.Raw(sb.ToString());
+    var ResidentDisbursementsDeleteUrl = @Html.Raw(ResidentDisbursementsDeleteUrl.ToString());
+    $(document).ready(function () {
+        function deleteResidentExpence(Id)
+        {
+            if(ResidentDisbursementsDeleteUrl)
+            {
+                $.ajax({
+                    url: ResidentDisbursementsDeleteUrl +Id,
+                    type: 'DELETE',
+                    cache: false,
+                    success: function () {
+                        return true;
+                    },
+                    error: function (xmlHttpRequest, textStatus, errorThrown) {
+                        console.log('some error occured', textStatus, errorThrown);
+                    }});
+            }
+        }
+        $('body').on('keypress', '.currency', $.currenciesOnly).on('blur', '.currency', function () { $(this).val($.formatCurrency($(this).val())) });
+        $("input[type=text].currency").on('keypress', $.currenciesOnly).on('blur', function () { $(this).val($.formatCurrency($(this).val())) });
+        $(".dialog-confirm").hide();
+        $("#disbursement-dialog").hide();
+        $(".btnDoc").click(function () {
+            var img = $(this).attr("data-app-id")
+            var imgSrc = "data:image/png;base64," + img;
+            if (img) { $('#expenseDoc').attr('src', imgSrc); }
+            else { $('#expenseDoc').attr('src', "/Content/Images/error_404.jpg"); }
+            $("#disbursement-dialog").dialog({
+                modal: true,
+                resizable: false,
+                width: 900,
+                height: 670,
+                open: function (event, ui) { $('.ui-dialog').css('z-index', 99999999); $('.ui-widget-overlay').css('z-index', 102); },
+                buttons: { "Close": function () { $('#expenseDoc').attr('src', ""); $(this).dialog("close"); } }
+            });
+        });
+        $(".btnDelete").click(function () {
+            var id = $(this).attr("data-app-id")
+            $(".dialog-confirm").dialog({
+                resizable: false,
+                height: 200,
+                width: 500,
+                modal: true,
+                buttons: {
+                    "Delete Disbursement": function () {
+                        var expenses = new Array();
+                        $.ajax({
+                            url: deleteDisbursementUrl + id,
+                            type: 'DELETE',
+                            cache: false,
+                            success: function () {
+                                deleteResidentExpence(id)
+                                window.location = expencesURL;
+                            },
+                            error: function (xmlHttpRequest, textStatus, errorThrown) {
+                                alert(textStatus);
+                                console.log('some error occured', textStatus, errorThrown);
+                            }
+                        });
+                        $(this).dialog("close");
+                    },
+                    Cancel: function () { $(this).dialog("close"); }
+                }
+            });
+        });
+    });
+    $(function () { $("#DisbursementModel_DisbursementDate").datepicker({ dateFormat: 'dd/mm/yy', autoClose: true }); });
+    $(function () { $("#tabs").tabs(); });
+</script>

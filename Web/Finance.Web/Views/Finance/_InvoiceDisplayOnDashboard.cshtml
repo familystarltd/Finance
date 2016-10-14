@@ -1,0 +1,38 @@
+﻿@model Finance.Web.Model.FeeInvoiceModel
+@if (Model != null)
+{
+    string style = "";
+    switch (Model.InvoiceStatus)
+    {
+        case Finance.Web.Model.InvoiceStatus.New:
+            style = "color:red;font-weight:bold;";
+            break;
+        case Finance.Web.Model.InvoiceStatus.Delete:
+            style = "color:red; text-decoration:line-through; font-weight:bold;";
+            break;
+        case Finance.Web.Model.InvoiceStatus.Cancel:
+            style = "color:red; text-decoration:line-through; font-weight:bold;";
+            break;
+        case Finance.Web.Model.InvoiceStatus.Approved:
+            style = "font-weight: bold;";
+            break;
+        case Finance.Web.Model.InvoiceStatus.Paid:
+            style = "color:green; font-weight:bold;";
+            break;
+        default:
+            break;
+    }
+    <div class="row" style="@style">
+        <div class="col-md-3">
+            @Model.InvoiceNo
+        </div>
+        <div class="col-md-4">
+            <span>@Model.InvoiceDate.Date.ToString("dd/MM/yyyy")</span>
+        </div>
+        <div class="col-md-4" style="text-align:right;">
+            <span style="text-align:right;">
+                @string.Format("{0:C}", Model.NetTotal)
+            </span>
+        </div>
+    </div>
+}

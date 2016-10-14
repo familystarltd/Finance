@@ -28,7 +28,7 @@
         /// </summary>
         /// <param name="item">Item to add to repository</param>
         void Add(TEntity item);
-
+        //void Add<T>(T item) where T : Entity;
         /// <summary>
         /// Delete item 
         /// </summary>
@@ -40,6 +40,7 @@
         /// </summary>
         /// <param name="item">Item to modify</param>
         void Modify(TEntity item);
+        void SetModified<T>(T item) where T : Entity;
 
         /// <summary>
         ///Track entity into this repository, really in UnitOfWork. 

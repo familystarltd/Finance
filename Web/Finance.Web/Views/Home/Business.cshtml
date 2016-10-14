@@ -1,0 +1,236 @@
+﻿@model Finance.Web.Models.BusinessViewModel
+<script src="~/lib/dist/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
+@Html.Partial("_DataLoader")
+<div class="row" style="margin-left: 10px; margin-top: 15px;">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3><img src="~/images/business.png" class="ico-m" style="margin-right:5px;" />Business
+                    <a href="@Url.Action("Business", "Home", new { businessId = Guid.Empty })" style="margin: 5px; padding: 0px;">
+                        <img class='addBusiness' src='/images/add-plus.png' style='width: 32px; height: 32px;cursor:pointer;margin-top:0px;margin-bottom:5px;margin-left:3px;' />
+                    </a>
+                    
+                </h3>
+            </div>
+            <div class="col-sm-6" style="vertical-align:text-bottom;margin-top:10px;">
+                <div id="BusinesserrorMessage" class="border ui-corner-all" style="padding: 0 .7em; margin-bottom: 5px; vertical-align: middle;display:none">
+                    <p>
+                        <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+                        <div id="businessErrorwrap" style="color:red;"></div>
+                    </p>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                {
+                <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;color:darkgreen;margin-bottom:5px;">
+                    <p style="margin-top:5px;">
+                        <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                        @Model.SuccessMessage
+                    </p>
+                </div>
+                }
+            </div>
+        </div>
+        @if (Model.Businesses != null && Model.Businesses.Count() > 0)
+        {
+            <div class="row border" style="margin-left: 1px;margin-right:1px;">
+                <div class="col-md-12 table_header">Business</div>
+                @foreach (Finance.Web.Models.Business business in Model.Businesses)
+                {
+                    <div class="row" style="margin-top:10px;margin-bottom:10px;">
+                        <div class="control-label col-sm-8">
+                            <a href="@Url.Action("Business", "Home", new { businessId = business.Id })" style="margin: 5px; padding: 0px;">
+                                <img class='businessDelete' src='/images/delete.png' style='width: 16px; height: 16px;margin-right:5px;margin-left:5px; cursor:pointer;' data-app-id='@business.Id' />
+                            </a>
+                            <a href="@Url.Action("Business", "Home", new { businessId = business.Id })" style="margin: 5px; padding: 0px;">
+                                <img class='businessEdit' src='/images/edit.png' style='width: 16px; height: 16px;margin-right:5px;cursor:pointer;' data-app-id='@business.Id' />
+                            </a>
+                            @business.Name
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            @*<div id="businessErrorwrap" class="row" style="margin-bottom:5px;color:red;width:auto;height:auto;">
+                </div>*@
+            if (Model.Business == null)
+            { Model.Business = new Finance.Web.Models.Business(); Model.Business.Id = Guid.Empty;}
+            using (Html.BeginForm("Business", "Home", FormMethod.Post, new { id = "businessForm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+            {
+            <div class="row">
+                <div class="col-sm-2">
+                    <input type="image" id="businessSave" src="~/images/save.png" style="height: 32px; cursor: pointer;" />
+                    <img id="businessReset" src="~/images/reset.png" style="height: 32px; cursor: pointer; margin-top: -27px;" />
+                    <img id="businessExit" src="~/images/exit.png" style="height: 32px; cursor: pointer; margin-top: -27px;" />
+                </div>
+                <div class="col-sm-1">
+                    <p style="margin-right: 3px;margin-top:5px;"><a href="#" id="departmentDialogLink" class="dialog-link ui-state-default ui-corner-all" style="color:#ffffff;"><span class="ui-icon ui-icon-newwin"></span>Departments</a></p>
+                 </div>
+                </div>
+                <hr class="border" />
+                @*@Html.Hidden("Reset", Model.Reset)*@
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <label for="Name" class="control-label col-sm-2">Services</label>
+                        <div class="col-sm-8" style="font-size:medium;font-weight:bold;">
+                            @foreach (Finance.Web.Models.Service Service in Model.Services){
+                                bool Checked = Model.Business != null && Model.Business.Services != null && Model.Business.Services.Any(s=>s.Name == Service.Name);
+                                <input type="checkbox" name="Services" value="@Service.Name" @string.Format("{0}",Checked?"checked='checked'":"") /><span>@Service.Name</span>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Name" class="control-label col-sm-2">Name</label>
+                        <div class="col-sm-3">
+                            @Html.HiddenFor(d => d.Business.Id, new { Name = "Id", @class = "form-control" })
+                            @Html.TextBoxFor(d => d.Business.Name, new { Name = "Name", @class = "form-control", style = "color:black;width:300px;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Address" class="control-label col-sm-2">Address</label>
+                        <div class="col-sm-8">
+                            @Html.TextAreaFor(d => d.Business.Address, 8, 8, new { Name = "Address", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="PostCode" class="control-label col-sm-2">Post Code</label>
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(d => d.Business.PostCode, new { Name = "PostCode", @class = "form-control", style = "color:black;" })
+                        </div>
+                        <label for="Address" class="control-label col-sm-1">Telephone</label>
+                        <div class="col-sm-3">
+                            @Html.TextBoxFor(d => d.Business.Telephone, new { Name = "Telephone", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    @if (Model.Business.Logo == null || Model.Business.Logo.Length <= 0)
+                    {
+                        <label for="Logo" class="control-label col-sm-1">Logo</label>
+                        <div class="col-sm-3">
+                            <img src="~/images/nophoto.png" id="businessLogo" style="width: 100px; height: 100px;cursor:pointer; " />
+                            @Html.TextBox("UploadLogo", null, new { id = "UploadLogo", @class = "form-control", type = "file", style = "color:black;width:350px;" })
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            @Html.Image(Model.Business.Name, Model.Business.Logo)
+                            @Html.TextBox("UploadLogo", null, new { id = "UploadLogo", @class = "form-control", type = "file", style = "color:black;width:350px;" })
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <label for="Fax" class="control-label col-sm-2">Fax</label>
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(d => d.Business.Fax, new { Name = "Fax", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email" class="control-label col-sm-2">Email</label>
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(d => d.Business.Email, new { Name = "Email", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="TaxOfficeName" class="control-label col-sm-2">Tax Office</label>
+                        <div class="col-sm-8">
+                            @Html.TextBoxFor(d => d.Business.TaxOfficeName, new { Name = "TaxOfficeName", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="PAYERef" class="control-label col-sm-2">Tax Ref</label>
+                        <div class="col-sm-3">
+                            @Html.TextBoxFor(d => d.Business.PAYERef, new { Name = "PAYERef", @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-1 col-sm-5">
+
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+@Html.Partial("_Department")
+<script>
+    @{string emailRegExp = @"^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";}
+    var emailRegExp = "@emailRegExp";
+    $(document).ready(function () {
+        var allowedPhotos = [".png", ".jpeg"];
+        $.validator.addMethod('regExp', function (value, element, param) {
+            return this.optional(element) || value.match(param); // Compare with regular expression
+        }, 'Please check your data.');
+        var Business_Validator;
+        function configBusinessValidationRules() {
+            var Business_Rules = {
+                Name: { required: true },
+                Address: { required: true },
+                PostCode: { required: true },
+                Email: { regExp: emailRegExp },
+                UploadLogo: { regExp: "([a-zA-Z0-9\s_\\.\-:])+(" + allowedPhotos.join('|') + ")$" }
+            };
+            var Business_Messages = {
+                Name: { required: "Please enter business name." },
+                Address: { required: "Please enter address of business" },
+                PostCode: { required: "Please enter Post Code" },
+                Email: { regExp: "Please enter valid email" },
+                UploadLogo: { regExp: "Please upload photo, having extensions: " + allowedPhotos.join(', ') + " only." }
+            };
+            $('#businessForm').removeData('validator');
+            Business_Validator = new jQueryValidatorWrapper("businessForm",
+                Business_Rules, Business_Messages, "businessErrorwrap");
+        }
+        $("#businessSave").click(function (e) {
+            e.preventDefault();
+            configBusinessValidationRules();
+            if (!Business_Validator.validate()) { $("#BusinesserrorMessage").show(); return };
+            $("#BusinesserrorMessage").hide();
+            $('#businessForm').submit();
+        });
+        $("#businessReset").click(function (e) {
+            e.preventDefault();
+        });
+        $("#businessExit").click(function (e) {
+
+        }); 
+        $("#departmentDialogLink").click(function (e) {
+            e.preventDefault();
+            $("#departmentList").data("BusinessId", $("#Business_Id").val());
+            $("#departmentList").dialog("open");
+        });
+        $("#jobTitleDialogLink").click(function (e) {
+            e.preventDefault();
+            $("#jobTitleList").data("BusinessId", $("#Business_Id").val());
+            $("#jobTitleList").dialog("open");
+        });
+        $("#jobDialogLink").click(function (e) {
+            e.preventDefault();
+            $("#jobList").data("BusinessId", $("#Business_Id").val());
+            $("#jobList").dialog("open");
+        });
+        $("#employeeGroupDialogLink").click(function (e) {
+            e.preventDefault();
+            $("#employeeGroupList").data("BusinessId", $("#Business_Id").val());
+            $("#employeeGroupList").dialog("open");
+        });
+        $("#attendanceDeviceDialogLink").click(function (e) {
+            e.preventDefault();
+            $("#attendanceDeviceList").data("BusinessId", $("#Business_Id").val());
+            $("#attendanceDeviceList").dialog("open");
+        });
+        $('body').on('click', "#businessExit", function () {
+            window.location = "/Home/business?businessId=";
+        });
+        $('body').on('click', "#businessReset", function () {
+            window.location = "/Home/business?businessId=" + $.Guid.Empty();
+        });
+
+        $("form input:checkbox").wrap("<span></span>").parent().css({ background: "yellow", border: "3px red solid", "padding-top": "3px", "padding-left": "3px", "padding-right": "3px", "padding-bottom": "0px" });
+    });
+</script>

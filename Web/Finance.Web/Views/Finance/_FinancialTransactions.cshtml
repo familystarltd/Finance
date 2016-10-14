@@ -1,0 +1,67 @@
+﻿@using Finance.Web.Model
+@model Finance.Web.Model.FinancialTransactionModel
+@if (Model != null)
+{
+    string style = "";
+    switch (Model.FinancialTransactionType)
+    {
+        case Finance.Web.Model.FinancialTransactionTypeModel.FeeInvoice:
+            style = "color:black; font-weight:bold;";
+            break;
+        case Finance.Web.Model.FinancialTransactionTypeModel.DisbursementInvoice:
+            style = "color:black; font-weight:bold;";
+            break;
+        case Finance.Web.Model.FinancialTransactionTypeModel.Receipt:
+            style = "color:green; font-weight:bold;";
+            break;
+        case Finance.Web.Model.FinancialTransactionTypeModel.CreditNote:
+            style = "color:red;font-weight:bold;";
+            break;
+        case Finance.Web.Model.FinancialTransactionTypeModel.BadDebt:
+            style = "color:red; text-decoration:line-through; font-weight:bold;";
+            break;
+        default:
+            break;
+    }
+    <div class="row" style="@style margin:0px;padding:0px;">
+        <div class="col-md-1" style="margin:0px;padding:0px;vertical-align:top;text-align:right;">
+            @if (Model is FeeInvoiceModel && (Model as FeeInvoiceModel).DueAmount <= 0)
+            {
+                <img src="~/images/active.png" />
+            }
+            @{string refNo = "";
+            switch (Model.FinancialTransactionType)
+            {
+                case Finance.Web.Model.FinancialTransactionTypeModel.FeeInvoice:
+                    refNo = "";
+                    break;
+                case Finance.Web.Model.FinancialTransactionTypeModel.DisbursementInvoice:
+                    refNo = "";
+                    break;
+                case Finance.Web.Model.FinancialTransactionTypeModel.Receipt:
+                    refNo = Model.RefPrefix;
+                    break;
+                case Finance.Web.Model.FinancialTransactionTypeModel.CreditNote:
+                    refNo = Model.RefPrefix;
+                    break;
+                case Finance.Web.Model.FinancialTransactionTypeModel.BadDebt:
+                    refNo = Model.RefPrefix;
+                    break;
+                default:
+                    break;
+            }}
+            <span style="@style">@refNo</span>
+        </div>
+        <div class="col-md-3" style="margin:0px;padding:0px;">
+            <span style="@style">@Model.TransactionRef</span>
+        </div>
+        <div class="col-md-4" style="margin:0px;padding:0px;">
+            <span>@Model.ProcessedDate.Date.ToString("dd/MM/yyyy")</span>
+        </div>
+        <div class="col-md-4" style="text-align: right;padding-left:70px;">
+            <span style="text-align:right;float:right;">
+                @string.Format("{0:C}", Model.Amount)
+            </span>
+        </div>
+    </div>
+}

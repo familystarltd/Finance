@@ -1,0 +1,140 @@
+﻿<div class="invoice-lookup-dialog" id="creditNote-create" title="Invoices" style="display:none;">
+    <table id="invoiceLookupInvoice" style="width: 98%;">
+        <tr style="color:white;background-color:grey">
+            <th style="width:15%;">Invoice</th>
+            <th style="width:12%;">Date</th>
+            <th style="width:33%;">Payer</th>
+            <th style="width:20%;text-align:right;">Total</th>
+            <th style="width: 20%; text-align: right;">Due</th>
+        </tr>
+    </table>
+    <div style="height:250px;overflow-y:scroll;">
+        <table id="invoiceLookupInvoice" style="width: 100%;">
+            <tbody id="tblBodyInvoiceLookupInvoices"></tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbGetInvoiceLookup_InvoiceByPayerId = new System.Text.StringBuilder();
+          sbGetInvoiceLookup_InvoiceByPayerId.Append("'");
+          sbGetInvoiceLookup_InvoiceByPayerId.Append(ViewBag.FinanceApiService);
+          sbGetInvoiceLookup_InvoiceByPayerId.Append("/FinanceApi/Invoices?PayerId=");
+          sbGetInvoiceLookup_InvoiceByPayerId.Append("'");}
+        var Url = @Html.Raw(sbGetInvoiceLookup_InvoiceByPayerId.ToString()) + '';
+        function clearCreditNoteForm()
+        {
+            $("#tblBodyInvoiceLookupInvoices").empty();
+        }
+        function generateInvoice(Invoice) {
+            return "<tr>"
+                          +
+                          "<td style='width:15%;'> <a class='invoiceSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;' data-app-id='" + Invoice.id + "'" + "data-app-name='" + Invoice.invoiceNo + "'" + ">" + Invoice.invoiceNo + " </a></td>"
+                          +
+                          "<td style='width:12%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(Invoice.invoiceDate)) + "</td>"
+                          +
+                          "<td style='width:33%;'>" + Invoice.payer.name + "</td>"
+                          +
+                          "<td style='width:20%; text-align: right;'>" + $.formatCurrency(Invoice.amount, "£") + "</td>"
+                          +
+                          "<td style='width:20%; text-align:right;'>" + $.formatCurrency(Invoice.dueAmount, "£") + "</td>"
+                          + "</tr>";
+        }
+        function generateInvoices(InvoiceData, Pagination) {
+            $("#tblBodyInvoiceLookupInvoices").empty();
+            if (InvoiceData) {
+                if (InvoiceData.length > 0) {
+                    var tableBody = "";
+                    var invoiceStatus = "";
+                    for (var i = 0; i < InvoiceData.length; i++) {
+                        tableBody += generateInvoice(InvoiceData[i])
+                    }
+                    if (tableBody != "") {
+                        $("#tblBodyInvoiceLookupInvoices").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkInvoicePrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 1);
+                            $("#lnkInvoicePrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoicePrev").removeAttr('href');
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoicePrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkInvoiceNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 1);
+                            $("#lnkInvoiceNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoiceNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoiceNext").attr('style', "cursor:none;");
+                        }
+                        $("#lblTotalInvoices").text(Pagination.TotalCount);
+                        $("#lblCurrentTotalInvoices").text(InvoiceData.length);
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblInvoicePagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblInvoicePagingNos").empty(); $("#lnkInvoicePrev").removeAttr('href'); $("#lnkInvoiceNext").removeAttr('href'); }
+                }
+                else { alert("Invoices have not been found! Please try again later.") }
+            }
+        }
+        function loadInvoices(PayerId, ProcessedDate) {
+            var getInvoiceLookup_InvoicesByPayerUrl = Url + PayerId + "&PayDate=" + ProcessedDate + "&PageIndex=0&PageSize=100";
+            var requestInvoice = $.ajax({
+                type: "GET",
+                url: getInvoiceLookup_InvoicesByPayerUrl,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (invoiceData) {
+                    if (!$.isNullOrEmpty(invoiceData)) {
+                        generateInvoices(invoiceData, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                    }
+                },
+                error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); }
+            });
+            requestInvoice.fail(function (jqxhr, textStatus, error) {
+                alert("List of Invoice Request failed: " + textStatus);
+            });
+        }
+        $('body').on('click', 'a.invoiceSelect', function (e) {
+            e.preventDefault();
+            $(".invoice-lookup-dialog").data({ "InvoiceId": $(this).attr("data-app-id") });
+            $(".invoice-lookup-dialog").data({ "InvoiceNo": $(this).attr("data-app-name") });
+            $(".invoice-lookup-dialog").dialog("close");
+        });
+        $(".invoice-lookup-dialog").dialog({ modal: true, resizable: false, width: 900, height: 350, autoOpen: false });
+        $(".invoice-lookup-dialog").on("dialogopen", function (event, ui) {
+            $("#tblBodyInvoiceLookupInvoices").empty();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".invoice-lookup-dialog").dialog("moveToTop");
+
+            var MODE = $(".invoice-lookup-dialog").data("Mode");
+            loadInvoices($(".invoice-lookup-dialog").data("PayerId"), $(".invoice-lookup-dialog").data("ProcessedDate"));
+        });
+        $(".invoice-lookup-dialog").on("dialogclose", function (event, ui) { clearCreditNoteForm(); });
+    });
+</script>

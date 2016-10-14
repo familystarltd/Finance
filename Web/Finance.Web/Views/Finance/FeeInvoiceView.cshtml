@@ -1,0 +1,236 @@
+﻿@using Finance.Web.Model;
+@model Finance.Web.Model.InvoiceModel
+@{
+    ViewBag.TitleHeader = "Invoice";
+}
+<style>
+    table tr th td {
+        border: none;
+    }
+
+    #tblCustomerInfo td {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        vertical-align: top;
+    }
+
+    #tblCustomerInfo th {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        vertical-align: top;
+    }
+
+    #tblInvoiceDetails td {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        vertical-align: top;
+    }
+
+    #tblInvoiceDetails th {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        padding-left: 5px;
+        padding-right: 5px;
+        vertical-align: top;
+    }
+
+    .tblHourlyInvoiceDetails, .tblHourlyInvoiceDetails td, tr {
+        border: none;
+    }
+</style>
+@if (Model != null)
+{
+    <h2><img src="~/images/invoice.jpg" style="width:64px;height:64px;" /> Invoice for <u>@Model.Customer.PersonalInfo.FullName</u> </h2>
+
+    <div class="row" style="border:1px solid #000;margin-left:5px;padding-left:15px;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-2">
+                        Invoice No
+                    </div>
+                    <div class="col-md-5">
+                        @Model.InvoiceNo
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        Invoice Date
+                    </div>
+                    <div class="col-md-5">
+                        @Model.InvoiceDate.ToString("dd MMMM yyyy")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        Customer
+                    </div>
+                    <div class="col-md-5">
+                        @Model.Customer.PersonalInfo.FullName
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        D.O.A
+                    </div>
+                    <div class="col-md-5">
+                        @Model.Customer.ActiveDate.ToString("dd MMMM yyyy")
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">
+                        Payer
+                    </div>
+                    <div class="col-md-5">
+                        @Model.Payer.Name
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                @if (Model.DueAmount <= 0)
+                { <img src="~/images/paid.png" />}
+            </div>
+            <div class="col-md-4" style="text-align:right;padding-top:10px;padding-right:25px;">
+                <a style="color:#ffffff;" href="@Url.Action("PrintPreviewInvoices", "Finance", new { InvoiceNoSearch = Model.InvoiceNo })">
+                    <img src="~/images/print_preview.png" style="width:64px;height:64px;" alt="print invoice" title="print invoice" />
+                </a>
+                @if (Model.DueAmount > 0)
+                {
+                    <a style="color:#ffffff;" href="@Url.Action("PrintPreviewInvoices", "Finance", new { InvoiceNoSearch = Model.InvoiceNo })">
+                        <img src="~/images/credit_note.png" style="width:64px;height:64px;" alt="credit note" title="credit note" />
+                    </a>
+                    <a style="color:#ffffff;" href="@Url.Action("PrintPreviewInvoices", "Finance", new { InvoiceNoSearch = Model.InvoiceNo })">
+                        <img src="~/images/receipt.png" style="width:64px;height:64px;" alt="receipt" title="receipt" />
+                    </a>
+                    <a style="color:#ffffff;" href="@Url.Action("PrintPreviewInvoices", "Finance", new { InvoiceNoSearch = Model.InvoiceNo })">
+                        <img src="~/images/note.png" style="width:64px;height:64px;" alt="notes" title="notes" />
+                    </a>
+                    <a style="color:#ffffff;" href="@Url.Action("PrintPreviewInvoices", "Finance", new { InvoiceNoSearch = Model.InvoiceNo })">
+                        <img src="~/images/inv_adjustment.png" style="width:64px;height:64px;" alt="adjustments" title="adjustments" />
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="row" style="margin-top:25px;">
+            <div class="col-md-6" style="vertical-align:top;">
+                TO :<br />
+                @if (Model.Payer.FeeInvoiceBillingContact == null && Model.Payer.FeeInvoiceDeliveryContact != null)
+                {
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Company))
+                    {
+                        <span> @Model.Payer.FeeInvoiceDeliveryContact.Company </span> <br />
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Department))
+                        {
+                            <span> @Model.Payer.FeeInvoiceDeliveryContact.Department </span> <br />
+                        }
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.ContactReference))
+                        {
+                            <span> @Model.Payer.FeeInvoiceDeliveryContact.ContactReference </span> <br />
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.FirstName) && !string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.LastName))
+                    {
+                        <span> @string.Format("{0} {1}", Model.Payer.FeeInvoiceDeliveryContact.Title, Model.Payer.FeeInvoiceDeliveryContact.FullName) </span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Address))
+                    {
+                        <span> @Model.Payer.FeeInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>")</span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.PostCode))
+                    {
+                        <span> @Model.Payer.FeeInvoiceDeliveryContact.PostCode </span> <br />
+                    }
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.Company))
+                    {
+                        <span> @Model.Payer.FeeInvoiceBillingContact.Company </span> <br />
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.Department))
+                        {
+                            <span> @Model.Payer.FeeInvoiceBillingContact.Department </span> <br />
+                        }
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.ContactReference))
+                        {
+                            <span> @Model.Payer.FeeInvoiceBillingContact.ContactReference </span> <br />
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.FirstName) && !string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.LastName))
+                    {
+                        <span> @string.Format("{0} {1}", Model.Payer.FeeInvoiceBillingContact.Title, Model.Payer.FeeInvoiceBillingContact.FullName) </span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.Address))
+                    {
+                        <span> @Html.Raw(Model.Payer.FeeInvoiceBillingContact.Address.Replace(Environment.NewLine, "<br>"))</span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceBillingContact.PostCode))
+                    {
+                        <span> @Model.Payer.FeeInvoiceBillingContact.PostCode </span> <br />
+                    }
+                }
+            </div>
+            <div class="col-md-6">
+                @if (Model.Payer.FeeInvoiceDeliveryContact != null)
+                {
+                    <span>SHIP TO :</span> <br />
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Company))
+                    {
+                        <span> @Model.Payer.FeeInvoiceDeliveryContact.Company </span> <br />
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Department))
+                        {
+                            <span> @Model.Payer.FeeInvoiceDeliveryContact.Department </span> <br />
+                        }
+                        if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.ContactReference))
+                        {
+                            <span> @Model.Payer.FeeInvoiceDeliveryContact.ContactReference </span> <br />
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.FirstName) && !string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.LastName))
+                    {
+                        <span> @string.Format("{0} {1}", Model.Payer.FeeInvoiceDeliveryContact.Title, Model.Payer.FeeInvoiceDeliveryContact.FullName) </span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.Address))
+                    {
+                        <span> @Html.Raw(Model.Payer.FeeInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>"))</span> <br />
+                    }
+                    if (!string.IsNullOrEmpty(Model.Payer.FeeInvoiceDeliveryContact.PostCode))
+                    {
+                        <span> @Model.Payer.FeeInvoiceDeliveryContact.PostCode </span> <br />
+                    }
+                }
+            </div>
+        </div>
+        @*Invoice Details*@
+        <div class="row" style="margin-top:25px;margin-bottom:10px;">
+            <div class="col-md-12">
+                @{
+                    switch (Model.InvoiceType)
+                    {
+                        case InvoiceTypeModel.Fee:
+                            if (Html.ViewData.ContainsKey("RatesShow")) { Html.ViewData["RatesShow"] = true; }
+                            else { Html.ViewData.Add("RatesShow", true); }
+                            @Html.Partial("_FeeInvoiceDetail", Model, new ViewDataDictionary(Html.ViewData))
+                            break;
+                        case InvoiceTypeModel.FNC:
+                            @Html.Partial("_FNCInvoiceDetail", Model, new ViewDataDictionary(Html.ViewData));
+                            break;
+                        case InvoiceTypeModel.Expenses:
+                            @Html.Partial("_ExpensesInvoiceDetail", Model, new ViewDataDictionary(Html.ViewData));
+                            break;
+                        case InvoiceTypeModel.Manual:
+                            @Html.Partial("_ManualInvoiceDetail", Model, new ViewDataDictionary(Html.ViewData));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            </div>
+        </div>
+    </div>
+                    }

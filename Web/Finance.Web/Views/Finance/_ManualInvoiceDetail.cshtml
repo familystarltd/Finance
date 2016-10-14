@@ -1,0 +1,31 @@
+﻿@using Finance.Web.Model;
+@model Finance.Web.Model.InvoiceModel
+<table id="tblInvoiceDetails" border="1" style="border:1px solid;">
+    <thead>
+        <tr>
+            <th style="width: 700px; border: 1px solid;">
+                Description
+            </th>
+            <th style="width: 150px; text-align: right; border: 1px solid;">
+                Total
+            </th>
+        </tr>
+    </thead>
+    @foreach (InvoiceDetailModel invoiceDetail in Model.InvoiceDetails)
+    {
+        <tr>
+            <td style="border:1px solid;">
+                @Html.Raw(invoiceDetail.Article)
+            </td>
+            <td style="text-align: right; vertical-align: top; border: 1px solid;">
+                @string.Format("{0:C}", invoiceDetail.TotalPlusVAT)
+            </td>
+        </tr>
+    }
+    <tfoot>
+        <tr>
+            <td style="padding-top: 15px; font-weight: bold; font-size: large; border: 1px solid;">Total</td>
+            <td colspan="2" style="text-align: right; vertical-align: top; padding-top: 15px; font-weight: bold; font-size: large;border:1px solid;">@string.Format("{0:c}", Model.Amount)</td>
+        </tr>
+    </tfoot>
+</table>

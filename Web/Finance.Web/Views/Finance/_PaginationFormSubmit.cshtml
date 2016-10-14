@@ -1,0 +1,28 @@
+﻿@model Finance.Web.Model.PaginationHeader
+@if (Model != null && Model.TotalPages > 1)
+{
+    <ul class="pagination" style="margin:0px;margin-top:3px;">
+        @for (int i = 0; i < Model.TotalPages; i++)
+        {
+            <li class='@(Model.PageIndex == i ? "active" : "")'>
+                <a data-app-id="@i" class="Page_Index_Invoice" onclick="javascript: return false;" style="cursor:pointer;text-decoration:underline;">
+                    @(i + 1)
+                </a>
+            </li>
+        }
+    </ul>
+    <p>
+        @Html.HiddenFor(m => m.PageIndex, new { @class = "Page_Index_Hidden" })
+        @Html.HiddenFor(m => m.PageSize)
+        Total Records Found : @Model.TotalCount<br />
+    </p>
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', ".Page_Index_Invoice", function (e) {
+                var index = $(this).attr("data-app-id");
+                $(".Page_Index_Hidden").val(index);
+                $(this).closest("form").submit();
+            });
+        });
+    </script>
+}

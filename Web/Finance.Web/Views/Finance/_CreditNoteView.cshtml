@@ -1,0 +1,211 @@
+﻿<div class="creditNote-view-dialog" id="creditNote-view-dialog" title="CreditNote" style="display:none;">
+    <h4 id="creditNoteViewsuccessMsg" style="color:green;display:none;"><img src="~/images/success.png" style="width:48px;height:48px;" />Credit Note has been created successfully</h4>
+    <div class="row">
+        <div class="col-md-2">
+            Credit Note No
+        </div>
+        <div class="col-md-4">
+            <label id="lblCreditNoteViewCreditNoteNo" style="color:red;font-weight:bold;"></label>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            Date <label id="lblCreditNoteViewDate"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Payer
+        </div>
+        <div class="col-md-8">
+            <label id="lblCreditNoteViewPayer"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Description
+        </div>
+        <div class="col-md-10">
+           <p><label id="lblCreditNoteViewDescription"></label></p> 
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Amount
+        </div>
+        <div class="col-md-4">
+            <label id="lblCreditNoteViewAmount"></label>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            Available Credit  : <label id="lblCreditNoteViewAvailableCredit" style="color:red;font-weight:bold;"></label>
+        </div>
+    </div>
+    <div id="creditNoteViewReceiptDisplay" style="display:none;">
+        <div class="row">
+            <div class="col-md-12">
+                <b>Invoices</b><br />
+                <table id="creditNoteViewInvoice" style="width: 98%;">
+                    <tr style="color:white;background-color:grey">
+                        <th style="width:12%;">Invoice</th>
+                        <th style="width:8%;">Date</th>
+                        <th style="width:20%;text-align:right;">Total</th>
+                        <th style="width: 20%; text-align: right;">Total Received</th>
+                        <th style="width: 20%; text-align: right;">Due</th>
+                        <th style="width: 20%; text-align: right;">Credit Amount</th>
+                    </tr>
+                </table>
+                <div style="height:130px;overflow-y:scroll;">
+                    <table id="creditNoteInvoice" style="width: 100%;">
+                        <tbody id="tblBodyCreditNoteViewInvoices"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10" style="text-align:right;">
+                Total Amount Allocated To Invoices
+            </div>
+            <div class="col-md-2" style="text-align:right;">
+                <label id="lblCreditNoteViewTotalAmountToInvoice"></label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <b>Receipts</b><br />
+                <table id="creditNoteViewReceipt" style="width: 98%;">
+                    <tr style="color:white;background-color:grey">
+                        <th style="width:20%;">Receipt</th>
+                        <th style="width:20%;">Date</th>
+                        <th style="width:30%;text-align:right;">Total</th>
+                    </tr>
+                </table>
+                <div style="height:100px;overflow-y:scroll;">
+                    <table id="creditNoteviewCreditNote" style="width: 100%;">
+                        <tbody id="tblBodyCreditNoteViewReceipts"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10" style="text-align:right;">
+                Total Receipts
+            </div>
+            <div class="col-md-2" style="text-align:right;">
+                <label id="lblCreditNoteViewTotalAmountToReceipt"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbCreditNoteView = new System.Text.StringBuilder();
+          sbCreditNoteView.Append("'");
+          sbCreditNoteView.Append(ViewBag.FinanceApiService);
+          sbCreditNoteView.Append("/FinanceApi/CreditNote?CreditNoteNo=");
+          sbCreditNoteView.Append("'");}
+        var creditNoteViewUrl = @Html.Raw(sbCreditNoteView.ToString()) + '';
+        var CREDITNOTEVIEW_MODE;
+        function clearCreditNoteView() {
+            $("#lblCreditNoteViewCreditNoteNo").text("");
+            $("#creditNoteViewReceiptDisplay").css("display", "none");
+            $("#creditNoteViewsuccessMsg").css("display", "none");
+            $("#tblBodyCreditNoteViewInvoices").empty();
+            $("#tblBodyCreditNoteViewReceipts").empty();
+            $("#lblCreditNoteViewDate").text("");
+            $("#lblCreditNoteViewPayer").text("");
+            $("#lblCreditNoteViewDescription").text("");
+            $("#lblCreditNoteViewAmount").text("");
+            $("#lblCreditNoteViewAvailableCredit").text("");
+
+        }
+        function loadCreditNoteForView(creditNoteView) {
+            $("#lblCreditNoteViewCreditNoteNo").text(creditNoteView.refPrefix + creditNoteView.creditNoteNo);
+            var creditNoteDate = new Date(creditNoteView.processedDate);
+            $("#lblCreditNoteViewDate").text($.datepicker.formatDate('dd/mm/yy', creditNoteDate));
+            $("#lblCreditNoteViewPayer").text(creditNoteView.payer.name);
+            $("#lblCreditNoteViewDescription").text(creditNoteView.description);
+            $("#lblCreditNoteViewAmount").text($.formatCurrency(creditNoteView.amount, "£"));
+            $("#lblCreditNoteViewAvailableCredit").text($.formatCurrency(creditNoteView.creditAvailable, "£"));
+            
+            var totalAllocatedToInvoice = 0;
+            $("#tblBodyCreditNoteViewInvoices").empty();
+            // Receipts
+            $("#tblBodyCreditNoteViewReceipts").empty();
+            if (!$.isNullOrEmpty(creditNoteView.receipts) && creditNoteView.receipts.length > 0) {
+                var totalAllocatedToReceipt = 0;
+                var tableBody = "";
+                var tableBodyInvoice = "";
+                $(creditNoteView.receipts).each(function (index, receipt) {
+                    totalAllocatedToReceipt = parseFloat(totalAllocatedToReceipt) + parseFloat($.toNumber(receipt.amount));
+                    tableBody += loadReceiptForCreditNoteView(receipt);
+                    //receipt -> Invoices
+                    $(receipt.receiptInvoices).each(function (index, invoice) {
+                        totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber(invoice.amountReceived));
+                        tableBodyInvoice += loadInvoiceForCreditNoteView(invoice);
+                    });
+                    if (tableBodyInvoice != "") { $("#tblBodyCreditNoteViewInvoices").append(tableBodyInvoice); }                    
+                });
+                if (tableBody != "") { $("#tblBodyCreditNoteViewReceipts").append(tableBody); $("#creditNoteViewReceiptDisplay").css("display", "block"); }
+                $("#lblCreditNoteViewTotalAmountToReceipt").text($.formatCurrency(totalAllocatedToReceipt, "£"));
+                $("#lblCreditNoteViewTotalAmountToInvoice").text($.formatCurrency(totalAllocatedToInvoice, "£"));
+            }
+        }
+        function loadInvoiceForCreditNoteView(creditNoteInvoice) {
+            var totalAmountReceived = 0;
+            $(creditNoteInvoice.invoice.creditNoteInvoices).each(function (index, creditNoteInvoice) {
+                totalAmountReceived = parseFloat(totalAmountReceived) + parseFloat($.toNumber(creditNoteInvoice.amountReceived));
+            });
+            if (totalAmountReceived == 0) {
+                totalAmountReceived = creditNoteInvoice.amountReceived;
+            }
+            var dueAmount = parseFloat(creditNoteInvoice.invoice.amount) - parseFloat(totalAmountReceived);
+            return "<tr>"
+                + "<td style='width:12%;'> <a target='_blank' style='text-decoration:underline;width:10%;' href='/InvoiceSearchByNo?InvoiceNoSearch=" + creditNoteInvoice.invoice.invoiceNo + "'>" + creditNoteInvoice.invoice.invoiceNo + " </a></td>"
+                + "<td style='width:8%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(creditNoteInvoice.invoice.invoiceDate)) + "</td>"
+                + "<td style='width:20%; text-align: right;'>" + $.formatCurrency(creditNoteInvoice.invoice.amount, "£") + "</td>"
+                + "<td style='width:20%; text-align: right;'>" + $.formatCurrency(totalAmountReceived, "£") + "</td>"
+                + "<td style='width:20%; text-align:right;'>" + $.formatCurrency(dueAmount, "£") + "</td>"
+                + "<td style='width:20%; text-align:right;'>" + "<label>" + $.formatCurrency(creditNoteInvoice.amountReceived, "£") + "</label>" + "</td>"
+                + "</tr>";
+        }
+        function loadReceiptForCreditNoteView(receipt) {
+            return "<tr>"
+                + "<td style='width:20%;'> <a target='_blank' style='text-decoration:underline;width:19%;'>" + receipt.refPrefix + receipt.receiptNo + " </a></td>"
+                + "<td style='width:20%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(receipt.processedDate)) + "</td>"
+                + "<td style='width:30%; text-align: right;'>" + $.formatCurrency(receipt.amount, "£") + "</td>"
+                + "</tr>";
+        }
+        $(".creditNote-view-dialog").dialog({ modal: true, resizable: false, width: 900, height: 630, autoOpen: false });
+        $(".creditNote-view-dialog").on("dialogopen", function (event, ui) {
+            $(".creditNote-view-dialog").fadeOut();
+            clearCreditNoteView();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".creditNote-view-dialog").dialog("moveToTop");
+            var creditNoteNo = $(".creditNote-view-dialog").data("CreditNoteNo");
+            if (!$.isNullOrEmpty(creditNoteNo)) {
+                CREDITNOTEVIEW_MODE = $(".creditNote-view-dialog").data("Mode");
+                switch (CREDITNOTEVIEW_MODE) {
+                    case "View":
+                    case "VIEW":
+                        $("#creditNoteViewsuccessMsg").css("display", "none");
+                        break;
+                    case "ADDED":
+                    case "Added":
+                        $("#creditNoteViewsuccessMsg").css("display", "block");
+                        break;
+                    default:
+                        $("#creditNoteViewsuccessMsg").css("display", "block");
+                        break;
+                }
+                $.getJSON(creditNoteViewUrl + creditNoteNo, function (creditNoteView) {
+                    loadCreditNoteForView(creditNoteView);
+                }).error(function (xhr) {  }).fail(function () { alert("Receipt view Request failed! Please try again later. "); });
+            }
+            else {
+                alert("Please contact I.T Administrator");
+            }
+            $(".creditNote-view-dialog").fadeIn();
+        });
+        $(".creditNote-view-dialog").on("dialogclose", function (event, ui) { clearCreditNoteView(); });
+    });
+</script>

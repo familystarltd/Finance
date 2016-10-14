@@ -1,0 +1,275 @@
+﻿@using FinanceManagement.Web.Model;
+@model FinanceManagement.Web.Model.FeeInvoiceModel
+@{
+    bool IsRatesApplied = false;
+    bool.TryParse(Html.ViewData["RatesShow"] == null ? "" : Html.ViewData["RatesShow"].ToString(), out IsRatesApplied);
+    IEnumerable<FeeInvoiceDetailModel> weeklyInvoiceDetails = Model.InvoiceDetails.Where(inv => inv.Rate.RateMethod == RateMethod.Weekly).OrderBy(inv => inv.FromDate);
+    IEnumerable<FeeInvoiceDetailModel> monthlyInvoiceDetails = Model.InvoiceDetails.Where(inv => inv.Rate.RateMethod == RateMethod.Monthly).OrderBy(inv => inv.FromDate);
+    IEnumerable<FeeInvoiceDetailModel> dailyInvoiceDetails = Model.InvoiceDetails.Where(inv => inv.Rate.RateMethod == RateMethod.Daily).OrderBy(inv => inv.FromDate);
+    IEnumerable<FeeInvoiceDetailModel> hourlyInvoiceDetails = Model.InvoiceDetails.Where(inv => inv.Rate.RateMethod == RateMethod.Hourly).OrderBy(inv => inv.FromDate);
+    string paymentDesc = Model.Fee.PaymentTerm == PaymentTerm.Monthly ? string.Format("{0} {1}", "for the month of", Model.InvoiceDate.ToString("MMMM")) : "4 weeks";
+    IEnumerable<IGrouping<DateTime, FeeInvoiceDetailModel>> dailyInvoiceGroup = dailyInvoiceDetails.GroupBy(inv => inv.FromDate, inv => inv);
+
+    var hourlyInvoiceGroup = hourlyInvoiceDetails.GroupBy(cm => new { FromDate = cm.FromDate, ToDate = cm.ToDate }).ToList();
+    <table id="tblInvoiceDetails" border="1" cellpadding="3" cellspacing="0" style="width:100%;">
+        <thead>
+            <tr>
+                <th style="width: 80%;">
+                    Description
+                </th>
+                @if (IsRatesApplied)
+                {
+                    <th style="">
+                        Rates Applied
+                    </th>
+                }
+                <th style="width: 150px; text-align: right;">
+                    Total
+                </th>
+            </tr>
+        </thead>
+
+        @foreach (FeeInvoiceDetailModel invoiceDetail in weeklyInvoiceDetails)
+        {
+            <tr>
+                <td>
+                    @if (weeklyInvoiceDetails.Count() == 1 && Model.Fee.PaymentTerm == PaymentTerm.Monthly)
+                    {
+                        <span> @string.Format("{0} Fees payable for the month of", invoiceDetail.Rate.FeeRate.RateDescription) </span>
+                        <b>
+                            @string.Format("{0}", Model.InvoiceDate.ToString("MMMM"))
+                        </b>
+                        <span>at the rate of @string.Format("{0:C} {1}", invoiceDetail.Rate.RateAmount, "a week")</span>
+                        <br />
+                        <span>
+                            @string.Format("{0} days at the daily rate of {1:c}", invoiceDetail.NoOfDays, invoiceDetail.Rate.RateAmount / 7)
+                        </span>
+                    }
+                    else
+                    {
+                        <span> @string.Format("{0} Fees payable for the period from", invoiceDetail.Rate.FeeRate.RateDescription) </span>
+                        <b>
+                            @string.Format("{0} - {1}", invoiceDetail.FromDate.ToString("dd/MM/yyyy"), invoiceDetail.ToDate.ToString("dd/MM/yyyy"))
+                        </b>
+                        <span>
+                            at the rate of @string.Format("{0:C} {1}", invoiceDetail.Rate.RateAmount, "a week")
+                        </span>
+                        <br />
+                        <span>
+                            @string.Format("{0} days at the daily rate of {1:c}", invoiceDetail.NoOfDays, invoiceDetail.Rate.RateAmount / 7)
+                        </span>
+                    }
+                </td>
+                @if (IsRatesApplied)
+                {
+                    <td>
+                        @string.Format("{0} from {1} - {2} @ {3:C} per week", invoiceDetail.Rate.FeeRate.RateDescription,
+                      invoiceDetail.Rate.EffectiveDate.ToString("dd/MM/yyyy"), invoiceDetail.Rate.ClosingDate.HasValue && invoiceDetail.Rate.ClosingDate.Value.Date <= invoiceDetail.ToDate.Date ? invoiceDetail.Rate.ClosingDate.Value.ToString("dd/MM/yyyy") : "to date", invoiceDetail.Rate.RateAmount)  <br />
+                    </td>
+                }
+                <td style="text-align: right; vertical-align: top;">
+                    @string.Format("{0:C}", invoiceDetail.TotalPlusVAT)
+                </td>
+            </tr>
+        }
+        @foreach (FeeInvoiceDetailModel invoiceDetail in monthlyInvoiceDetails)
+        {
+            <tr>
+                <td>
+                    @if (weeklyInvoiceDetails.Count() == 1 && Model.Fee.PaymentTerm == PaymentTerm.Monthly)
+                    {
+                    <span> @string.Format("{0} Fees payable for the month of", invoiceDetail.Rate.FeeRate.RateDescription) </span>
+                    <b>
+                        @string.Format("{0}", Model.InvoiceDate.ToString("MMMM"))
+                    </b>
+                    <span>at the rate of @string.Format("{0:C} {1}", invoiceDetail.Rate.RateAmount, "a week")</span>
+                    <br />
+                    <span>
+                        @string.Format("{0} days at the daily rate of {1:c}", invoiceDetail.NoOfDays, invoiceDetail.Rate.RateAmount / invoiceDetail.NoOfDays)
+                    </span>
+                    }
+                    else
+                    {
+                    <span> @string.Format("{0} Fees payable for the period from", invoiceDetail.Rate.FeeRate.RateDescription) </span>
+                    <b>
+                        @string.Format("{0} - {1}", invoiceDetail.FromDate.ToString("dd/MM/yyyy"), invoiceDetail.ToDate.ToString("dd/MM/yyyy"))
+                    </b>
+                    <span>
+                        at the rate of @string.Format("{0:C} {1}", invoiceDetail.Rate.RateAmount, "a week")
+                    </span>
+                    <br />
+                    <span>
+                        @string.Format("{0} days at the daily rate of {1:c}", invoiceDetail.NoOfDays, invoiceDetail.Rate.RateAmount / DateTime.DaysInMonth(invoiceDetail.ToDate.Year, invoiceDetail.ToDate.Month)) )
+                    </span>
+                    }
+                </td>
+                @if (IsRatesApplied)
+                {
+                    <td>
+                        @string.Format("{0} from {1} - {2} @ {3:C} per month", invoiceDetail.Rate.FeeRate.RateDescription,
+                      invoiceDetail.Rate.EffectiveDate.ToString("dd/MM/yyyy"), invoiceDetail.Rate.ClosingDate.HasValue && invoiceDetail.Rate.ClosingDate.Value.Date <= invoiceDetail.ToDate.Date ? invoiceDetail.Rate.ClosingDate.Value.ToString("dd/MM/yyyy") : "to date", invoiceDetail.Rate.RateAmount)  <br />
+                    </td>
+                }
+                <td style="text-align: right; vertical-align: top;">
+                    @string.Format("{0:C}", invoiceDetail.TotalPlusVAT)
+                </td>
+            </tr>
+        }
+        @foreach (IGrouping<DateTime, FeeInvoiceDetailModel> invoiceDetailGroup in dailyInvoiceGroup)
+        {
+            decimal groupTotal = 0;
+            FeeInvoiceDetailModel invoiceDetailTemp = invoiceDetailGroup.Count() > 0 ? invoiceDetailGroup.First() : new FeeInvoiceDetailModel();
+            <tr>
+                <td>
+                    <span>
+                        @string.Format("{0} {1} - {2}", invoiceDetailTemp.Rate.FeeRate.RateDescription, invoiceDetailGroup.Key.ToString("dd/MM/yyyy"), invoiceDetailTemp.ToDate.ToString("dd/MM/yyyy"))
+                    </span>
+                    <table border="0" cellpadding="3"  style="border: 0px;width:100%;">
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in invoiceDetailGroup)
+                        {
+                            groupTotal += invoiceDetail.TotalPlusVAT;
+                            <tr>
+                                <td style="text-align:left;border:0px;">
+                                    @string.Format("{0} {1} @ daily rate of {2:c} ", invoiceDetail.NoOfDays,
+                         invoiceDetail.Rate.DayPremium == DayPremium.Weekday ? "Weekdays" : invoiceDetail.Rate.DayPremium == DayPremium.Weekend ? "Weekends" : invoiceDetail.Rate.DayPremium == DayPremium.Bankholiday ? "Bank holidays" : string.Empty,
+                         invoiceDetail.Rate.RateAmount)
+                                </td>
+                                <td style="text-align: right; border: 0px;">
+                                    @string.Format("{0:c}", invoiceDetail.TotalPlusVAT)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+                @if (IsRatesApplied)
+                {
+                    <td>
+                        <span>
+                            @string.Format("{0} from {1} - {2}", invoiceDetailTemp.Rate.FeeRate.RateDescription, invoiceDetailTemp.Rate.EffectiveDate.ToString("dd/MM/yyyy"), invoiceDetailTemp.Rate.ClosingDate.HasValue && invoiceDetailTemp.Rate.ClosingDate.Value.Date <= invoiceDetailTemp.ToDate.Date ? invoiceDetailTemp.Rate.ClosingDate.Value.ToString("dd/MM/yyyy") : "to date")
+                        </span>
+                        <br />
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in invoiceDetailGroup)
+                        {
+                        <span>
+                            @string.Format("{0:C} per {1}", invoiceDetail.Rate.RateAmount, invoiceDetail.Rate.DayPremium)
+                        </span><br />
+                        }
+                    </td>
+                }
+                <td style="text-align: right; vertical-align: top; ">
+                    @string.Format("{0:c}", groupTotal)
+                </td>
+            </tr>
+        }
+        @foreach (var invoiceDetailGroup in hourlyInvoiceGroup.OrderBy(inv => inv.Key.FromDate).ThenByDescending(inv => inv.Key.ToDate))
+        {
+            FeeInvoiceDetailModel invoiceDetailTemp = invoiceDetailGroup.Count() > 0 ? invoiceDetailGroup.First() : new FeeInvoiceDetailModel();
+            <tr>
+                <td>
+                    <span>
+                        @string.Format("{0} {1} - {2}", invoiceDetailTemp.Rate.FeeRate.RateDescription, invoiceDetailGroup.Key.FromDate.ToString("dd/MM/yyyy"), invoiceDetailGroup.Key.ToDate.ToString("dd/MM/yyyy"))
+                    </span>
+                    @{decimal groupTotal = 0;
+                        IEnumerable<FeeInvoiceDetailModel> weekDayInvoiceDetails = invoiceDetailGroup.Where(inv => inv.Rate.DayPremium == DayPremium.Weekday && inv.FromDate == invoiceDetailGroup.Key.FromDate && inv.ToDate == invoiceDetailGroup.Key.ToDate).OrderBy(inv => inv.Rate.TimePremium);//.ToList();
+                    }
+                    <table border="0" class="tblHourlyInvoiceDetails" style="border:none;">
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in weekDayInvoiceDetails)
+                        {
+                            groupTotal += invoiceDetail.TotalPlusVAT;
+                            <tr>
+                                <td>
+                                    <span>
+                                        @string.Format("{0} - {1} {2}s for {3} hours", invoiceDetail.Rate.DayPremium, invoiceDetail.NoOfDays, invoiceDetail.Rate.TimePremium, invoiceDetail.NoOfHours)
+                                        <br />
+                                        @string.Format("{0:c} per hour", invoiceDetail.Rate.RateAmount)
+                                    </span>
+                                </td>
+                                <td style="padding-left:10px;text-align:right;">
+                                    @string.Format("{0:c}", invoiceDetail.TotalPlusVAT)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    @{IEnumerable<FeeInvoiceDetailModel> weekEndInvoiceDetails = invoiceDetailGroup.Where(inv => inv.Rate.DayPremium == DayPremium.Weekend).OrderBy(inv => inv.Rate.TimePremium);//.ToList();
+                    }
+                    <table class="tblHourlyInvoiceDetails" style="border:none;">
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in weekEndInvoiceDetails)
+                        {
+                            groupTotal += invoiceDetail.TotalPlusVAT;
+                        <tr>
+                            <td>
+                                <span>
+                                    @string.Format("{0} - {1} {2}s for {3} hours", invoiceDetail.Rate.DayPremium, invoiceDetail.NoOfDays, invoiceDetail.Rate.TimePremium, invoiceDetail.NoOfHours)
+                                    <br />
+                                    @string.Format("{0:c} per hour", invoiceDetail.Rate.RateAmount)
+                                </span>
+                            </td>
+                            <td style="padding-left:10px;text-align:right;">
+                                @string.Format("{0:c}", invoiceDetail.TotalPlusVAT)
+                            </td>
+                        </tr>
+                        }
+                    </table>
+                    @{
+                        IEnumerable<FeeInvoiceDetailModel> bankHolidayInvoiceDetails = invoiceDetailGroup.Where(inv => inv.Rate.DayPremium == DayPremium.Bankholiday).OrderBy(inv => inv.Rate.TimePremium);//.ToList();
+                    }
+                    <table class="tblHourlyInvoiceDetails" style="border:none;">
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in bankHolidayInvoiceDetails)
+                        {
+                            groupTotal += invoiceDetail.TotalPlusVAT;
+                        <tr>
+                            <td>
+                                <span>
+                                    @string.Format("{0} - {1} {2}s for {3} hours", invoiceDetail.Rate.DayPremium, invoiceDetail.NoOfDays, invoiceDetail.Rate.TimePremium, invoiceDetail.NoOfHours)
+                                    <br />
+                                    @string.Format("{0:c} per hour", invoiceDetail.Rate.RateAmount)
+                                </span>
+                            </td>
+                            <td style="padding-left:10px;text-align:right;">
+                                @string.Format("{0:c}", invoiceDetail.TotalPlusVAT)
+                            </td>
+                        </tr>
+
+                        }
+                    </table>
+                </td>
+                @*<td>
+                        <span>
+                            @string.Format("{0} from {1} - {2}", invoiceDetailTemp.Rate.FeeRate.RateDescription, invoiceDetailTemp.Rate.EffectiveDate.ToString("dd/MM/yyyy"), invoiceDetailTemp.Rate.ClosingDate.HasValue && invoiceDetailTemp.Rate.ClosingDate.Value.Date <= invoiceDetailTemp.ToDate.Date ? invoiceDetailTemp.Rate.ClosingDate.Value.ToString("dd/MM/yyyy") : "to date")
+                        </span>
+                        <br />
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in invoiceDetailGroup.OrderBy(inv => inv.Rate.DayPremium).ThenBy(inv => inv.Rate.TimePremium))
+                        {
+                            <span>
+                                @string.Format("{0} - {1} {2:C} per Hour", invoiceDetail.Rate.DayPremium, invoiceDetail.Rate.TimePremium, invoiceDetail.Rate.RateAmount)
+                            </span><br />
+                        }
+                    </td>*@
+                @if (IsRatesApplied)
+                {
+                    <td>
+                        <span>
+                            @string.Format("{0} from {1} - {2}", invoiceDetailTemp.Rate.FeeRate.RateDescription, invoiceDetailTemp.Rate.EffectiveDate.ToString("dd/MM/yyyy"), invoiceDetailTemp.Rate.ClosingDate.HasValue && invoiceDetailTemp.Rate.ClosingDate.Value.Date <= invoiceDetailTemp.ToDate.Date ? invoiceDetailTemp.Rate.ClosingDate.Value.ToString("dd/MM/yyyy") : "to date")
+                        </span>
+                        <br />
+                        @foreach (FeeInvoiceDetailModel invoiceDetail in invoiceDetailGroup.OrderBy(inv => inv.Rate.DayPremium).ThenBy(inv => inv.Rate.TimePremium))
+                        {
+                            <span>
+                                @string.Format("{0} - {1} {2:C} per Hour", invoiceDetail.Rate.DayPremium, invoiceDetail.Rate.TimePremium, invoiceDetail.Rate.RateAmount)
+                            </span><br />
+                        }
+                    </td>
+                }
+                <td style="text-align: right; vertical-align: top;">
+                    @string.Format("{0:c}", groupTotal)
+                </td>
+            </tr>
+                        }
+        <tfoot>
+            <tr>
+                <td style="padding-top: 15px; font-weight: bold; font-size: large;">Total</td>
+                <td colspan="@(IsRatesApplied ? 2 : 1)" style="text-align: right; vertical-align: top; padding-top: 15px; font-weight: bold; font-size: large;">@string.Format("{0:c}", Model.Amount)</td>
+            </tr>
+        </tfoot>
+    </table>
+}

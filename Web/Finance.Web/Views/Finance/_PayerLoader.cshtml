@@ -1,0 +1,37 @@
+﻿<input type="text" class="search-textbox" name=@(ViewData["PayerControlId"] == null ? "PayerName" : ViewData["PayerControlId"].ToString()) id="PayerName" value="" />
+<input type="hidden" name=@(ViewData["PayerValueControlId"] == null ? "payer-return-id" : ViewData["PayerValueControlId"].ToString()) id="PayerValueControlId" value="0" />
+<script type="text/javascript">
+    var PayerReturnId = @Html.Raw(string.Format("'{0}'", ViewData["PayerValueControlId"] != null ? ViewData["PayerValueControlId"].ToString() : "payer-return-id"));
+    var PayerName = @Html.Raw(string.Format("'{0}'", ViewData["PayerName"] != null ? ViewData["PayerName"].ToString() : ""));
+    var ParentId = @Html.Raw(string.Format("'{0}'", ViewData["ParentId"] != null ? ViewData["ParentId"].ToString() : String.Empty));
+    var Url = @Html.Raw(string.Format("'{0}/FinanceApi/Payers?searchText='", ViewBag.FinanceApiService));
+    $(document).ready(function () {
+        $('#PayerName').val(PayerName);
+        $('#PayerName').autocomplete({
+            source: function (request, response) {
+                $('#PayerName').addClass('loadinggif');
+                $.ajax({url: Url + $("#PayerName").val(),type: 'GET',cache: false,dataType: 'json',
+                    success: function (json) {
+                        $('#PayerName').removeClass('loadinggif');
+                        response($.map(json, function (data, id) {return {label: data.name,value: data.id,};
+                        }));
+                    },
+                    error: function (xmlHttpRequest, textStatus, errorThrown) {$('#PayerName').removeClass('loadinggif');console.log('some error occured', textStatus, errorThrown);}
+                });
+            },
+            minLength: 2,
+            open: function(e) {valid = false;},
+            focus: function(event, ui) { event.preventDefault(); $(this).val(ui.item.label);},
+            close: function(e){if (!valid){ $('#PayerName').val('');}},
+            change: function (event, ui) {if (!ui.item) {this.value = '';}else{$(this).val(ui.item.label);$('#PayerValueControlId').val(ui.item.value);}},
+            select: function (event, ui) {
+                valid=true;
+                $('#PayerName').val(ui.item.label);
+                $('#PayerValueControlId').val(ui.item.value);
+                return false;
+            }
+        });
+        $('#PayerName').autocomplete("option", "appendTo", ParentId);
+        $("#PayerName").bind('input propertychange', function() {if (this.value == ""){$('#PayerValueControlId').val("");}});
+    });
+</script>

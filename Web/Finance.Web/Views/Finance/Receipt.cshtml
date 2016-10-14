@@ -1,0 +1,183 @@
+﻿@model Finance.Web.Model.ReceiptViewModel
+<style>
+    table, tr, th, td {
+        border: none;
+    }
+</style>
+<script src="~/lib/dist/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
+@Html.Partial("_DataLoader")
+<h3><img src="~/images/receipt.png" style="margin-right:5px;" />Receipt</h3>
+<div class="row" style="margin-left: 10px; margin-top: 15px;">
+    <div class="col-md-12" style="border: 1px solid; padding-top: 15px; padding-bottom: 5px;">
+        <div id="receiptSearchErrorwrap" class="row" style="margin-bottom:5px;color:red;width:auto;height:auto;">
+        </div>
+        @using (Html.BeginForm("Receipt", "Finance", FormMethod.Post, new { id = "receiptListForm", @class = "form-inline", enctype = "multipart/form-data" }))
+        {
+            @Html.HiddenFor(d => d.Pagination.PageSize)
+            @Html.Hidden("Reset", Model.Reset)
+            <div class="form-group">
+                <label for="ReceiptPayer">Payer Name</label>
+                @Html.TextBoxFor(d => d.PayerName, string.Empty, new { @class = "receiptPayerName form-control", @readonly = "readonly", style = "color:black;width:300px;" })
+                @Html.HiddenFor(d => d.PayerId, new { @class = "receiptPayerId" })
+                <button type="button" id="btnPayerNameLookupReceiptSearch" class="btn btn-default" style="font-weight:bold;">...</button>
+                <label for="FromDate">From Date</label>
+                @Html.TextBoxFor(d => d.FromDate, new { @class = "form-control", style = "color:black;width:130px;" })
+                <label for="ToDate">To Date</label> @Html.TextBoxFor(d => d.ToDate, new { @class = "form-control", style = "color:black;width:130px;" })
+                <input type="image" id="receiptSearch" src="~/images/search.png" class="btn" style="height:48px;cursor:pointer;padding-top:5px;" />
+                <input type="image" id="receiptSearchReset" src="~/images/reset.png" class="btn" style="height:48px;cursor:pointer;padding-top:5px;" />
+                <input type="image" id="addReceipt" src="~/images/add-plus.png" class="btn" style="height:48px;cursor:pointer;padding-top:5px;" />
+            </div>
+            if (Model.Receipts != null && Model.Receipts.Count() > 0)
+            {
+                <table style="width:100%;">
+                    <thead>
+                        <tr style="color:white;background-color:grey">
+                            <th>Receipt No</th>
+                            <th>Date</th>
+                            <th>Payer</th>
+                            <th style="text-align:right;padding-right:10px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Finance.Web.Model.ReceiptModel receipt in Model.Receipts)
+                        {
+                            <tr>
+                                <td style="vertical-align:top;">
+                                    <a onclick='javascript: return false;' class="ReceiptViewByReceiptNo" data-app-id="@receipt.ReceiptNo" style="cursor:pointer;text-decoration:underline;">
+                                        @string.Format("{0}{1}{2}", receipt.RefPrefix, receipt.ReceiptNo,
+                                receipt.CreditNoteId.HasValue && receipt.CreditNote != null ? string.Format(" - {0}{1}", receipt.CreditNote.RefPrefix, receipt.CreditNote.CreditNoteNo) : "")
+                                    </a>
+                                </td>
+                                <td style="vertical-align:top;">@receipt.ProcessedDate.Date.ToString("dd/MM/yyyy")</td>
+                                <td style="padding-bottom:19px;">
+                                    @receipt.Payer.Name
+                                    @*<table style="width:80%;border:1px solid;">
+                                        <tr>
+                                            <th>Invoice</th>
+                                            <th>Date</th>
+                                            <th style="text-align:right;">Total</th>
+                                            <th style="text-align:right;">Total Received</th>
+                                            <th style="text-align:right;">Due</th>
+                                        </tr>
+                                        @foreach (Finance.Web.Model.ReceiptInvoiceModel receiptInvoice in receipt.ReceiptInvoices)
+                                        {
+                                            decimal totalAmountReceived = receiptInvoice.Invoice.ReceiptInvoices.Where(r => r.Receipt.ReceiptNo <= receipt.ReceiptNo).Sum(r => ((decimal?)r.AmountReceived) ?? 0);
+                                            totalAmountReceived = totalAmountReceived + receiptInvoice.AmountReceived;
+                                            <tr>
+                                                <td>@receiptInvoice.Invoice.InvoiceNo</td>
+                                                <td>@receiptInvoice.Invoice.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                                                <td style="text-align:right;">@string.Format("{0:c}", receiptInvoice.Invoice.Amount)</td>
+                                                <td style="text-align:right;">@string.Format("{0:c}", totalAmountReceived)</td>
+                                                <td style="text-align:right;">@string.Format("{0:c}", receiptInvoice.Invoice.Amount - totalAmountReceived)</td>
+                                            </tr>
+                                        }
+                                    </table>*@
+                                </td>
+                                <td style="text-align:right;padding-right:10px;vertical-align:top;">
+                                    @string.Format("{0:c}", receipt.Amount)
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td colspan="5">
+                                @{ Html.ViewData.TemplateInfo.HtmlFieldPrefix = "Pagination"; }
+                                @Html.Partial("_PaginationFormSubmit", Model.Pagination, new ViewDataDictionary(Html.ViewData))
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            }
+        }
+    </div>
+</div>
+@Html.Partial("_Receipt", new ViewDataDictionary(Html.ViewData))
+<script>
+    $(document).ready(function () {
+        var validator;
+        $("#Reset").val("False");
+        function configValidationRules() {
+            Rate_Rules = { FromDate: { date: true }, ToDate: { date: true } };
+            Rate_Messages = { FromDate: { date: "Please enter valid from date" }, ToDate: { date: "Please enter valid To date" } };
+            $('#receiptListForm').removeData('validator');
+            validator = new jQueryValidatorWrapper("receiptListForm",
+                Rate_Rules, Rate_Messages, "receiptSearchErrorwrap");
+        }
+        function validateDate() {
+            var fromDate = new Date($("#FromDate").datepicker("getDate"));
+            var ToDate = new Date($("#ToDate").datepicker("getDate"));
+            if (fromDate > ToDate) {
+                alert("From date shoud be less than to date");
+                return false;
+            }
+            return true;
+        }
+        $("#receiptSearch").click(function (e) {
+            configValidationRules();
+            if (!validateDate()) { e.preventDefault(); return; }
+            if (!validator.validate()) { e.preventDefault(); return; }
+        });
+        $("#receiptSearchReset").click(function (e) {
+            $(".receiptPayerName").val("");
+            $(".receiptPayerId").val("");
+            $("#Reset").val("True");
+        });
+        $("#addReceipt").click(function (e) {
+            e.preventDefault();
+            $(".receipt-create-dialog").data("Mode", "NEW");
+            $(".receipt-create-dialog").dialog("open");
+        });
+        $("#btnPayerNameLookupReceiptSearch").click(function (e) {
+            $(".payer-lookup-dialog").data("Parent", "Search_Receipt");
+            $(".payer-lookup-dialog").dialog("open");
+        });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) {
+            if ($(".payer-lookup-dialog").data("Parent") == "Search_Receipt") {
+                $(".payer-lookup-dialog").data("Parent", null);
+                $(".receiptPayerName").val($(".payer-lookup-dialog").data("payerName"));
+                $(".receiptPayerId").val($(".payer-lookup-dialog").data("payerId"));
+            }
+        });
+        $("#FromDate").datepicker({ dateFormat: 'dd/mm/yy', autoClose: true })
+        .on("change", function (e) {
+            //var effectDate = new Date($(this).datepicker("getDate"));
+            //$(this).datepicker("setDate", effectDate);
+        });
+        $("#ToDate").datepicker({ dateFormat: 'dd/mm/yy', autoClose: true })
+        .on("change", function (e) {
+
+            //var effectDate = new Date($(this).datepicker("getDate"));
+            //alert(effectDate);
+        });
+        $('body').on('click', 'a.ReceiptViewByReceiptNo', function (e) {
+            e.preventDefault();
+            var receiptNo = $(this).attr("data-app-id");
+            if (receiptNo) {
+                e.preventDefault();
+                $(".receipt-view-dialog").data("Mode", "VIEW");
+                $(".receipt-view-dialog").data("PayerId", null);
+                $(".receipt-view-dialog").data("ReceiptNo", receiptNo);
+                $(".receipt-view-dialog").dialog("open");
+            }
+        });
+        $(".receipt-view-dialog").on("dialogclose", function (event, ui) {
+            var RECEIPTVIEW_MODE = $(".receipt-view-dialog").data("Mode");
+            switch (RECEIPTVIEW_MODE) {
+                case "View":
+                case "VIEW":
+                    return;
+                    break;
+                case "ADDED":
+                case "Added":
+                    location.reload();
+                    break;
+                default:
+                    location.reload();
+                    break;
+            }
+        });
+    });
+</script>

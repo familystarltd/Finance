@@ -1,0 +1,20 @@
+﻿@model Finance.Web.Models.BusinessViewModel
+@{
+    ViewBag.TitleHeader = "Family Star Ltd";
+}
+<div class="" style="margin-top:18px;padding-top:8px; width:100%;">
+    @foreach (Finance.Web.Models.Business business in Model.Businesses)
+    {
+        <div class="row" style="width:99%;margin-left:5px;margin-right:0px;margin-bottom:25px;padding-top:10px; box-shadow: 3px 3px 3px 3px grey;background-color:aliceblue;">
+            <div class="col-md-3" style="vertical-align:middle;">
+                @if (business.Logo == null || business.Logo.Length <= 0)
+                {<h3 style="font-style:oblique;text-shadow: 5px 5px 5px 5px grey;">@business.Name</h3>@*<img src="~/Content/Images/nophoto.png" id="businessLogo" style="width: 100px; height: 100px;" />*@}
+                else
+                {<div style="box-shadow: 5px 5px 5px 5px grey;margin:0px;padding:0px;width:95%;"> @Html.Image(business.Name, business.Logo) </div>}
+            </div>
+            <div class="col-md-9" style="margin-top:3px;">
+                <div class="row" style="margin-left:5px; margin-bottom:25px;box-shadow: 5px 5px 5px 5px grey;width:100%;"> @Html.Partial("_ControlPanelFinance", business)</div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,64 @@
+﻿@model Finance.Web.Model.CustomerModel
+@{
+    ViewBag.TitleHeader = "DisbursementInvoice";
+}
+<h2>Expenses Invoice</h2>
+@Scripts.Render("~/bundles/jquery/validation")
+<div class="row">
+    <div class="col-md-12" style="margin-top: 5px;">
+        <div id="tabs" style="font-size:small;">
+            @Html.ValidationSummary(true)
+            @using (Html.BeginForm("GenerateInvoice", "Finance", FormMethod.Post))
+            {
+                <div class="row">
+                    <div class="col-xs-2">
+                        <h4>Customer</h4>
+                    </div>
+                    <div class="col-md-6">
+                        @Html.Partial("_CustomersNameLoader", new ViewDataDictionary { { "Action", "Expense" }, { "CustomerValueControlName", "DisbursementViewModel.CustomerId" }, { "CustomerValueId", Model != null ? Model.Id : Guid.Empty }, { "CustomerName", Model != null ? Model.PersonalInfo.FullName : string.Empty } })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-2">
+                        <h4>Processed Date</h4>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" name="ProcessedDate" id="ProcessedDate" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-offset-2 col-xs-2">
+                        <input type="image" id="btngenerate" alt="generate" src="~/Content/Images/generate.png" />
+                    </div>
+                </div>
+            }
+            <ul>
+                <li><a onclick="return false;" href="#tabs-1">Generate Expense Invoice</a></li>
+                <li><a onclick="return false;" href="#tabs-2">Customer Expenses List</a></li>
+            </ul>
+            <div id="tabs-1">
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-6" style="margin-left: 10px; margin-top: 1px;">
+                                <h3>Expenses Invoice</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tabs-2">
+                <p><h3>Customer Expenses List</h3></p>
+                <div class="row" style="background-color: #fafafa; border: 1px solid #e7e7e7;margin-top:10px;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () { $("form").removeAttr("novalidate"); });
+    $(function () { $("#ProcessedDate").datepicker({ dateFormat: 'dd-mm-yy' }); });
+    $(function () { $("#ToDate").datepicker({ dateFormat: 'dd-mm-yy' }); });
+    $(function () { $("#tabs").tabs(); });
+</script>

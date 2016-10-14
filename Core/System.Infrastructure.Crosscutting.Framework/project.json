@@ -4,7 +4,7 @@
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "System.Reflection.TypeExtensions": "4.1.0",
-    "AutoMapper": "5.0.0",
+    "AutoMapper": "5.1.1",
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0",
     "System.ComponentModel.Annotations": "4.1.0",
     "System.ComponentModel.TypeConverter": "4.1.0",

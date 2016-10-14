@@ -46,7 +46,10 @@
         public virtual void Add(TEntity item)
         {
             if (item != (TEntity)null)
+            {
+                object obj = GetSet();
                 GetSet().Add(item); // add new item in this set
+            }
             else
             {
                 LoggerFactory.CreateLog()
@@ -54,6 +57,18 @@
 
             }
         }
+        //public void Add<T>(T item) where T : Entity
+        //{
+        //    if (item != (T)null)
+        //    {
+        //        _UnitOfWork.Attach<T>(item);
+        //    }
+        //    else
+        //    {
+        //        LoggerFactory.CreateLog()
+        //                  .LogInfo(Messages.info_CannotModifyNullEntity, typeof(TEntity).ToString());
+        //    }
+        //}
 
         /// <summary>
         /// <see cref="CareSystem.Domain.Seedwork.IRepository{TValueObject}"/>
@@ -90,7 +105,16 @@
                           .LogInfo(Messages.info_CannotModifyNullEntity, typeof(TEntity).ToString());
             }
         }
-
+        public void SetModified<T>(T item) where T : Entity
+        {
+            if (item != (T)null)
+                _UnitOfWork.SetModified<T>(item);
+            else
+            {
+                LoggerFactory.CreateLog()
+                          .LogInfo(Messages.info_CannotModifyNullEntity, typeof(TEntity).ToString());
+            }
+        }
         /// <summary>
         /// <see cref="CareSystem.Domain.Seedwork.IRepository{TValueObject}"/>
         /// </summary>

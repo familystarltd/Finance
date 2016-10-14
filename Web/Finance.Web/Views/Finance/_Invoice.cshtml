@@ -1,0 +1,420 @@
+﻿@Html.Partial("_InvoiceArticle", new Finance.Web.Models.HtmlEditor(), new ViewDataDictionary(Html.ViewData))
+@*@Html.Partial("_InvoiceArticle", new Finance.Web.Models.HtmlEditor(), new ViewDataDictionary(Html.ViewData)
+                               {
+                                   TemplateInfo = new System.Web.Mvc.TemplateInfo
+                                   {
+                                       HtmlFieldPrefix = "HtmlEditor"
+                                   }
+                               })*@
+<script src="~/lib/dist/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
+<style>
+    table#invoice {
+        border: none;
+    }
+
+        table#invoice tr {
+            border: none;
+        }
+
+        table#invoice td {
+            border: none;
+        }
+
+        table#invoice th {
+            border: none;
+        }
+</style>
+<div class="invoice-dialog" id="invoice-create" title="Create Invoice" style="display:none;">
+    <div id="invoiceErrorwrap" class="row" style="margin-bottom:5px;color:red;width:auto;height:auto;">
+    </div>
+    <form id="invoiceForm" class="form-inline" role="form">
+        <input type="hidden" id="InvoiceId" />
+        <div class="row">
+            <div class="col-md-7">
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2">
+                        <label for="InvoiceCustomerName">Customer</label>
+                    </div>
+                    <div class="col-md-10 form-group">
+                        <input type="text" id="InvoiceCustomerName" name="InvoiceCustomerName" style="width: 300px; color: black;" class="invoiceCustomerName form-control" readonly="readonly" />
+                        <input type="hidden" id="InvoiceCustomerId" />
+                        <button type="button" id="btnCustomerNameLookupInvoice" class="btn btn-default" style="font-weight:bold;cursor:pointer;">...</button>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2">
+                        <label for="InvoicePayerName">Payer</label>
+                    </div>
+                    <div class="col-md-10 form-group">
+                        <input type="text" id="InvoicePayerName" name="InvoicePayerName" style="width: 300px; color: black;" class="invoicePayerName form-control" readonly="readonly" />
+                        <input type="hidden" id="InvoicePayerId" />
+                        <button type="button" id="btnPayerNameLookupInvoice" class="btn btn-default" style="font-weight:bold;">...</button>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-2">
+                        <label for="InvoicePayRef">Ref</label>
+                    </div>
+                    <div class="col-md-10 form-group">
+                        <input type="text" id="InvoicePayRef" name="InvoicePayRef" style="width: 300px; color: black;" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="row">
+                    <div class="col-md-12 form-group" style="text-align:right;float:right;">
+                        <label for="txtInvoiceRef">Invoice Ref </label><input type="text" id="txtInvoiceRef" name="txtInvoiceRef" style="width: 150px; color: black;" class="form-control" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-12 form-group" style="text-align:right;float:right;">
+                        <label for="InvoiceDate">Invoice Date </label>
+                        <input type="text" id="InvoiceDate" name="InvoiceDate" class="form-control" style="width:150px;" />
+                    </div>
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    <div class="col-md-12 form-group" style="text-align:right;float:right;">
+                        <label for="InvoiceDueDate">Due Date </label>
+                        <input type="text" id="InvoiceDueDate" name="InvoiceDueDate" class="form-control" style="width:150px;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:5px;">
+            <div class="col-md-12 form-group">
+                <table id="invoice" class="NoBorder" style="width: 98%;">
+                    <tr>
+                        <td colspan="2">
+                            <span style="font-weight:bold;">Invoice Article<input type="image" id="addInvoiceArticle" src="~/images/add-plus.png" class="btn" style="height:32px; cursor:pointer;" /></span>
+                        </td>
+                    </tr>
+                    <tr class="header">
+                        <th colspan="1" style="width:9%;">Article</th>
+                        <th style="width:75%;text-align:left;"></th>
+                        <th style="width:14%;text-align:right;">Amount</th>
+                    </tr>
+                </table>
+                <div style="height:350px;overflow-y:scroll;">
+                    <table id="invoice" class="NoBorder" style="width: 100%;">
+                        <tbody id="tblBodyInvoices"></tbody>
+                    </table>
+                </div>
+                <table id="invoice" class="NoBorder" style="width: 98%;">
+                    <tr>
+                        <td colspan="3" style="text-align: right;">
+                            <div class="form-group" style="float:left;">
+                                <input type="image" id="invoiceSave" src="~/images/Save.png" style="width:32px;height:32px;" />
+                                <input type="image" id="invoiceReset" src="~/images/reset.png" style="height:32px;cursor:pointer;padding-top:0px;" />
+                                <img src="~/images/exit.png" id="invoiceExit" class="invoiceExit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+                            </div>
+                            Total :<input type="text" id="invoiceTotalDueAmount" disabled="disabled" style="font-weight:bold; width:200px;text-align:right;" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbInvoiceUpdate = new System.Text.StringBuilder();
+          sbInvoiceUpdate.Append("'");
+          sbInvoiceUpdate.Append(ViewBag.FinanceApiService);
+          sbInvoiceUpdate.Append("/FinanceApi/Invoice");
+          sbInvoiceUpdate.Append("'");}
+        var invoiceUpdateUrl = @Html.Raw(sbInvoiceUpdate.ToString()) +'';
+
+        @{System.Text.StringBuilder sbInvoiceGet = new System.Text.StringBuilder();
+          sbInvoiceGet.Append("'");
+          sbInvoiceGet.Append(ViewBag.FinanceApiService);
+          sbInvoiceGet.Append("/FinanceApi/Invoices/");
+          sbInvoiceGet.Append("'");}
+        var invoiceGetUrl = @Html.Raw(sbInvoiceGet.ToString()) +'';
+        var Invoice_Validator;
+        var ArticleId = 0;
+        var PayerName;
+        var PayerId;
+        var CustomerName;
+        var CustomerId;
+        var InvoiceId;
+        var InvoiceRef;
+        var DefaultInvoiceRef = "------NEW------";
+        var InvoiceArticleId = 0;
+        var InvoiceType = @Html.Raw((int)Finance.Web.Model.InvoiceTypeModel.Manual) +'';
+        var NewInvoiceId = "@Guid.Empty";
+        var Invoice = {};// Create empty JSON invoice object
+        var InvoiceDate = new Date();
+        var InvoiceDueDate = new Date();
+        function clearInvoiceForm() {
+            $("#tblBodyInvoices").empty();
+            $("#InvoicePayRef").val("");
+            $("#invoiceTotalDueAmount").val("");
+            $("#InvoicePayerName").val("");
+            $("#InvoicePayerId").val("");
+            $("#InvoiceCustomerName").val("");
+            $("#InvoiceCustomerId").val("");
+            $("#InvoiceId").val("");
+            InvoiceRef = DefaultInvoiceRef;
+            $("#txtInvoiceRef").val(InvoiceRef);
+            $("#InvoiceDate").datepicker("setDate", new Date());
+            InvoiceDueDate = $("#InvoiceDate").datepicker("getDate");
+            InvoiceDueDate.setMonth(InvoiceDueDate.getMonth() + 1);
+            $('#InvoiceDueDate').datepicker('setDate', InvoiceDueDate);
+            ArticleId = 0;
+            PayerName = "";
+            PayerId = "";
+            CustomerName = "";
+            CustomerId = "";
+            InvoiceId = "";
+            InvoiceArticleId = 0;
+            Invoice = {};// Create empty JSON invoice object
+            InvoiceDate = new Date();
+        }
+        function configInvoiceValidationRules() {
+            var Invoice_Rules = {
+                InvoicePayerName: { required: true },
+                InvoiceCustomerName: { required: true },
+                InvoiceDate: { required: true }
+            };
+            var Invoice_Messages = {
+                InvoicePayerName: { required: "Please select Payer for this invoice" },
+                InvoiceCustomerName: { required: "Please select Customer for this invoice" },
+                InvoiceDate: { required: "Please enter vaid date" }
+            };
+            $('#invoiceForm').removeData('validator');
+            Invoice_Validator = new jQueryValidatorWrapper("invoiceForm",
+                Invoice_Rules, Invoice_Messages, "invoiceErrorwrap");
+        }
+        function loadInvoice(InvoiceNo) {
+            var URL = invoiceGetUrl + InvoiceNo;
+            var requestInvoice = $.ajax({
+                type: "GET", url: URL, contentType: "application/json", datatype: "json",
+                success: function (invoiceData) {
+                    if (!$.isNullOrEmpty(invoiceData)) {
+                        Invoice = invoiceData;
+                        $("#InvoiceId").val(Invoice.id);
+                        $("#txtInvoiceRef").val(Invoice.invoiceNo);
+                        InvoiceRef = Invoice.invoiceNo;
+                        $("#InvoicePayerName").val(Invoice.payer.name);
+                        $("#InvoicePayerId").val(Invoice.payerId);
+                        $("#InvoiceCustomerId").val(Invoice.customerId);
+                        $("#InvoiceCustomerName").val(Invoice.customer.personalInfo.fullName);
+                        $("#InvoicePayRef").val(Invoice.payContactReference);
+                        $('#InvoiceDate').datepicker('setDate', new Date(Invoice.processedDate));
+                        $('#InvoiceDueDate').datepicker('setDate', new Date(Invoice.dueDate));
+                        $("#invoiceTotalDueAmount").val(Invoice.amount);
+                        loadInvoiceDetails();
+                    }
+                }
+            });
+        }
+        function loadInvoiceDetails() {
+            var tableBody = "";
+            var total = 0;
+            $("#tblBodyInvoices").empty();
+            $.each(Invoice.invoiceDetails, function (i, invoiceDetail) {
+                tableBody += createInvoiceArticle(invoiceDetail);
+                total = parseFloat(total) + parseFloat($.toNumber(invoiceDetail.total));
+            })
+            $("#invoiceTotalDueAmount").val($.formatCurrency(total, "£"));
+            if (tableBody != "") {
+                $("#tblBodyInvoices").append(tableBody);
+            }
+        }
+        function createInvoiceArticle(invoiceDetail) {
+            return "<tr>"
+                + "<td style='width:9%;vertical-align:top;'>"
+                + "<img class='invoiceArticleDelete' src='~/images/delete.png' style='width: 16px; height: 16px;margin-right:3px;cursor:pointer;' " + "data-app-id='" + invoiceDetail.id + "'" + "/>"
+                + "<img class='invoiceArticleEdit' src='~/images/edit.png' style='width: 16px; height: 16px;cursor:pointer;' " + "data-app-id='" + invoiceDetail.id + "'" + "/>"
+                + "</td>"
+                + "<td style='width:75%;vertical-align:top;'>" + invoiceDetail.article + "</td>"
+                + "<td style='width:14%; text-align:right;vertical-align:top;'>"
+                + "<input type='text' class='currency invoiceArticleAmount' id=''" + invoiceDetail.id + "' style='width:140px; text-align:right;margin-top:3px;'" + "data-app-id='" + invoiceDetail.id + "' " + "data-app='" + $.formatCurrency(invoiceDetail.total, "£") + "'" + "value='" + $.formatCurrency(invoiceDetail.total, "£") + "'/>"
+                + "</td>"
+                + "</tr>"
+                + "<tr> <td colspan='3'><hr/></td></tr>"
+            ;
+        }
+        function saveInvoice() {
+            Invoice["invoiceType"] = InvoiceType;
+            Invoice["invoiceNo"] = InvoiceRef == DefaultInvoiceRef ? 0 : InvoiceRef;
+            Invoice["id"] = $("#InvoiceId").val();
+            Invoice["payerId"] = $("#InvoicePayerId").val();
+            Invoice["customerId"] = $("#InvoiceCustomerId").val();
+            Invoice["payContactReference"] = $("#InvoicePayRef").val();
+            Invoice["processedDate"] = $.datepicker.formatDate('yy-mm-dd', InvoiceDate);
+            Invoice["dueDate"] = $.datepicker.formatDate('yy-mm-dd', InvoiceDueDate);
+            Invoice["isManual"] = true;
+            Invoice["amount"] = parseFloat($.toNumber($("#invoiceTotalDueAmount").val()));
+            if ($.isNullOrEmpty(Invoice.invoiceDetails) || Invoice.invoiceDetails.length == 0) { alert("Please enter Invoice article"); return; }
+            var isValid = true;
+            $("input[type=text].invoiceArticleAmount").each(function () {
+                if ($.toNumber($(this).val()) <= 0) { alert("Please check invoice article amount" + '\n\n' + 'Please allocate the exact amount to invoice article by typing the amount in the Amount column.'); $(this).focus(); isValid = false; return; }
+            });
+            if (!isValid) { return; }
+            $.ajax({
+                type: "POST", url: invoiceUpdateUrl, dataType: "json", data: JSON.stringify(Invoice), contentType: "application/json",
+                success: function (Invoice) {
+                    if (!$.isNullOrEmpty(Invoice)) {
+                        window.location = '/FeeInvoiceSearchByNo?InvoiceNoSearch=' + Invoice.invoiceNo;
+                    } else { alert("Invoice has not been updated! Please try again later."); }
+                },
+                error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); }
+            }).fail(function (jqXHR, textStatus) { alert("Request failed: " + textStatus); });
+        }
+        $('body').on('keypress', '.currency', $.currenciesOnly).on('blur', '.currency', function () { $(this).val($.formatCurrency($(this).val(), "£")) });
+        $('body').on('change', '.invoiceArticleAmount', function (e) {
+            var articleId = $(this).attr("data-app-id");
+            var invoiceDetail = $.getJsonObject(Invoice.invoiceDetails, { "id": articleId });
+            if (!$.isEmptyObject(invoiceDetail)) {
+                invoiceDetail.total = parseFloat($.toNumber($(this).val()));
+            }
+            var total = 0;
+            $(Invoice.invoiceDetails).each(function (i, invoice) {
+                total = parseFloat(total) + invoice.total;
+            });
+            $("#invoiceTotalDueAmount").val($.formatCurrency(total, "£"));
+        });
+        $('body').on('click', '.invoiceArticleEdit', function (e) {
+            e.preventDefault();
+            var articleId = $(this).attr("data-app-id");
+            var invoiceDetail = $.getJsonObject(Invoice.invoiceDetails, { "id": articleId });
+            if (!$.isEmptyObject(invoiceDetail)) {
+                $(".invoiceArticle-dialog").data("Article", invoiceDetail.article);
+                $(".invoiceArticle-dialog").data("ArticleId", invoiceDetail.id);
+                $(".invoiceArticle-dialog").dialog("open");
+            }
+        });
+        $('body').on('click', '.invoiceArticleDelete', function (e) {
+            e.preventDefault();
+            var articleId = $(this).attr("data-app-id");
+            $.removeJsonObject(Invoice.invoiceDetails, "id", articleId);
+            loadInvoiceDetails();
+        });
+        $("#InvoiceDate").datepicker({ dateFormat: 'dd/mm/yy', autoclose: true }).on("change", function (e) {
+            InvoiceDate = $(this).datepicker("getDate");
+            var invoiceDueDate = InvoiceDate;
+            invoiceDueDate.setMonth(InvoiceDate.getMonth() + 1);
+            $('#InvoiceDueDate').datepicker('setDate', invoiceDueDate);
+            $("#btnPayerNameLookupInvoice").focus();
+            $('#InvoiceDate').datepicker("hide");
+            $('#InvoiceDueDate').datepicker("hide");
+        });
+        $("#InvoiceDueDate").datepicker({ dateFormat: 'dd/mm/yy', autoclose: true }).on("change", function (e) {
+            var invoiceDate = $("#InvoiceDate").datepicker("getDate");
+            InvoiceDueDate = $(this).datepicker("getDate");
+            if (invoiceDate > InvoiceDueDate) {
+                alert("Invoice due date should be more than Invoice date");
+                var invoiceDueDate = invoiceDate;
+                invoiceDueDate.setMonth(invoiceDate.getMonth() + 1);
+                $(this).datepicker('setDate', invoiceDueDate);
+            }
+            $("#btnPayerNameLookupInvoice").focus();
+            $('#InvoiceDueDate').datepicker("hide");
+        });
+        $("#addInvoiceArticle").on("click", function (e) {
+            e.preventDefault();
+            var invoiceArticle = "";
+            Invoice["id"] = $("#InvoiceId").val();
+            Invoice["payerId"] = $("#InvoicePayerId").val();
+            Invoice["customerId"] = $("#InvoiceCustomerId").val();
+            Invoice["amount"] = parseFloat($.toNumber($("#invoiceTotalDueAmount").val()));
+            Invoice["processedDate"] = $.datepicker.formatDate('yy-mm-dd', InvoiceDate);
+            if (!Invoice.invoiceDetails) { $.extend(Invoice, { invoiceDetails: [] }); }
+            InvoiceArticleId++;
+            $(".invoiceArticle-dialog").data("ArticleId", InvoiceArticleId);
+            $(".invoiceArticle-dialog").data("Article", invoiceArticle);
+            $(".invoiceArticle-dialog").dialog("open");
+        });
+        $(".invoice-dialog").dialog({ modal: true, resizable: false, width: 900, height: 640, autoOpen: false });
+        $(".invoice-dialog").on("dialogopen", function (event, ui) {
+            clearInvoiceForm();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".invoice-dialog").dialog("moveToTop");
+
+            MODE = $(".invoice-dialog").data("Mode");
+            PayerId = $(".invoice-dialog").data("PayerId");
+            PayerName = $(".invoice-dialog").data("PayerName");
+            CustomerId = $(".invoice-dialog").data("CustomerId");
+            CustomerName = $(".invoice-dialog").data("CustomerName");
+            InvoiceId = $(".invoice-dialog").data("InvoiceId");
+            var InvoiceNo = $(".invoice-dialog").data("InvoiceNo");
+            InvoiceArticleId = 0;
+            if (!$.isNullOrEmpty(InvoiceNo)) {
+                loadInvoice(InvoiceNo);
+            }
+            else {
+                // Create empty JSON invoice object
+                InvoiceId = NewInvoiceId;
+                Invoice = {};
+            }
+            $("#InvoicePayerName").val(PayerName);
+            $("#InvoicePayerId").val(PayerId);
+            $("#InvoiceCustomerName").val(CustomerName);
+            $("#InvoiceCustomerId").val(CustomerId);
+            $("#InvoiceId").val(InvoiceId);
+            $("#txtInvoiceRef").val(InvoiceRef);
+        });
+        $(".invoiceArticle-dialog").on("dialogclose", function (event, ui) {
+            if (!Invoice.invoiceDetails) {
+                $.extend(Invoice, { invoiceDetails: [] });
+            }
+            var invoiceArticle = $(".invoiceArticle-dialog").data("Article");
+            var articleId = $(".invoiceArticle-dialog").data("ArticleId");
+            if (!$.isNullOrEmpty(invoiceArticle) && !$.isNullOrEmpty(articleId)) {
+                var invoiceDetail = $.getJsonObject(Invoice.invoiceDetails, { "id": articleId });
+                if ($.isEmptyObject(invoiceDetail)) {
+                    Invoice.invoiceDetails.push(invoiceDetail);
+                    invoiceDetail["total"] = 0;
+                }
+                invoiceDetail["id"] = articleId;
+                invoiceDetail["article"] = invoiceArticle;
+                loadInvoiceDetails();
+            }
+            $(".invoiceArticle-dialog").data("Article", "");
+            $(".invoiceArticle-dialog").data("ArticleId", 0);
+        });
+        $("#btnCustomerNameLookupInvoice").click(function (e) {
+            $(".customer-lookup-dialog").dialog("open");
+        });
+        $(".customer-lookup-dialog").on("dialogclose", function (event, ui) {
+            CustomerName = $(".customer-lookup-dialog").data("customerName");
+            CustomerId = $(".customer-lookup-dialog").data("customerId");
+            $("#InvoiceCustomerName").val(CustomerName);
+            $("#InvoiceCustomerId").val(CustomerId);
+        });
+        $("#btnPayerNameLookupInvoice").click(function (e) {
+            $(".payer-lookup-dialog").dialog("open");
+        });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) {
+            PayerId = $(".payer-lookup-dialog").data("payerId");
+            PayerName = $(".payer-lookup-dialog").data("payerName");
+            $("#InvoicePayerName").val(PayerName);
+            $("#InvoicePayerId").val(PayerId);
+
+        });
+        $("#invoiceSave").click(function (e) {
+            e.preventDefault();
+            configInvoiceValidationRules();
+            if (!Invoice_Validator.validate()) return;
+            saveInvoice();
+            //switch (MODE) {
+            //    case "New":
+            //    case "NEW":
+            //        saveInvoice();
+            //        break;
+            //    case "Edit":
+            //    case "EDIT":
+            //        alert("To Update Receipt please contact I.T Support ");
+            //        break;
+            //    case "Delete":
+            //    case "DELETE":
+            //        alert("Delete");
+            //        break;
+            //}
+        });
+        $("#invoiceReset").click(function (e) { e.preventDefault(); clearInvoiceForm(); });
+        $("#invoiceExit").on("click", function (e) { clearInvoiceForm(); $(".invoice-dialog").dialog("close"); });
+    });
+</script>

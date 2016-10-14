@@ -1,0 +1,187 @@
+﻿<div class="customer-lookup-dialog" id="customer-lookup-dialog" title="Customers" style="display: none;">
+    <input type="text" id="txtCustomerSearch" style="width:300px;" /><input type="image" id="getCustomerSearch" src="~/Content/images/search.png" style="height:32px;cursor:pointer;padding-top:8px;margin-top:15px;vertical-align:bottom;" />
+    <table style="border:none;">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkCustomerPrev"><img style="width:16px; height:16px;" src="~/Content/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblCustomersPagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkCustomerNext"><img style="width:16px; height:16px;" src="~/Content/images/pagingNext.png" /></a></th>
+            </tr>
+        </thead>
+    </table>
+    <table id="tblCustomerList" style="width:100%; border:1px;">
+        <thead>
+            <tr class="header">
+                <th>SVN</th>
+                <th>Name</th>
+                <th>D.O.A</th>
+                <th>Business</th>
+                <th style="text-align:center;">IsActive</th>
+            </tr>
+        </thead>
+        <tbody id="tblCustomersBody"></tbody>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+        @{System.Text.StringBuilder sbGetNewInvoices = new System.Text.StringBuilder();
+            sbGetNewInvoices.Append("'");
+            sbGetNewInvoices.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbGetNewInvoices.Append("/FinanceApi/CustomersBySearch?searchText=");
+            sbGetNewInvoices.Append("'");}
+        var getCustomersUrl =   @Html.Raw(sbGetNewInvoices.ToString()) +'';
+        function clearCustomerForm() {
+            $("#tblCustomersBody").empty();
+            $("#tblCustomersPagingNos").empty();
+            $("#lnkCustomerPrev").removeAttr('href');
+            $("#lnkCustomerNext").removeAttr('href');
+        }
+        function clearData() {
+            $(".customer-lookup-dialog").data("SearchText", "");
+        }
+        $(".customer-lookup-dialog").dialog({ modal: true, resizable: false, width: 1000, height: 500, zindex: 30000, autoOpen: false, position: { my: 'top', at: 'top+160' } });
+        $(".customer-lookup-dialog").on("dialogopen", function (event, ui) {
+            $(".customer-lookup-dialog").data("SearchText");
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".customer-lookup-dialog").dialog("moveToTop");
+        });
+        function loadCustomers(Customers, Pagination) {
+            if (Customers) {
+                if (Customers.length > 0) {
+                    clearCustomerForm();
+                    var tableBody = "";
+                    var customerStatus = "";
+                    $.each(Customers, function (c, customer) {
+                        if (customer.deactive) {
+                            customerStatus = "<img src='/Content/Images/deactivate.jpg' style='width:20px;height:20px;'/>";
+                        }
+                        else {
+                            customerStatus = "<img src='/Content/Images/active.png' style='width:20px;height:20px;'/>";
+                        }
+
+                        tableBody += "<tr>"
+                        +
+                        "<td> <a class='customerSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;' data-app-id='" + customer.id +"'" + " data-app-name='" + customer.personalInfo.fullName + "'" + ">" + customer.ref + " </a></td>"
+                        +
+                        "<td><a class='customerSelect' onclick='javascript: return false;' style='text-decoration:underline;cursor:pointer;'   data-app-id='" + customer.id +"'" + " data-app-name='" + customer.personalInfo.fullName + "'" + ">" + customer.personalInfo.fullName + "</a></td>"
+                        +
+                        "<td>" + $.datepicker.formatDate('dd/mm/yy', new Date(customer.activeDate)) + "</td>"
+                        +
+                        "<td>" + customer.business.name + "</td>"
+                        +
+                        "<td  style='text-align:center;'>" + customerStatus + "</td>"
+                        + "</tr>";
+                    });
+                    if (tableBody != "") {
+                        $("#tblCustomersBody").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkCustomerPrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkCustomerPrev').stop().fadeTo('slow', 1);
+                            $("#lnkCustomerPrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkCustomerPrev").removeAttr('href');
+                            $('#lnkCustomerPrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkCustomerPrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkCustomerNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkCustomerNext').stop().fadeTo('slow', 1);
+                            $("#lnkCustomerNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkCustomerNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkCustomerNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkCustomerNext").attr('style', "cursor:none;");
+                        }
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblCustomersPagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblCustomersPagingNos").empty(); $("#lnkCustomerPrev").removeAttr('href'); $("#lnkCustomerNext").removeAttr('href'); }
+                }
+                else { alert("Customers have not been found! Please try again later."); $("#tblCustomersBody").empty(); $("#tblCustomersPagingNos").empty(); }
+            }
+        };
+        $("#getCustomerSearch").click(function (e) {
+            var URL = getCustomersUrl + $("#txtCustomerSearch").val() + '&pageIndex=0&pageSize=10';
+            var requestCustomer = $.ajax({
+                type: "GET",
+                url: URL,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (customers) {
+                    if (!$.isNullOrEmpty(customers)) {
+                        loadCustomers(customers, JSON.parse(requestCustomer.getResponseHeader('X-Pagination')));
+                    }
+                }
+            });
+            requestCustomer.fail(function (jqxhr, textStatus, error) {
+                alert("List of Customers Request failed: " + textStatus);
+            });
+        });
+        $(".exit").click(function () { closeFeeDialog(); });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            if (url) {
+                var requestCustomer = $.getJSON(url, function (customers) {
+                    loadCustomers(customers, JSON.parse(requestCustomer.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of customers Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('click', 'a.customerSelect', function (e) {
+            e.preventDefault();
+            var customerId = $(this).attr("data-app-id");
+            var customerName = $(this).attr("data-app-name");
+            if (customerName) {
+                $(".customer-lookup-dialog").data({ "customerName": customerName, "customerId": customerId });
+                $(".customer-lookup-dialog").dialog("close");
+            }
+        });
+        $("#lnkCustomerPrev").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkCustomerPrev").attr('href');
+            if (url) {
+                var requestCustomers = $.getJSON(url, function (customers) {
+                    loadCustomers(customers, JSON.parse(requestCustomers.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Customers Request failed! Please try again later. "); })
+            }
+        });
+        $("#lnkCustomerNext").click(function (e) {
+            e.preventDefault();
+            var url = $("#lnkCustomerNext").attr('href');
+            if (url) {
+                var requestCustomers = $.getJSON(url, function (customers) {
+                    loadCustomers(customers, JSON.parse(requestCustomers.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Customers Request failed! Please try again later. "); })
+            }
+        });
+        $(".customer-lookup-dialog").on("dialogclose", function (event, ui) { clearCustomerForm();});
+    });
+</script>

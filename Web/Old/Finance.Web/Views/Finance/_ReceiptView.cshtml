@@ -1,0 +1,236 @@
+﻿<div class="receipt-view-dialog" id="receipt-view-dialog" title="Receipt" style="display:none;">
+    <h4 id="receipt-view-successMsg" style="color:green;display:none;"><img src="~/Content/images/success.png" style="width:48px;height:48px;" />Receipt has been created successfully</h4>
+    <div class="row">
+        <div class="col-md-2">
+            Receipt No
+        </div>
+        <div class="col-md-4">
+            <label id="lblReceiptViewReceiptNo"></label>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            Date <label id="lblReceiptViewDate"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Payer
+        </div>
+        <div class="col-md-8">
+            <label id="lblReceiptViewPayer"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Paid By
+        </div>
+        <div class="col-md-4">
+            <label id="lblReceiptViewPaidBy"></label>
+        </div>
+        <div class="col-md-6">
+            <label id="lblReceiptViewCrediNote"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            Pay Ref
+        </div>
+        <div class="col-md-4">
+            <p>
+                <label id="lblReceiptViewReceiptRef"></label>
+            </p>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            Amount : <label id="lblReceiptViewAmount"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <b>Invoices</b><br />
+            <table id="receiptInvoice" style="width: 98%;">
+                <tr style="color:white;background-color:grey">
+                    <th style="width:12%;">Invoice</th>
+                    <th style="width:8%;">Date</th>
+                    <th style="width:19%;text-align:right;">Total</th>
+                    <th style="width:19%; text-align:right;">Total Received</th>
+                    <th style="width:20%; text-align:right;">Due</th>
+                    <th style="width:20%; text-align:right;">Receipt Amount</th>
+                </tr>
+            </table>
+            <div style="height:130px;overflow-y:scroll;">
+                <table id="receiptInvoice" style="width: 100%;">
+                    <tbody id="tblBodyReceiptViewInvoices"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10" style="text-align:right;">
+            Total Amount Allocated To Invoices
+        </div>
+        <div class="col-md-2" style="text-align:right;">
+            <label id="lblReceiptViewTotalAmountToInvoice"></label>
+        </div>
+    </div>
+    <div id="receiptViewCreditNoteDisplay" style="display:none;">
+        <div class="row">
+            <div class="col-md-12">
+                <b>Credit Notes</b><br />
+                <table id="receiptInvoice" style="width: 98%;">
+                    <tr style="color:white;background-color:grey">
+                        <th style="width:20%;">Credit Note</th>
+                        <th style="width:20%;">Date</th>
+                        <th style="width:30%;text-align:right;">Total</th>
+                        <th style="width: 30%; text-align: right;">Credit Available</th>
+                    </tr>
+                </table>
+                <div style="height:100px;overflow-y:scroll;">
+                    <table id="receiptInvoice" style="width: 100%;">
+                        <tbody id="tblBodyReceiptViewFeeCreditNotes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10" style="text-align:right;">
+                Total Credit Note
+            </div>
+            <div class="col-md-2" style="text-align:right;">
+                <label id="lblReceiptViewTotalAmountToCreditNote"></label>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var RECEIPTVIEW_MODE;
+        function clearReceiptView(){
+            $("#lblReceiptViewReceiptNo").text("");
+            $("#lblReceiptViewReceiptRef").text("");
+            $("#lblReceiptViewAmount").text($.formatCurrency("0", "£"));
+            $("#lblReceiptViewDate").text("");
+            $("#lblReceiptViewPayer").text("");
+            $("#lblReceiptViewPaidBy").text("");
+            $("#lblReceiptViewCrediNote").text("");
+            $("#lblReceiptViewTotalAmountToInvoice").text("");
+            $("#lblReceiptViewTotalAmountToCreditNote").text("");
+
+            $("#tblBodyReceiptViewInvoices").empty();
+            $("#receiptViewCreditNoteDisplay").css("display","none");
+            $("#tblBodyReceiptViewFeeCreditNotes").empty();
+        }
+        @{System.Text.StringBuilder sbReceiptView = new System.Text.StringBuilder();
+          sbReceiptView.Append("'");
+          sbReceiptView.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+          sbReceiptView.Append("/FinanceApi/Receipt?ReceiptNo=");
+          sbReceiptView.Append("'");}
+        var receiptViewUrl = @Html.Raw(sbReceiptView.ToString()) + '';
+        var CREDITNOTE = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.CreditNote);
+        var BANKTRANSFER = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.BankTransfer);
+        var CASH = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.Cash);
+        var CHEQUE = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.Cheque);
+        function loadReceiptForView(receiptView) {
+            $("#lblReceiptViewReceiptNo").text(receiptView.refPrefix + receiptView.receiptNo);
+            var receiptDate = new Date(receiptView.processedDate);
+            $("#lblReceiptViewDate").text($.datepicker.formatDate('dd/mm/yy', receiptDate));
+            $("#lblReceiptViewPayer").text(receiptView.payer.name);
+            switch (receiptView.paymentMethod) {
+                case CREDITNOTE:
+                    $("#lblReceiptViewPaidBy").text("Credit Note");
+                    $("#lblReceiptViewCrediNote").text("Credit Note No : " + receiptView.creditNote.creditNoteNo);
+                    break;
+                case BANKTRANSFER :
+                    $("#lblReceiptViewPaidBy").text("Bank Transfer");
+                    break;
+                case CASH:
+                    $("#lblReceiptViewPaidBy").text("Cash");
+                    break;
+                case CHEQUE:
+                    $("#lblReceiptViewPaidBy").text("Cheque");
+                    break;
+            }
+            $("#lblReceiptViewReceiptRef").text(receiptView.ContactReference);
+            $("#lblReceiptViewAmount").text($.formatCurrency(receiptView.amount, "£"));
+
+            //Invoices
+            var totalAllocatedToInvoice = 0;
+            $("#tblBodyReceiptViewInvoices").empty();
+            var tableBody = "";
+            $(receiptView.receiptInvoices).each(function (index, value) {
+                totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber(value.amountReceived));
+                tableBody += loadInvoiceForReceiptView(receiptView.receiptNo,value);
+            });
+            if (tableBody != "") {$("#tblBodyReceiptViewInvoices").append(tableBody);}
+            $("#lblReceiptViewTotalAmountToInvoice").text($.formatCurrency(totalAllocatedToInvoice, "£"));
+
+            // Credit Notes
+            $("#tblBodyReceiptViewFeeCreditNotes").empty();
+            if(!$.isNullOrEmpty(receiptView.creditNotes) && receiptView.creditNotes.length > 0)
+            {
+                var totalAllocatedToCreditNote = 0;
+                var tableBody = "";
+                $(receiptView.creditNotes).each(function (index, value) {
+                    totalAllocatedToCreditNote = parseFloat(totalAllocatedToCreditNote) + parseFloat($.toNumber(value.amount));
+                    tableBody += loadCreditNoteForReceiptView(value);
+                });
+                if (tableBody != "") {$("#tblBodyReceiptViewFeeCreditNotes").append(tableBody);$("#receiptViewCreditNoteDisplay").css("display","block");}
+                $("#lblReceiptViewTotalAmountToCreditNote").text($.formatCurrency(totalAllocatedToCreditNote, "£"));
+            }
+        }
+        function loadInvoiceForReceiptView(ReceiptNo, receiptInvoice) {
+            var totalAmountReceived = 0;
+            $(receiptInvoice.invoice.receiptInvoices).each(function(index, receiptInvoice){
+                if(receiptInvoice.receipt.receiptNo <= ReceiptNo){
+                    totalAmountReceived = parseFloat(totalAmountReceived) + parseFloat($.toNumber(receiptInvoice.amountReceived));
+                }
+            });
+            totalAmountReceived = totalAmountReceived + receiptInvoice.amountReceived;
+            var dueAmount = parseFloat(receiptInvoice.invoice.amount) - parseFloat(totalAmountReceived);
+            return "<tr>"
+                +"<td style='width:12%;'> <a target='_blank' style='text-decoration:underline;' href='/InvoiceSearchByNo?InvoiceNoSearch=" + receiptInvoice.invoice.invoiceNo + "'>" + receiptInvoice.invoice.invoiceNo + " </a></td>"
+                +"<td style='width:8%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(receiptInvoice.invoice.invoiceDate)) + "</td>"
+                +"<td style='width:19%; text-align:right;'>" + $.formatCurrency(receiptInvoice.invoice.amount, "£") + "</td>"
+                +"<td style='width:19%; text-align:right;'>" + $.formatCurrency(totalAmountReceived, "£") + "</td>"
+                +"<td style='width:20%; text-align:right;'>" + $.formatCurrency(dueAmount, "£") + "</td>"
+                +"<td style='width:20%; text-align:right;'>"+"<label>"  + $.formatCurrency(receiptInvoice.amountReceived, "£") +  "</label>" + "</td>"
+                + "</tr>";
+        }
+        function loadCreditNoteForReceiptView(receiptCreditNote) {
+            return "<tr>"
+                +"<td style='width:20%;'> <a target='_blank' style='text-decoration:underline;width:19%;' href='/InvoiceSearchByNo?InvoiceNoSearch=" + receiptCreditNote.creditNoteNo + "'>" + receiptCreditNote.creditNoteNo + " </a></td>"
+                +"<td style='width:20%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(receiptCreditNote.processedDate)) + "</td>"
+                +"<td style='width:30%; text-align: right;'>" + $.formatCurrency(receiptCreditNote.amount, "£") + "</td>"
+                +"<td style='width:30%; text-align: right;'>" + $.formatCurrency(receiptCreditNote.creditAvailable, "£") + "</td>"
+                + "</tr>";
+        }
+        $(".receipt-view-dialog").dialog({ modal: true, resizable: false, width: 900, height: 630, autoOpen: false });
+        $(".receipt-view-dialog").on("dialogopen", function (event, ui) {
+            $(".receipt-view-dialog").fadeOut();
+            clearReceiptView();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".receipt-view-dialog").dialog("moveToTop");
+            RECEIPTVIEW_MODE = $(".receipt-view-dialog").data("Mode");
+            var receiptNo = $(".receipt-view-dialog").data("ReceiptNo");
+            if(!$.isNullOrEmpty(receiptNo)){
+                switch (RECEIPTVIEW_MODE) {
+                    case "View":
+                    case "VIEW":
+                        $("#receipt-view-successMsg").css("display", "none");
+                        break;
+                    case "ADDED":
+                    case "Added":
+                        $("#receipt-view-successMsg").css("display", "block");
+                        break;
+                    default:
+                        $("#receipt-view-successMsg").css("display", "none");
+                        break;
+                }
+                $.getJSON(receiptViewUrl + receiptNo, function (receiptView) {
+                    loadReceiptForView(receiptView);
+                }).error(function (xhr) { }).fail(function (){ alert("Receipt view Request failed! Please try again later. "); });
+            }
+            $(".receipt-view-dialog").fadeIn();
+        });
+        $(".receipt-view-dialog").on("dialogclose", function (event, ui) { clearReceiptView(); });
+    });
+</script>

@@ -1,0 +1,39 @@
+﻿$main-background-color:#261803;
+$content-color:#eacd86;
+select{color:#000000;}
+.main_header{/* IE10+ */ 
+background-image: -ms-linear-gradient(top, $main-background-color 0%, #443113 100%);/* Mozilla Firefox */ background-image: -moz-linear-gradient(top, $main-background-color 0%, #443113 100%);/* Opera */ background-image: -o-linear-gradient(top, $main-background-color 0%, #443113 100%);
+/* Webkit (Safari/Chrome 10) */ 
+background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, $main-background-color), color-stop(100, #443113));
+/* Webkit (Chrome 11+) */ 
+background-image: -webkit-linear-gradient(top, $main-background-color 0%, #443113 100%);
+/* W3C Markup */ 
+background-image: linear-gradient(to bottom, $main-background-color 0%, #443113 100%);color:#ffffff;}
+.header{border:1px solid #baaa5a;background:$main-background-color;color:$content-color;font-weight:bold}
+.content{border:1px solid #efec9f;background:#443113;color:#efec9f}
+input[type="text"] {color:#000;}
+.content-sub{background:$content-color;color:#000000;}
+.border{border: 1px solid #027ff4;}.no-border{border:none;}table.no-border {border: none;}table.no-border tr{border: none;}table.no-border td{border: none;}table.no-border th{border: none;}
+.field-validation-error{color: #ff0000;font-weight: bold;}
+.dialog-link{padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
+.dialog-link span.ui-icon{margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}
+.table_header{background:$main-background-color;color:$content-color;font-size: large;font-weight: bold;padding-top: 5px;padding-bottom: 5px;}
+.financetopmenu{}.financetopmenu > li > a{color: #ffffff;}.residentsub{}.residentsub li a:hover{-webkit-transition-duration: .33s;-webkit-transition-property: color, background;}
+.header a {color:$content-color;}a:hover{background-color: none;}.content a {color:#efec9f;}.content-sub a {color:#000000;}a:hover{background-color: none;}
+.print{-ms-transform: rotate(-90deg); /* IE 9 */-webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */transform: rotate(-90deg);border: 1px solid red;background-color: red;}
+table, th, td{border: 1px solid #efec9f;border-collapse: collapse;width: auto;}
+.BlockBed{background-color: green;text-align: center;margin: 0px;padding: 0px;color: white;}
+.namelink{color: #ffffff;}
+.camelCase {text-transform: capitalize;}
+.text-upperCase{text-transform:uppercase;}
+.ui-icon-L{zoom:1.5;margin-top:-5px;}
+.menu{margin: 0px;padding: 0px;font-size: small;}.menu li a{margin: 5px;padding: 0px;border: none;}.menu li a img{margin: 0px;padding: 0px;border: none;margin-right: 10px;}
+.ico-xxs{width: 8px;height: 8px;}.ico-xs{width: 16px;height: 16px;}.ico-s{width: 24px;height: 24px;}.ico-sm{width: 32px;height: 32px;}.ico-m{width: 48px;height: 48px;}.ico-L{width: 64px;height: 64px;}.ico-XL{width: 128px;height: 128px;}
+.search-textbox {display:block;width:100%;height:34px;padding:6px 12px;font-size:14px;line-height:1.42857143;color:#555;background-color:#fff;background-image:none;border:1px solid #ccc;border-radius:4px;-webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075);box-shadow:inset 0 1px 1px rgba(0,0,0,.075);-webkit-transition:border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;-o-transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s;transition:border-color ease-in-out .15s,box-shadow ease-in-out .15s}
+.loadinggif {background:url('/Content/images/loading_blue.gif') no-repeat right center;background-size:24px 24px}
+.text-alert {color:red;font-weight:900;animation:blink 1300ms linear infinite;-webkit-animation:blink 1300ms linear infinite; /* Safari and Chrome */}
+.text-alert:hover{-webkit-animation-play-state: paused;-moz-animation-play-state: paused;-o-animation-play-state: paused;animation-play-state: paused;font-weight:900;cursor:pointer;animation:hoverColor infinite;-webkit-animation:hoverColor infinite;}
+@keyframes blink {90%{opacity: 1.0;}97% {opacity: 0.1;}100% { opacity: 1.0; }}
+@keyframes hoverColor {from {color:red;}to {color:red;}}
+@-webkit-keyframes blink {90%{opacity: 1.0;}99% {opacity: 0.1;}100% { opacity: 1.0; }}
+@-webkit-keyframes hoverColor {from {color:red;}to {color:red;}}

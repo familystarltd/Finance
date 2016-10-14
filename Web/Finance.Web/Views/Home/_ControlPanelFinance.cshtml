@@ -1,0 +1,12 @@
+﻿@model Finance.Web.Models.Business
+<h4 style="color:darkblue;margin:0px;padding:0px;margin-left:15px;">Finance</h4>
+<ul class="nav navbar-nav">
+    <li><a href="@Url.Action("Index", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/dashboard.png" style="width:16px;height:16px;margin-right:1px;" />Dashboard</a></li>
+    <li><a href="@Url.Action("FeeInvoice", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/fee_invoice.png" style="width: 16px; height: 16px; margin-right: 1px;" />Fee Invoice</a></li>
+    <li><a href="@Url.Action("FNCInvoice", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/fee_invoice.png" style="width: 16px; height: 16px; margin-right: 1px;" />FNC Invoice</a></li>
+    <li><a href="@Url.Action("DisbursementInvoice", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/%c2%a3.png" style="width: 16px; height: 16px; margin-right: 1px;" />Disbursement Invoice</a></li>
+    <li><a href="@Url.Action("Receipt", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/receipt.png" style="width: 16px; height: 16px; margin-right: 1px;" />Receipts</a></li>
+    <li><a href="@Url.Action("CreditNote", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/credit_note.png" style="width: 16px; height: 16px; margin-right: 1px;" />Credit Note</a></li>
+    <li><a href="@Url.Action("Customer", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/people.png" style="width: 16px; height: 16px; margin-right: 1px;" />Customers</a></li>
+    <li><a href="@Url.Action("Payer", "Finance",AppSettings.SetBusinessRouteValues(Model))"><img src="~/images/payer.png" style="width: 16px; height: 16px; margin-right: 1px;" />Payers</a></li>
+</ul>

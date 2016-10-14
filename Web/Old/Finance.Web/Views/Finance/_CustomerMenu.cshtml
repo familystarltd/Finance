@@ -1,0 +1,34 @@
+﻿@model FinanceManagement.Web.Model.CustomerModel
+@{var namelink = Html.ViewData["class"] == null ? "" : Html.ViewData["class"];}
+<ul class="nav navbar-nav" style="font:inherit; margin: 0px; padding: 0px;margin-left:5px;">
+    <li class="dropdown" style="margin: 0px; padding: 0px;">
+        <a onclick="javascript: return false;" class="dropdown-toggle @namelink" data-toggle="dropdown" style="font:inherit;margin:0px;padding:0px;cursor:pointer;">@Model.PersonalInfo.FullName<b class="caret"></b></a>
+        <ul class="dropdown-menu menu" role="menu" style="margin: 0px; padding: 0px;right:0;left:0;top:-130px;font:inherit;">
+            <li>
+                <a href="@Url.Action("FeeInvoice", "Finance", new { id = Model.Id })" style="margin: 5px; padding: 0px;">
+                    <img src="~/Content/Images/fee_invoice.png" style="width: 16px; height: 16px;" />Fee Invoice
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("DisbursementInvoice", "Finance", new { id = Model.Id })" style="margin: 5px; padding: 0px;">
+                    <img src="~/Content/Images/%c2%a3.png" style="width: 16px; height: 16px;" />Expenses Invoice
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("EditCustomer", "Finance", new { id = Model.Id })" style="margin: 5px; padding: 0px;">
+                    <img src="~/Content/Images/edit.png" style="width: 16px; height: 16px;" />Edit
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("CustomerFee", "Finance", new { CustomerId = Model.Id })" style="margin: 5px; padding: 0px;">
+                    <img src="~/Content/Images/fee_setup.png" style="width: 16px; height: 16px;" />Fee Setup
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Disbursement", "Finance", new { id = Model.Id })" style="margin: 5px; padding: 0px;">
+                    <img src="~/Content/Images/%c2%a3.png" style="width: 16px; height: 16px;" />Disbursements
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>

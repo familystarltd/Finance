@@ -1,0 +1,213 @@
+﻿@using Finance.Web.Helpers.ExtensionMethods
+@model Finance.Web.Model.CustomerModel
+@Html.Partial("_DataLoader")
+<script src="~/lib/dist/jquery-validation/jquery.validate.min.js" asp-append-version="true"></script>
+<div class="row" style="margin-left: 10px; margin-top: 15px;">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-sm-12" style="vertical-align:bottom;padding-top:25px;text-align:left;float:left;">
+                <a href='@Url.Action("customer", "Finance/Personnel")'><img id="customerAddNew" src="~/images/add-plus.png" style="height: 32px; cursor: pointer;" /></a>
+                <a id="customerResetLink" href="@Url.Action("customer", "Finance/Personnel", new { customerId = Model.Id })" ><img id="customerReset" src="~/images/reset.png" style="height: 32px; cursor: pointer;" /></a>
+                <img id="customerSave" src="~/images/save.png" style="height: 32px; cursor: pointer;" />
+                <img id="customerExit" src="~/images/exit.png" style="height: 32px; cursor: pointer;" />
+            </div>
+        </div>
+        <hr class="border" style="margin:0px;padding:0px;margin-bottom:3px;" />
+        @using (Html.BeginForm("SaveCustomer", "Finance/Customer", FormMethod.Post, new { id = "customerForm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(cus => cus.Id)
+            @Html.HiddenFor(cus => cus.PersonalInfo.Id)
+            <div id="customererrorMessage" class="border ui-corner-all" style="padding: 0 .7em; margin-bottom: 5px; vertical-align: middle;display:none">
+                <p>
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span><span id="customererrorMessage-close" class="ui-icon ui-icon-close" style="float:right;cursor:pointer;"></span>
+                    <div id="customerErrorwrap" style="color:red;"></div>
+                </p>
+            </div>
+            if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div id="customerSuccessMessage" class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;color:darkgreen;margin-bottom:5px;display:none;">
+                    <p style="margin-top:5px;">
+                        <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><span id="customerSuccessMessages-close" class="ui-icon ui-icon-close" style="float:right;cursor:pointer;"></span>
+                        @Model.SuccessMessage
+                    </p>
+                </div>
+            }
+            <div id="customerTabs" style="display:none;">
+                <ul>
+                    <li><a href="#customerTabs-personal" onclick="return false;">Personal Information</a></li>
+                    <li><a href="#customerTabs-contact" onclick="return false;">Contact Information</a></li>
+                    <li><a href="#customerTabs-note" onclick="return false;">Notes</a></li>
+                </ul>
+                <div id="customerTabs-personal">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                <label for="customerRef" class="control-label col-sm-2">Customer Ref</label>
+                                <div class="col-md-9">
+                                    @Html.TextBoxFor(cus => cus.Ref, new { name = "CustRef", id = "CustRef", @class = "form-control", style = "color:black;width:199px;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="Title" class="control-label col-sm-2">Title</label>
+                                <div class="col-md-9">
+                                    @Html.DropDownListFor(model => model.PersonalInfo.Title, Model.PersonalInfo.Title.ToSelectList(addPleaseSelect: true, selectMsg: ""), new { @class = "form-control", style = "text-align: left;width:84px;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="Name" class="control-label col-sm-2">First Name</label>
+                                <div class="col-sm-3">
+                                    @Html.TextBoxFor(cus => cus.PersonalInfo.FirstName, new { @class = "form-control", style = "color:black;width:400px;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="Address" class="control-label col-sm-2">Surname</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(cus => cus.PersonalInfo.LastName, new { @class = "form-control", style = "color:black;width:400px;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="DateOfBirth" class="control-label col-sm-2">Date of Birth</label>
+                                <div class="col-sm-2" style="color:black;">
+                                    @Html.TextBoxFor(cus => cus.PersonalInfo.DateOfBirth, new { @class = "form-control date-of-birth", style = "color:black;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="DateOfBirth" class="control-label col-sm-2">Gender</label>
+                                <div class="col-sm-3">
+                                    @Html.DropDownListFor(model => model.PersonalInfo.Gender, Model.PersonalInfo.Gender.ToSelectList(addPleaseSelect: true, selectMsg: ""), new { @class = "form-control", style = "text-align: left;" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            @if (Model.PersonalInfo.PictureRawPhoto == null || Model.PersonalInfo.PictureRawPhoto.Length <= 0)
+                            {
+                                <label for="Logo" class="control-label col-sm-1"></label>
+                                <div class="col-sm-3">
+                                    <img src="/Images/nophoto.png" id="customerLogo" style="width: 100px; height: 100px;cursor:pointer; " />
+                                    @Html.TextBox("UploadcustomerPhoto", null, new { id = "UploadcustomerPhoto", @class = "form-control", type = "file", style = "color:black;width:350px;" })
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    @Html.Image(Model.PersonalInfo.FullName, Model.PersonalInfo.PictureRawPhoto)
+                                    @Html.TextBox("UploadcustomerPhoto", null, new { id = "UploadcustomerPhoto", @class = "form-control", type = "file", style = "color:black;width:350px;" })
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div id="customerTabs-contact">
+                    <div class="form-group">
+                        <label for="Address" class="control-label col-sm-1">Address</label>
+                        <div class="col-sm-8">
+                            @Html.TextAreaFor(cus => cus.PersonalInfo.Address, 8, 8, new { @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="PostCode" class="control-label col-sm-1">Post Code</label>
+                        <div class="col-sm-2">
+                            @Html.TextBoxFor(cus => cus.PersonalInfo.PostCode, new { @class = "form-control", style = "color:black;" })
+                        </div>
+                        <label for="Address" class="control-label col-sm-1">Telephone</label>
+                        <div class="col-sm-3">
+                            @Html.TextBoxFor(cus => cus.PersonalInfo.Telephone, new { @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email" class="control-label col-sm-1">E-Mail</label>
+                        <div class="col-sm-5">
+                            @Html.TextBoxFor(cus => cus.PersonalInfo.Email, new { @class = "form-control", style = "color:black;" })
+                        </div>
+                    </div>
+                </div>
+                <div id="customerTabs-note" style="vertical-align:top;">
+                    @Html.TextAreaFor(model => Model.Notes, new { cols = "190", rows = "30", wrap = "virtual", @class = "form-control", style = "width:800px;" })
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    @{
+        string customerRef = !string.IsNullOrEmpty(Model.Ref) ? Model.Ref.ToString() : "----- New customer -----";
+        string dateOfBirth = Model.PersonalInfo.DateOfBirth.HasValue ? Model.PersonalInfo.DateOfBirth.Value.ToString("dd/MM/yyyy") : String.Empty;
+        string startDate = Model.ActiveDate > DateTime.MinValue ? Model.ActiveDate.ToString("dd/MM/yyyy") : String.Empty;
+        string leaveDate = Model.DeactiveDate.HasValue ? Model.DeactiveDate.Value.ToString("dd/MM/yyyy") : String.Empty;
+      }
+    var customerRef = "@customerRef"; var dateOfBirth = "@dateOfBirth"; var startDate = "@startDate"; var leaveDate = "@leaveDate";
+    $(document).ready(function () {
+        $("#customerTabs").tabs();
+        $("#customerTabs").show();
+        $(".cus-start-date").val(startDate);
+        $(".cus-leave-date").val(leaveDate);
+        $(".date-of-birth").val(dateOfBirth);
+        $(".cus-start-date").datepicker({ dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, autoClose: true });
+        $(".cus-leave-date").datepicker({ dateFormat: 'dd/mm/yy', changeMonth: true, changeYear: true, autoClose: true });
+        $(".date-of-birth").datepicker({ dateFormat: 'dd/mm/yy', yearRange: "-100:+0", maxDate: "-20Y", changeMonth: true, changeYear: true, autoClose: true });
+        var allowedPhotos = [".png", ".jpeg", ".jpg"];
+        jQuery.validator.addMethod('regExp', function (value, element, param) { return this.optional(element) || value.match(param); /*Compare with regular expression*/ }, 'Please check your data.');
+        jQuery.validator.addMethod("greaterThan", function (value, element, params) { if (value.length == 0) { return true; } if (!/Invalid|NaN/.test(new Date($.datepicker.parseDate('dd/mm/yy', value)))) { return new Date($.datepicker.parseDate('dd/mm/yy', value)) > new Date($.datepicker.parseDate('dd/mm/yy', $(params).val())); } return isNaN(value) && isNaN($(params).val()) || (Number(value) > Number($(params).val())); }, 'Must be greater than {0}.');
+        var customer_Validator;
+        function configcustomerValidationRules() {
+            var customer_Rules = {
+                "PersonalInfo.Title": { required: true },
+                "PersonalInfo.FirstName": { required: true },
+                "PersonalInfo.Surname": { required: true },
+                "PersonalInfo.Gender": { required: true },
+                "PersonalInfo.DateOfBirth": { required: true },
+                "PersonalInfo.Address": { required: true },
+                "PersonalInfo.PostCode": { required: true },
+                "PersonalInfo.Email": {email: true},
+                "NextOfKin.Email": { email: true },
+                UploadcustomerPhoto: { regExp: "([a-zA-Z0-9\s_\\.\-:])+(" + allowedPhotos.join('|') + ")$" },
+                //NINo: { regExp: /^[A-CEGHJ-PR-TW-Z]{1}[A-CEGHJ-NPR-TW-Z]{1}(?:\s*\d\s*){6}[A-DFM]{0,1}?\s*$/ },
+                StartDate: { required: true },
+                LeaveDate: { greaterThan: "#StartDate" },
+                "Bank.SortCode": { regExp: /^(?!(?:0{6}|00-00-00))(?:\d{6}|\d\d-\d\d-\d\d)$/ },
+                "Bank.AccountNo": { regExp: /^\d*$/ }
+            };
+            var customer_Messages = {
+                "PersonalInfo.Title": { required: "Please select title." },
+                "PersonalInfo.FirstName": { required: "Please enter customer first name." },
+                "PersonalInfo.Surname": { required: "Please enter customer surname." },
+                "PersonalInfo.Gender": { required: "Please select Gender." },
+                "PersonalInfo.DateOfBirth": { required: "Please enter Date of Birth." },
+                "PersonalInfo.Address": { required: "Please enter address of customer under contact information tab" },
+                "PersonalInfo.PostCode": { required: "Please enter Post Code under contact information tab" },
+                "PersonalInfo.Email": { email: "Please enter valid email under contact information tab" },
+                "NextOfKin.Email": { regExp: "Please enter valid email under next of kin tab" },
+                UploadcustomerPhoto: { regExp: "Please upload photo, having extensions: " + allowedPhotos.join(', ') + " only." },
+                //NINo: { regExp: "Please enter valid national insurance no under employment tab" },
+                StartDate: { required: "Please enter start date under employment tab" },
+                LeaveDate: { greaterThan: "Please enter valid leave date" },
+                "Bank.SortCode": { regExp: "Please enter valid bank sort code e.g: 12-34-56 or 123456" },
+                "Bank.AccountNo": { regExp: "Please enter valid bank account no" }
+            };
+            $('#customerForm').removeData('validator');
+            customer_Validator = new jQueryValidatorWrapper("customerForm",
+                customer_Rules, customer_Messages, "customerErrorwrap");
+        }
+        $("#customerSave").click(function (e) {
+            $("#customerSuccessMessage").hide();
+            configcustomerValidationRules();
+            if (!customer_Validator.validate()) { $("#customererrorMessage").show(); return };
+            $("#customererrorMessage").hide();
+            var form = $('#customerForm');
+            form.submit();
+        });
+        $('body').on('click', '#customererrorMessage-close', function (e) {
+            $("#customererrorMessage").hide();
+        });
+        $('body').on('click', '#customerSuccessMessages-close', function (e) {
+            $("#customerSuccessMessages").hide();
+        });
+        $('body').on('click', "#customerExit", function () {
+            window.location = "/Finance/Personnel/customer?customerId=";
+        });
+        $('body').on('click', "#customerReset", function () {
+            // window.location = "/Finance/Personnel/customer?customerId=" + $.Guid.Empty();
+        });
+    });
+</script>

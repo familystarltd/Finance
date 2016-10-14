@@ -1,0 +1,208 @@
+﻿<div class="departmentList-dialog" id="departmentList" title="Departments" style="display: none;">
+    <table style="border:none;">
+        <thead>
+            <tr>
+                <th style="border:none;"><a id="lnkDepartmentPrev"><img style="width:16px; height:16px;" src="~/images/pagingPrev.png" /></a></th>
+                <th style="border:none;">
+                    <table style="border:none;"><tbody><tr><td id="tblDepartmentPagingNos" style="border:none;"></td></tr> </tbody></table>
+                </th>
+                <th style="border:none;"><a id="lnkDepartmentNext"><img style="width:16px; height:16px;" src="~/images/pagingNext.png" /></a></th>
+                <th style="border: none; width: 100%; text-align: right; vertical-align: baseline;">
+                    <input type="image" id="departmentExit" src="~/images/exit.png" style="height:32px;cursor:pointer;" />
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <table id="businessDepartments" class="Border" style="width: 100%;">
+        <tr class="table_header">
+            <th style="width:60%;">Departments - <label id="departmentBusinessName"></label> </th>
+        </tr>
+    </table>
+    <div style="height:350px;overflow-y:scroll;" class="border">
+        <table id="businessDepartments" class="NoBorder" style="width: 100%;">
+            <tbody id="tblBodyBusinessDepartments" class="NoBorder"></tbody>
+        </table>
+    </div>
+</div>
+<script>
+    @{
+        Guid newID;
+        Guid.TryParse("4", out newID);
+        var GuidPattern = @"^(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$";
+    }
+    var getDepartmentsUrl = @Html.Raw("'/BusinessApi/Business/'") +'';
+    var saveDepartmentUrl = @Html.Raw("'/BusinessApi/SaveDepartment'") +'';
+    var deleteDepartmentUrl = @Html.Raw("'/BusinessApi/DeleteDepartment/'") +'';
+    var defaultDepartmentId = "@newID";
+    var GuidPattern = "@GuidPattern";
+    $(document).ready(function () {
+        var Business;
+        var DeptID = 0;
+        var DeptBusinessId = "";
+        var TextBoxTransparentCss = "textbox-transparent";
+        var TextBoxDefaultCss = "textbox-default";
+        function clearDepartmentForm() {
+            $("#tblBodyBusinessDepartments").empty();
+            $("#tblDepartmentPagingNos").empty();
+            $("#lnkDepartmentPrev").removeAttr('href');
+            $("#lnkDepartmentNext").removeAttr('href');
+            $("#lblTotalDepartments").text("");
+            $("#lblCurrentTotalDepartments").text("");
+        }
+        function clearData() {
+            var Business = {};
+            var DeptID = 0;
+            var DeptBusinessId = "";
+            $(".fee-department-dialog").data("Pagination", "");
+            $("#departmentBusinessName").text("");
+        }
+        function loadDepartmentsByBusiness(businessId) {
+            $.getJSON(getDepartmentsUrl + businessId, function (business) {
+                if (business) {
+                    Business = business;
+                    if ($.isNullOrEmpty(Business.departments) || $.isEmptyObject(Business.departments)) {
+                        Business.departments = [];// Create empty JSON department of object
+                    }
+                    $("#departmentBusinessName").text(Business.name);
+                    loadDepartments(Business.departments, null);
+                    $("#tblBodyBusinessDepartments").closest('tr').find('input[type=text]').focus();
+                } else { alert("Business has not been found"); $("#departmentList").dialog("close"); return; }
+            }).error(function (xhr) {$("#departmentList").dialog("close"); return; });
+        }
+        function generateNewDepartment() { return "<tr>" + "<td style='padding-top:5px;padding-left:3px;width:100%;'>" + "<input type='text' class='departmentName textbox-default' data-app-id='" + '' + "' style='margin-top:5px;margin-bottom:5px;margin-left:3px;margin-right:3px;width:90%;float:left;' />" + "</td>" + "</tr>"; }
+        function generateDepartment(Department) {
+            var deleteDept = "<img class='departmentDelete' src='/images/delete.png' style='width: 10px; height: 10px;cursor:pointer;margin-top:15px;margin-bottom:5px;' " + "data-app-id='" + Department.id + "'" + "/>"
+            return "<tr>" + "<td style='vertical-align:middle;padding-top:5px;padding-left:3px;width:100%;'> <input type='text' readonly='readonly' class='departmentName textbox-transparent' data-app-id='" + Department.id + "' value='" + Department.name + "' style='margin-top:5px;margin-bottom:5px;margin-left:3px;margin-right:3px;width:90%;float:left;'/>" + deleteDept + "</td>" + "</tr>";
+        }
+        function loadDepartments(Departments, Pagination) {
+            clearDepartmentForm();
+            var tableBody;
+            $("#tblBodyBusinessDepartments").append(generateNewDepartment());
+            if (Departments) {
+                if (Departments.length > 0) {
+                    $(Departments).each(function (index, department) {
+                        tableBody += generateDepartment(department);
+                    });
+                    if (tableBody != "") {
+                        $("#tblBodyBusinessDepartments").append(tableBody);
+                    }
+                    //Paging for Departments
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkDepartmentPrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkDepartmentPrev').stop().fadeTo('slow', 1);
+                            $("#lnkDepartmentPrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkDepartmentPrev").removeAttr('href');
+                            $('#lnkDepartmentPrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkDepartmentPrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkDepartmentNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkDepartmentNext').stop().fadeTo('slow', 1);
+                            $("#lnkDepartmentNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkDepartmentNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkDepartmentNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkDepartmentNext").attr('style', "cursor:none;");
+                        }
+                        $("#lblTotalDepartments").text(Pagination.TotalCount);
+                        $("#lblCurrentTotalDepartments").text(Departments.length);
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblDepartmentPagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblDepartmentPagingNos").empty(); $("#lnkDepartmentPrev").removeAttr('href'); $("#lnkDepartmentNext").removeAttr('href'); }
+                }
+            }
+        }
+        function saveDepartment(Department){
+            $.postJSON(saveDepartmentUrl, Department, function (Department) { if (Department) { loadDepartmentsByBusiness(DeptBusinessId); } }, 'json').error(function (xhr) {$("#departmentList").dialog("close"); return; });
+        }
+        function deleteDepartment(DepartmentId){
+            $.deleteJSON(deleteDepartmentUrl + DepartmentId, function (IsDeleted) { if (IsDeleted) { loadDepartmentsByBusiness(DeptBusinessId); } }, 'json').error(function (xhr) {$("#departmentList").dialog("close"); return; });
+        }
+        $(".departmentList-dialog").dialog({ modal: true, resizable: false, width: 600, height: 500, autoOpen: false, zIndex: 30000, position: { my: 'top', at: 'top+160' }, stack: false });
+        $(".departmentList-dialog").on("dialogopen", function (event, ui) {
+            clearDepartmentForm();
+            DeptBusinessId = $(".departmentList-dialog").data("BusinessId");
+            if ($.Guid.IsEmpty(DeptBusinessId)) {alert("Please select business");$("#departmentList").dialog("close");return;}
+            loadDepartmentsByBusiness(DeptBusinessId)
+        });
+        $(".departmentList-dialog").on("dialogclose", function (event, ui) { clearDepartmentForm(); clearData(); });
+        $('body').on('click', 'a.Paging_ByIndex', function (e) {
+            e.preventDefault();
+            var url = $(this).attr("href");
+            Current_URL = url;
+            if (url) {
+                var requestDepartment = $.getJSON(url, function (departments) {
+                    loadDepartments(departments, JSON.parse(requestDepartment.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Department Request failed! Please try again later. "); })
+            }
+        });
+        $('body').on('focusin', '.departmentName', function () {
+            $(this).removeAttr("readonly");
+            $(this).removeClass(TextBoxTransparentCss).addClass(TextBoxDefaultCss);
+        });
+        $('body').on('focusout', '.departmentName', function (e) {
+            e.preventDefault();
+            var value = $(this).val();
+            var ID2 = $(this).attr("data-app-id");
+            if (!$.isNullOrEmpty($.trim(value))) { $(this).removeClass(TextBoxDefaultCss).addClass(TextBoxTransparentCss); }
+            else { $(this).removeClass(TextBoxTransparentCss).addClass(TextBoxDefaultCss); $(this).attr("readonly"); }
+            if (!$.isNullOrEmpty(ID2) && $.isNullOrEmpty($.trim(value))) {
+                alert("Please enter department name");
+                $(this).focus();
+                return;
+            }
+        });
+        $('body').on('change', '.departmentName', function (e) {
+            e.preventDefault();
+            var value = $(this).val();
+            var ID = $(this).attr("data-app-id");
+            if ((ID != defaultDepartmentId || $.isNullOrEmpty(ID)) && $.isNullOrEmpty($.trim(value))) {$(this).focus();return;}
+            var department= $.getJsonObject(Business.departments, { "id": ID });
+            if ($.isEmptyObject(department) && !$.isNullOrEmpty($.trim(value))) { DeptID = DeptID + 1; department={"id": DeptID, "name": $.trim(value), "businessId": DeptBusinessId }; }
+            else { department.name = value; }
+            saveDepartment(department);
+            //$(this).closest('tr').before(generateNewDepartment());
+        });
+        $('body').on('click', '.departmentDelete', function (e) {
+            e.preventDefault();
+            var r = confirm("Are you sure to delete this department !");
+            if (r == true) { var ID = $(this).attr("data-app-id"); if (!$.Guid.IsEmpty(ID)) { deleteDepartment(ID) }} else {return;}
+        });
+        $("#departmentSave").click(function () {
+            if ($.Guid.IsEmpty(DeptBusinessId)) {alert("Please select the business and save departments");$("#departmentList").dialog("close");return;}
+
+        });
+        $("#departmentExit").click(function () { $("#departmentList").dialog("close"); });
+        $("#lnkDepartmentPrev").click(function (e) {e.preventDefault();var url = $("#lnkDepartmentPrev").attr('href');Current_URL = url;if (url) {var requestDepartment = $.getJSON(url, function (departments) {
+                    loadDepartments(departments, JSON.parse(requestDepartment.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Department Request failed! Please try again later. "); })}});
+        $("#lnkDepartmentNext").click(function (e) {e.preventDefault();var url = $("#lnkDepartmentNext").attr('href');Current_URL = url;if (url) {var requestDepartment = $.getJSON(url, function (departments) {
+                    loadDepartments(departments, JSON.parse(requestDepartment.getResponseHeader('X-Pagination')));
+                }).fail(function ()
+                { alert("List of Department Request failed! Please try again later. "); })}});
+    });
+</script>

@@ -1,0 +1,88 @@
+﻿@model Finance.Web.Model.CustomerViewModel
+@{
+    Layout = null;
+}
+<style>
+    table, tr, td, th, tbody, thead, tfoot {
+        page-break-inside: avoid !important;
+        border: none;
+        overflow: visible !important;
+        padding: 0px;
+        margin: 0px;
+    }
+</style>
+<table style="width:100%;font-size:small;" cellpadding="0" cellspacing="0">
+    <thead class="content" style="font-weight:900;vertical-align:top;font-size:medium;text-align:left;">
+        <tr>
+            <th colspan="4" style="vertical-align:top;text-align:left;border-top:3px solid #000000;border-bottom:3px solid #000000;padding:3px 0px 3px 0px;">
+                Business : @Model.BusinessName <span style="float:right;">Run Date : @DateTime.Now.ToString("dd/MM/yyyy HH:mm") </span>
+            </th>
+        </tr>
+        <tr>
+            <th style="min-width:300px;border-bottom:3px solid #000000;">
+                Customer
+            </th>
+            <th style="width:90px;text-align:center;border-bottom:3px solid #000000;">
+                Active
+            </th>
+            <th style="vertical-align:top;width:68%;text-align:left;border-bottom:3px solid #000000;">
+                <table style="width:100%;" cellpadding="0" cellspacing="0">
+                    <thead style="display:table-row-group;page-break-inside: avoid;">
+                        <tr>
+                            <th style="width:70%;text-align:left;">
+                                Fee
+                            </th>
+                            <th style="width:30%;text-align:left;">
+                                Funding
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </th>
+            <th style="text-align:right;border-bottom:3px solid #000000;">
+                Due
+            </th>
+        </tr>
+    </thead>
+    <tbody class="content-sub" style="font-size:small;vertical-align:top;text-align:left;">
+        @if (Model.Customers != null && Model.Customers.Count() > 0)
+        {
+            foreach (Finance.Web.Model.CustomerModel customer in Model.Customers)
+            {
+                <tr>
+                    <td style="border-bottom:3px solid #000000;">
+                        @customer.PersonalInfo.FullName
+                    </td>
+                    <td style="padding-right:3px;border-bottom:3px solid #000000;">
+                        <span>@customer.ActiveDate.ToString("dd/MM/yyyy")</span>
+                    </td>
+                    @if (customer.Fees != null && customer.Fees.Count() > 0)
+                        {
+                        <td style="font-size:small;vertical-align:top;border-bottom:3px solid #000000;">
+                            <table style="width:100%;font-size:small;" cellpadding="0" cellspacing="0">
+                                @foreach (Finance.Web.Model.FeeModel fee in customer.Fees)
+                                {
+                                    <tr>
+                                        <td style="width:70%;vertical-align:top;">
+                                            @Html.Partial("_FeeDisplayOnDashboard", fee, new ViewDataDictionary(Html.ViewData))
+                                        </td>
+                                        <td style="width:30%;vertical-align:top;">
+                                            @fee.Payer.Name
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </td>
+                        }
+                    <td style="border-bottom:3px solid #000000;">
+                        <table style="width:100%;" cellpadding="0" cellspacing="0">
+                            <tr><td style="text-align: right; border: none;padding-right:15px;">Invoice:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits)</td></tr>
+                            <tr style="color:darkgreen;border-bottom:1px solid #000000;"><td style="text-align: right; border: none; padding-right: 15px; ">Received:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Credits)</td></tr>
+                            <tr style="color:red;"><td style="text-align: right; border: none; padding-right: 15px; ">Due:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits - customer.Credits)</td></tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

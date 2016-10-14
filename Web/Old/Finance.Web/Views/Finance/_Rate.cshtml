@@ -1,0 +1,1008 @@
+﻿<div class="rate-setup-dialog" id="rate-setup" title="Rates" style="display: none;">
+    <h4 id="ratePosition" style="margin-top:0px;">
+        <img src="~/Content/Images/rate.png" style="width:32px;height:32px;" /> <span id="role">
+        </span> Rate Setup
+    </h4>
+    <div id="Errorwrap" class="row" style="margin-bottom:5px;color:red;width:auto;height:auto;"></div>
+    <div id="WeeklyRate" style="margin-bottom:5px;" hidden>
+        <form id="weeklyRateForm">
+            <input type="hidden" id="weeklyRateId" />
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Description
+                </div>
+                <div class="col-md-8">
+                    <textarea cols="70" rows="3" class="form-control" id="weeklyRateDesc" name="weeklyRateDesc"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Weekly Rate
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control currency" value="" id="weeklyRateAmt" name="weeklyRateAmt" />
+                </div>
+                <div class="col-md-1"  style="font-weight:bold;color:green;">
+                    from
+                </div>
+                <div class="col-md-3" style="font-weight:bold;color:green;">
+                    <label id="weeklyRate_LastEffectiveDate">N/A</label>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    New Effective Date
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" value="" id="weeklyRate_EffectiveDate" name="weeklyRate_EffectiveDate" />
+                </div>
+            </div>
+            @*<div class="row" style="margin-bottom:5px;">
+                    <div class="col-md-3">
+                        Closing Date
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" value="" id="weeklyRate_ClosingDate" />
+                    </div>
+                </div>*@
+        </form>
+    </div>
+    <div id="MonthlyRate" style="margin-bottom:5px;" hidden>
+        <form id="monthlyRateForm">
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Description
+                </div>
+                <div class="col-md-8">
+                    <textarea cols="70" rows="3" class="form-control" id="monthlyRateDesc" name="monthlyRateDesc"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Monthly Rate
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control currency" value="" id="monthlyRateAmt" name="monthlyRateAmt" />
+                </div>
+                <div class="col-md-1">
+                    from
+                </div>
+                <div class="col-md-3">
+                    <label id="monthlyRate_LastEffectiveDate">N/A</label>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    New Effective Date
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" value="" id="monthlyRate_EffectiveDate" name="monthlyRate_EffectiveDate" />
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="DailyRate" style="margin-bottom:5px;" hidden>
+        <form id="dailyRateForm">
+            <input type="hidden" id="dailyWeekdayRateId" />
+            <input type="hidden" id="dailyWeekendRateId" />
+            <input type="hidden" id="dailyBankholidayRateId" />
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Description
+                </div>
+                <div class="col-md-8">
+                    <textarea cols="70" rows="3" class="form-control" id="dailyRateDesc" name="dailyRateDesc"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Weekday Rate
+                </div>
+                <div class="col-md-2" style="padding-right:1px;">
+                    <input type="text" class="form-control currency" value="" id="dailyWeekdayRateAmt" name="dailyWeekdayRateAmt" />
+                </div>
+                <div class="col-md-4" style="font-size: x-small;padding-left:0px;padding-top:5px;">
+                    <label id="dailyWeekdayRate_LastEffectiveDate" style="font-size: x-small;"></label>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Weekend Rate
+                </div>
+                <div class="col-md-2" style="padding-right:1px;">
+                    <input type="text" class="form-control currency" value="" id="dailyWeekendRateAmt" name="dailyWeekendRateAmt" />
+                </div>
+                <div class="col-md-4" style="font-size: x-small; padding-left: 0px; padding-top: 5px;">
+                    <label id="dailyWeekendRate_LastEffectiveDate"></label>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    Bank holiday
+                </div>
+                <div class="col-md-2" style="padding-right:1px;">
+                    <input type="text" class="form-control currency" value="" id="dailyBankholidayRateAmt" name="dailyBankholidayRateAmt" />
+                </div>
+                <div class="col-md-4" style="font-size: x-small; padding-left: 0px; padding-top: 5px;">
+                    <label id="dailyBankholidayRate_LastEffectiveDate"></label>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    New Effective Date
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" value="" id="dailyRate_EffectiveDate" name="dailyRate_EffectiveDate" />
+                </div>
+                <div class="col-md-3">
+                    @*<label id="dailyRate_LastEffectiveDate">N/A</label>*@
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="HourlyRate" style="margin-bottom:5px;" hidden>
+        <form id="hourlyRateForm">
+            <input type="hidden" id="hourlyWeekdayDayRateId" />
+            <input type="hidden" id="hourlyWeekdayNightRateId" />
+            <input type="hidden" id="hourlyWeekendDayRateId" />
+            <input type="hidden" id="hourlyWeekendNightRateId" />
+            <input type="hidden" id="hourlyBankholidayDayRateId" />
+            <input type="hidden" id="hourlyBankholidayNightRateId" />
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    <label for="hourlyRateDesc">Description</label>
+                </div>
+                <div class="col-md-8">
+                    <textarea cols="70" rows="3" class="form-control" id="hourlyRateDesc" name="hourlyRateDesc"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-3">
+                    New Effective Date
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" value="" id="hourlyRate_EffectiveDate" name="hourlyRate_EffectiveDate" />
+                </div>
+                <div class="col-md-3">
+                    <label id="hourlyRate_LastEffectiveDate">N/A</label>
+                </div>
+            </div>
+            <hr style="margin:0px;" />
+            <div class="row" style="margin-bottom:5px;font-size:x-small;">
+                <div class="col-md-3">
+                    Notes :
+                </div>
+                <div class="col-md-1">
+                    Day
+                </div>
+                <div class="col-md-7">
+                    <b>6:00 AM </b> - <b>08:00 PM</b> <span id="hourlyDayMaxHrs"></span>
+                </div>
+            </div>
+            <div class="row" style="margin-bottom: 5px; font-size: x-small;">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-1">
+                    Night
+                </div>
+                <div class="col-md-7">
+                    <b>8:00 PM</b> - <b>06:00 AM</b> <span id="hourlyNightMaxHrs"></span>
+                </div>
+            </div>
+            <hr style="margin:0px;" />
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-12">
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-1">
+
+                        </div>
+                        <div class="col-md-3" style="text-decoration:underline;">
+                            Rate per Hour
+                        </div>
+                        <div class="col-md-3" style="text-decoration:underline;">
+                            No. of Hours
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+                            Weekday
+                        </div>
+                        <div class="col-md-1">
+                            Day
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyWeekDayRateAmt" name="hourlyWeekDayRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyWeekDayHrs" name="hourlyWeekDayHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyWeekdayDay_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-1">
+                            Night
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyWeekNightRateAmt" name="hourlyWeekNightRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyWeekNightHrs" name="hourlyWeekNightHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyWeekdayNight_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <hr style="margin:0px;margin-bottom:5px;" />
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+                            Weekend
+                        </div>
+                        <div class="col-md-1">
+                            Day
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyWeekendDayRateAmt" name="hourlyWeekendDayRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyWeekendDayHrs" name="hourlyWeekendDayHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyWeekendDay_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-1">
+                            Night
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyWeekendNightRateAmt" name="hourlyWeekendNightRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyWeekendNightHrs" name="hourlyWeekendNightHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyWeekendNight_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <hr style="margin: 0px; margin-bottom: 5px;" />
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+                            Bank holiday
+                        </div>
+                        <div class="col-md-1">
+                            Day
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyBankholidayDayRateAmt" name="hourlyBankholidayDayRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyBankholidayDayHrs" name="hourlyBankholidayDayHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyBankholidayDay_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:5px;">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-1">
+                            Night
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control currency" value="" id="hourlyBankholidayNightRateAmt" name="hourlyBankholidayNightRateAmt" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control number" value="" id="hourlyBankholidayNightHrs" name="hourlyBankholidayNightHrs" />
+                        </div>
+                        <div class="col-md-3" style="font-size:x-small;">
+                            <label id="hourlyBankholidayNight_LastEffectiveDate"></label>
+                        </div>
+                    </div>
+                    <hr style="margin: 0px; margin-bottom: 5px;" />
+                </div>
+            </div>
+            @*<input class="submit" type="submit" value="Submit">
+                <input type="image" id="Rate_Save" src="~/Content/Images/Save.png" style="width:32px;height:32px;" />*@
+        </form>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+        </div>
+        <div class="col-md-4">
+            <input type="image" id="Rate_Save" src="~/Content/Images/Save.png" style="width:32px;height:32px;" />
+            <img src="~/Content/images/exit.png" id="exit" class="rateExit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+        </div>
+    </div>
+</div>
+<script type="text/javascript" language="javascript">
+    $(document).ready(function () {
+        var maxDayHours = 12;
+        var maxNightHours = 12;
+        var feeData;
+        var feeRateData;
+        var rateData;
+        var feeId;
+        var feeRateId;
+        var rateId;
+        var role;
+        var rateMethod;
+        var Rate_Rules;
+        var Rate_Messages;
+        var validator;
+        function clearForm() {
+            $.clearForm($(".rate-setup-dialog"));
+            $("#weeklyRate_EffectiveDate").prop("disabled", false);
+            $(".rate-setup-dialog").data("feeRateId", "");
+            $(".rate-setup-dialog").data("role", "");
+            $(".rate-setup-dialog").data("rateId", "");
+            $("#Errorwrap").empty();
+            $("#WeeklyRate").hide();
+            $("#MonthlyRate").hide();
+            $("#DailyRate").hide();
+            $("#HourlyRate").hide();
+            Rate_Rules = null;
+            Rate_Messages = null;
+            validator = null;
+        }
+        function configWeeklyRateValidationRules() {
+            Rate_Rules = {
+                weeklyRateDesc: { required: true }, weeklyRateAmt: { required: true, number: true }, weeklyRate_EffectiveDate: { required: true }
+            };
+            Rate_Messages = { weeklyRateDesc: { required: "Please enter rate description" }, weeklyRateAmt: { required: "Please enter rate", number: "Please enter valid rate" } };
+            $('#weeklyRateForm').removeData('validator');
+            validator = new jQueryValidatorWrapper("weeklyRateForm",
+                Rate_Rules, Rate_Messages, "Errorwrap");
+        }
+        function configMonthlyRateValidationRules() {
+            Rate_Rules = {
+                monthlyRateDesc: {
+                    required: true
+                },
+                monthlyRateAmt: {
+                    required: true,
+                    number: true
+                },
+                monthlyRate_EffectiveDate: {
+                    required: true
+                }
+            };
+            Rate_Messages = {
+                monthlyRateDesc: {
+                    required: "Please enter rate description"
+                },
+                monthlyRateAmt: {
+                    required: "Please enter rate",
+                    number: "Please enter valid rate"
+                },
+                monthlyRate_EffectiveDate: {
+                    required: "Please enter rate"
+                }
+            };
+            $('#monthlyRateForm').removeData('validator');
+            validator = new jQueryValidatorWrapper("monthlyRateForm",
+                Rate_Rules, Rate_Messages, "Errorwrap");
+        }
+        function configDailyRateValidationRules() {
+            Rate_Rules = {
+                dailyRateDesc: { required: true },
+                dailyRate_EffectiveDate: { required: true },
+                dailyWeekdayRateAmt: { required: true, number: true },
+                dailyWeekendRateAmt: { required: true, number: true },
+                dailyBankholidayRateAmt: { required: true, number: true },
+            };
+            Rate_Messages = {
+                dailyRateDesc: { required: "Please enter rate description" },
+                dailyRate_EffectiveDate: { required: "Please enter valid effective date" },
+                dailyWeekdayRateAmt: { required: "Please enter Weekday rate", number: "Please enter valid Weekday rate" },
+                dailyWeekendRateAmt: { required: "Please enter Weekend rate", number: "Please enter valid Weekend rate" },
+                dailyBankholidayRateAmt: { required: "Please enter Bankholiday rate", number: "Please enter valid Bankholiday rate" }
+            };
+            $('#dailyRateForm').removeData('validator');
+            validator = new jQueryValidatorWrapper("dailyRateForm",
+                Rate_Rules, Rate_Messages, "Errorwrap");
+        }
+        function configHourlyRateValidationRules() {
+            Rate_Rules = {
+                hourlyRateDesc: { required: true },
+                hourlyRate_EffectiveDate: { required: true },
+                // Rate Amount
+                hourlyWeekDayRateAmt: { number: true, min: 0.01, max: 999 },
+                hourlyWeekNightRateAmt: { number: true, min: 0.01, max: 999 },
+                hourlyWeekendDayRateAmt: { number: true, min: 0.01, max: 999 },
+                hourlyWeekendNightRateAmt: { number: true, min: 0.01, max: 999 },
+                hourlyBankholidayDayRateAmt: { number: true, min: 0.01, max: 999 },
+                hourlyBankholidayNightRateAmt: { number: true, min: 0.01, max: 999 },
+                // Rate Hours
+                hourlyWeekDayHrs: { required: !$.isNullOrEmpty($("#hourlyWeekDayRateAmt").val()), number: true, min: 1, max: maxDayHours },
+                hourlyWeekNightHrs: { required: !$.isNullOrEmpty($("#hourlyWeekNightRateAmt").val()), number: true, min: 1, max: maxNightHours },
+                hourlyWeekendDayHrs: { required: !$.isNullOrEmpty($("#hourlyWeekendDayRateAmt").val()), number: true, min: 1, max: maxDayHours },
+                hourlyWeekendNightHrs: { required: !$.isNullOrEmpty($("#hourlyWeekendNightRateAmt").val()), number: true, min: 1, max: maxNightHours },
+                hourlyBankholidayDayHrs: { required: !$.isNullOrEmpty($("#hourlyBankholidayDayRateAmt").val()), number: true, min: 1, max: maxDayHours },
+                hourlyBankholidayNightHrs: { required: !$.isNullOrEmpty($("#hourlyBankholidayNightRateAmt").val()), number: true, min: 1, max: maxNightHours }
+            };
+            Rate_Messages = {
+                hourlyRateDesc: { required: "Please enter rate description" },
+                hourlyRate_EffectiveDate: { required: "Please enter valid effective date" },
+                // Rate Amount
+                hourlyWeekDayRateAmt: { required: "Please enter Weekday Day Rate amount", number: "Please enter valid Weekday Day Rate amount", min: "Minimum Weekday Day Rate amount is 0.01", max: "Weekday Day Rate amount should be less than £999" },
+                hourlyWeekNightRateAmt: { required: "Please enter Weekday Day Rate amount", number: "Please enter valid Weekday Night Rate amount", min: "Minimum Weekday Night Rate amount is 0.01", max: "Weekday Night Rate amount should be less than £999" },
+                hourlyWeekendDayRateId: { required: "Please enter Weekend Day Rate amount", number: "Please enter valid Weekend Day Rate amount", min: "Minimum Weekend Day Rate amount is 0.01", max: "Weekend Day Rate amount should be less than £999" },
+                hourlyWeekendNightRateId: { required: "Please enter Weekend Night Rate amount", number: "Please enter valid Weekend Night Rate amount", min: "Minimum Weekend Night Rate amount is 0.01", max: "Weekend Night Rate amount should be less than £999" },
+                hourlyBankholidayDayRateAmt: { required: "Please enter Bankholiday Day Rate amount", number: "Please enter valid Bankholiday Day Rate amount", min: "Minimum Bankholiday Day Rate amount is 0.01", max: "Bankholiday Day Rate amount should be less than £999" },
+                hourlyBankholidayNightRateAmt: { required: "Please enter Bankholiday Night Rate amount", number: "Please enter valid Bankholiday Night Rate amount", min: "Minimum Bankholiday Night Rate amount is 0.01", max: "Bankholiday Night Rate amount should be less than £999" },
+                // Rate Hours
+                hourlyWeekDayHrs: { required: "Please enter Weekday Day Hours", number: "Please enter valid Weekday Day Hours", min: "Weekday Day Hours should be more than or equal to 1", max: "Weekday Day Hours should be less than or equal to " + maxDayHours },
+                hourlyWeekNightHrs: {
+                    required: "Please enter Weekday Night Hours", number: "Please enter valid Weekday Night Hours", min: "Weekday Night Hours should be more than or equal to 1", max: "Weekday Night Hours should be less than or equal to " + maxNightHours
+                },
+                hourlyWeekendDayHrs: { required: "Please enter Weekend Day Hours", number: "Please enter valid Weekend Day Hours", min: "Weekend Day Hours should be more than or equal to 1", max: "Weekend Day Hours should be less than or equal to " + maxDayHours },
+                hourlyWeekendNightHrs: { required: "Please enter Weekend Night Hours", number: "Please enter valid Weekend Night Hours", min: "Weekend Night Hours should be more than or equal to 1", max: "Weekend Night Hours should be less than or equal to " + maxNightHours },
+                hourlyBankholidayDayHrs: { required: "Please enter Bankholiday Day Hours", number: "Please enter Bankholiday Day Hours", min: "Bankholiday Day Hours should be more than or equal to 1", max: "Bankholiday Day Hours should be less than or equal to " + maxDayHours },
+                hourlyBankholidayNightHrs: { required: "Please enter Bankholiday Night Hours", number: "Please enter valid Bankholiday Night Hours", min: "Bankholiday Night Hours should be more than or equal to 1", max: "Bankholiday Night Hours should be less than or equal to " + maxNightHours }
+            };
+            $('#hourlyRateForm').removeData('validator');
+            validator = new jQueryValidatorWrapper("hourlyRateForm",
+                Rate_Rules, Rate_Messages, "Errorwrap");
+        }
+        function setDefaultEffectiveDate(effectDate, minRateEffectDate, maxRateEffectDate) {
+            switch (role) {
+                case "Weekly":
+                    $("#weeklyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    $("#weeklyRate_EffectiveDate").datepicker("option", "minDate", new Date(minRateEffectDate));
+                    $("#weeklyRate_EffectiveDate").datepicker("option", "maxDate", new Date(maxRateEffectDate));
+                    break;
+                case "Monthly":
+                    $("#monthlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    $("#monthlyRate_EffectiveDate").datepicker("option", "minDate", new Date(minRateEffectDate));
+                    $("#monthlyRate_EffectiveDate").datepicker("option", "maxDate", new Date(maxRateEffectDate));
+                    break;
+                case "Daily":
+                    $("#dailyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    $("#dailyRate_EffectiveDate").datepicker("option", "minDate", new Date(minRateEffectDate));
+                    $("#dailyRate_EffectiveDate").datepicker("option", "maxDate", new Date(maxRateEffectDate));
+                    break;
+                case "Hourly":
+                    $("#hourlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    $("#hourlyRate_EffectiveDate").datepicker("option", "minDate", new Date(minRateEffectDate));
+                    //$("#hourlyRate_EffectiveDate").datepicker("option", "maxDate", new Date(maxRateEffectDate));
+                    break;
+            }
+        }
+        function setRateAsNew(effectDate) {
+            switch (role) {
+                case "Weekly":
+                    feeRateId = "00000000-0000-0000-0000-000000000000";
+                    $("#weeklyRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#weeklyRate_LastEffectiveDate").text("N/A");
+                    $("#weeklyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    break;
+                case "Monthly":
+                    feeRateId = "00000000-0000-0000-0000-000000000000";
+                    $("#monthlyRateId").val("00000000-0000-0000");
+                    $("#monthlyRate_LastEffectiveDate").text("N/A");
+                    $("#monthlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    break;
+                case "Daily":
+                    feeRateId = "00000000-0000-0000-0000";
+                    $("#dailyWeekdayRateId").val("00000000-0000-0000-0000");
+                    $("#dailyWeekendRateId").val("00000000-0000-0000-0000");
+                    $("#dailyBankholidayRateId").val("00000000-0000-0000-0000");
+                    $("#dailyRate_LastEffectiveDate").text("N/A");
+                    $("#dailyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    break;
+                case "Hourly":
+                    feeRateId = "00000000-0000-0000-0000-000000000000";
+                    $("#hourlyWeekdayDayRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#hourlyWeekdayNightRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#hourlyWeekendDayRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#hourlyWeekendNightRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#hourlyBankholidayDayRateId").val("00000000-0000-0000-0000-000000000000");
+                    $("#hourlyBankholidayNightRateId").val("00000000-0000-0000-0000-000000000000");
+
+                    $("#hourlyRate_LastEffectiveDate").text("N/A");
+                    $("#hourlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(effectDate)));
+                    break;
+            }
+        }
+        function saveHourlyRate(feeRateData) {
+            // Defining FeeRate object
+            feeRateData["id"] = feeRateId;
+            feeRateData["feeId"] = feeId;//!$.isNullOrEmpty(feeData) ? $.date(feeData.activeDate, "dd/mm/yyyy") : "";
+            feeRateData["rateDescription"] = $("#hourlyRateDesc").val();
+            feeRateData["rateMethod"] = rateMethod;
+            if (!feeRateData.rates) {
+                $.extend(feeRateData, { rates: [] });
+            }
+            saveHourlyWeekdayDayRate(feeRateData.rates);
+            saveHourlyWeekdayNightRate(feeRateData.rates);
+            saveHourlyWeekendDayRate(feeRateData.rates);
+            saveHourlyWeekendNightRate(feeRateData.rates);
+            saveHourlyBankHolidayDayRate(feeRateData.rates);
+            saveHourlyBankHolidayNightRate(feeRateData.rates);
+        }
+        function saveHourlyWeekdayDayRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyWeekdayDayRateId").val(), "dayPremium": 1, "timePremium": 1 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekday Day Rate
+            rateData["id"] = $("#hourlyWeekdayDayRateId").val();
+            rateData["dayPremium"] = 1;
+            rateData["timePremium"] = 1;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyWeekDayRateAmt").val()) ? Number($("#hourlyWeekDayRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyWeekDayHrs").val()) ? Number($("#hourlyWeekDayHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveHourlyWeekdayNightRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyWeekdayNightRateId").val(), "dayPremium": 1, "timePremium": 2 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekday Night Rate
+            rateData["id"] = $("#hourlyWeekdayNightRateId").val();
+            rateData["dayPremium"] = 1;
+            rateData["timePremium"] = 2;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyWeekNightRateAmt").val()) ? Number($("#hourlyWeekNightRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyWeekNightHrs").val()) ? Number($("#hourlyWeekNightHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveHourlyWeekendDayRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyWeekendDayRateId").val(), "dayPremium": 2, "timePremium": 1 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekend Day Rate
+            rateData["id"] = $("#hourlyWeekendDayRateId").val();
+            rateData["dayPremium"] = 2;
+            rateData["timePremium"] = 1;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyWeekendDayRateAmt").val()) ? Number($("#hourlyWeekendDayRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyWeekendDayHrs").val()) ? Number($("#hourlyWeekendDayHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveHourlyWeekendNightRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyWeekendNightRateId").val(), "dayPremium": 2, "timePremium": 2 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekend Night Rate
+            rateData["id"] = $("#hourlyWeekendNightRateId").val();
+            rateData["dayPremium"] = 2;
+            rateData["timePremium"] = 2;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyWeekendNightRateAmt").val()) ? Number($("#hourlyWeekendNightRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyWeekendNightHrs").val()) ? Number($("#hourlyWeekendNightHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveHourlyBankHolidayDayRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyBankholidayDayRateId").val(), "dayPremium": 3, "timePremium": 1 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Bankholidayday Day Rate
+            rateData["id"] = $("#hourlyBankholidayDayRateId").val();
+            rateData["dayPremium"] = 3;
+            rateData["timePremium"] = 1;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyBankholidayDayRateAmt").val()) ? Number($("#hourlyBankholidayDayRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyBankholidayDayHrs").val()) ? Number($("#hourlyBankholidayDayHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveHourlyBankHolidayNightRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#hourlyBankholidayNightRateId").val(), "dayPremium": 3, "timePremium": 2 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Bankholiday Night Rate
+            rateData["id"] = $("#hourlyBankholidayNightRateId").val();
+            rateData["dayPremium"] = 3;
+            rateData["timePremium"] = 2;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#hourlyBankholidayNightRateAmt").val()) ? Number($("#hourlyBankholidayNightRateAmt").val()).toFixed(2) : 0;
+            rateData["noOfHours"] = !$.isNullOrEmpty($("#hourlyBankholidayNightHrs").val()) ? Number($("#hourlyBankholidayNightHrs").val()).toFixed(0) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#hourlyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveDailyRate(feeRateData) {
+            // Defining FeeRate object
+            feeRateData["id"] = feeRateId;
+            feeRateData["feeId"] = feeId;//!$.isNullOrEmpty(feeData) ? $.date(feeData.activeDate, "dd/mm/yyyy") : "";
+            feeRateData["rateDescription"] = $("#dailyRateDesc").val();
+            feeRateData["rateMethod"] = rateMethod;
+            if (!feeRateData.rates) {
+                $.extend(feeRateData, { rates: [] });
+            }
+            saveDailyWeekdayRate(feeRateData.rates);
+            saveDailyWeekendRate(feeRateData.rates);
+            saveDailyBankHolidayRate(feeRateData.rates);
+        }
+        function saveDailyWeekdayRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#dailyWeekdayRateId").val(), "dayPremium": 1, "timePremium": 0 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekday Day Rate
+            rateData["id"] = $("#dailyWeekdayRateId").val();
+            rateData["dayPremium"] = 1;
+            rateData["timePremium"] = 0;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#dailyWeekdayRateAmt").val()) ? Number($("#dailyWeekdayRateAmt").val()).toFixed(2) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#dailyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveDailyWeekendRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#dailyWeekendRateId").val(), "dayPremium": 2, "timePremium": 0 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Weekend Day Rate
+            rateData["id"] = $("#dailyWeekendRateId").val();
+            rateData["dayPremium"] = 2;
+            rateData["timePremium"] = 0;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#dailyWeekendRateAmt").val()) ? Number($("#dailyWeekendRateAmt").val()).toFixed(2) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#dailyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveDailyBankHolidayRate(rates) {
+            rateData = $.getJsonObject(rates, { "id": $("#dailyBankholidayRateId").val(), "dayPremium": 3, "timePremium": 0 });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            // Save Bankholidayday Day Rate
+            rateData["id"] = $("#dailyBankholidayRateId").val();
+            rateData["dayPremium"] = 3;
+            rateData["timePremium"] = 0;
+            rateData["rateAmount"] = !$.isNullOrEmpty($("#dailyBankholidayRateAmt").val()) ? Number($("#dailyBankholidayRateAmt").val()).toFixed(2) : 0;
+            rateData["effectiveDate"] = $.toJsonDate($("#dailyRate_EffectiveDate").datepicker("getDate"));
+            rateData["closingDate"] = null;
+        }
+        function saveWeeklyRate(feeRateData) {
+
+            // Defining FeeRate object
+            feeRateData["id"] = feeRateId;
+            feeRateData["feeId"] = feeId;//!$.isNullOrEmpty(feeData) ? $.date(feeData.activeDate, "dd/mm/yyyy") : "";
+            feeRateData["rateDescription"] = $("#weeklyRateDesc").val();
+            feeRateData["rateMethod"] = rateMethod;
+            if (!feeRateData.rates) {
+                $.extend(feeRateData, { rates: [] });
+            }
+            rateData = $.getJsonObject(feeRateData.rates, { "id": $("#weeklyRateId").val() });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            rateData["id"] = $("#weeklyRateId").val();
+            rateData["rateAmount"] = $("#weeklyRateAmt").val();
+            rateData["effectiveDate"] = $.toJsonDate($("#weeklyRate_EffectiveDate").datepicker("getDate"));
+        }
+        function saveMonthlyRate(feeRateData) {
+            // Defining FeeRate object
+            feeRateData["id"] = feeRateId;
+            feeRateData["feeId"] = feeId;//!$.isNullOrEmpty(feeData) ? $.date(feeData.activeDate, "dd/mm/yyyy") : "";
+            feeRateData["rateDescription"] = $("#monthlyRateDesc").val();
+            feeRateData["rateMethod"] = rateMethod;
+            if (!feeRateData.rates) {
+                $.extend(feeRateData, { rates: [] });
+            }
+            rateData = $.getJsonObject(feeRateData.rates, { "id": $("#monthlyRateId").val() });
+            if ($.isEmptyObject(rateData)) {
+                feeRateData.rates.push(rateData);
+            }
+            rateData["rateMethod"] = rateMethod;
+            rateData["feeRateId"] = feeRateId;
+            rateData["id"] = $("#monthlyRateId").val();
+            rateData["rateAmount"] = $("#monthlyRateAmt").val();
+            rateData["effectiveDate"] = $.toJsonDate($("#monthlyRate_EffectiveDate").datepicker("getDate"));
+        }
+        function loadRates(feeRateData) {
+            switch (rateMethod) {
+                case 1:
+                    loadHourlyRates(feeRateData);
+                    break;
+                case 2:
+                    loadDailyRates(feeRateData);
+                    break;
+                case 3:
+                    loadWeeklyRates(feeRateData);
+                    break;
+                case 4:
+                    loadMonthlyRates(feeRateData);
+                    break;
+            }
+        }
+        function loadWeeklyRates(feeRateData) {
+            if (!$.isNullOrEmpty(feeRateData.rates)) {
+                var rateData = $.getJsonObject(feeRateData.rates, { "feeRateId": feeRateId, "closingDate": null });
+                $("#weeklyRateDesc").val(feeRateData.rateDescription);
+                $("#weeklyRateId").val(rateData.id);
+                $("#weeklyRateAmt").val(rateData.rateAmount);
+                $("#weeklyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+                $("#weeklyRate_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rateData.effectiveDate)));
+            }
+            $("#WeeklyRate").show();
+        }
+        function loadMonthlyRates(feeRateData) {
+
+            if (!$.isNullOrEmpty(feeRateData.rates)) {
+                var rateData = $.getJsonObject(feeRateData.rates, { "feeRateId": feeRateId, "closingDate": null });
+                $("#monthlyRateId").val(rateData.id);
+                $("#monthlyRateDesc").val(feeRateData.rateDescription);
+                $("#monthlyRateAmt").val(rateData.rateAmount);
+                $("#monthlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+                $("#monthlyRate_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rateData.effectiveDate)));
+            }
+        }
+        function loadHourlyRates(feeRateData) {
+            $("#hourlyRateDesc").val(feeRateData.rateDescription);
+            $("#hourlyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+            $("#hourlyRate_LastEffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(feeRateData.effectiveDate)));
+            loadHourlyWeekdayDayRates(feeRateData.rates);
+            loadHourlyWeekdayNightRates(feeRateData.rates);
+            loadHourlyWeekendDayRates(feeRateData.rates);
+            loadHourlyWeekendNightRates(feeRateData.rates);
+            loadHourlyBankholidayDayRates(feeRateData.rates);
+            loadHourlyBankHolidayNightRates(feeRateData.rates);
+            $("#HourlyRate").show();
+        }
+        function loadHourlyWeekdayDayRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 1, "timePremium": 1 });
+            $("#hourlyWeekdayDayRateId").val(rate.id);
+            $("#hourlyWeekDayRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyWeekDayHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyWeekdayDay_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadHourlyWeekdayNightRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 1, "timePremium": 2 });
+            $("#hourlyWeekdayNightRateId").val(rate.id);
+            $("#hourlyWeekNightRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyWeekNightHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyWeekdayNight_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadHourlyWeekendDayRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 2, "timePremium": 1 });
+            $("#hourlyWeekendDayRateId").val(rate.id);
+            $("#hourlyWeekendDayRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyWeekendDayHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyWeekendDay_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadHourlyWeekendNightRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 2, "timePremium": 2 });
+            $("#hourlyWeekendNightRateId").val(rate.id);
+            $("#hourlyWeekendNightRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyWeekendNightHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyWeekendNight_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadHourlyBankholidayDayRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 3, "timePremium": 1 });
+            $("#hourlyBankholidayDayRateId").val(rate.id);
+            $("#hourlyBankholidayDayRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyBankholidayDayHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyBankholidayDay_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadHourlyBankHolidayNightRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 3, "timePremium": 2 });
+            $("#hourlyBankholidayNightRateId").val(rate.id);
+            $("#hourlyBankholidayNightRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#hourlyBankholidayNightHrs").val(rate.noOfHours > 0 ? rate.noOfHours : "");
+            $("#hourlyBankholidayNight_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadDailyRates(rateData) {
+            $("#dailyRateDesc").val(feeRateData.rateDescription);
+            $("#dailyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+            //$("#dailyRate_LastEffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(feeRateData.effectiveDate)));
+            loadDailyWeekdayRates(feeRateData.rates);
+            loadDailyWeekendRates(feeRateData.rates);
+            loadDailyBankholidayRates(feeRateData.rates);
+
+            $("#dailyRateId").val(rateData.id);
+            $("#dailyRateAmt").val(rateData.rateAmount);
+            $("#dailyRate_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+            //$("#dailyRate_LastEffectiveDate").text($.datepicker.formatDate('dd/mm/yy', new Date(rateData.effectiveDate)));
+            $("#DailyRate").show();
+        }
+        function loadDailyWeekdayRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 1, "timePremium": 0 });
+            $("#dailyWeekdayRateId").val(rate.id);
+            $("#dailyWeekdayRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#dailyWeekdayRate_LastEffectiveDate").text("from " + $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadDailyWeekendRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 2, "timePremium": 0 });
+            $("#dailyWeekendRateId").val(rate.id);
+            $("#dailyWeekendRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#dailyWeekendRate_LastEffectiveDate").text("from " + $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function loadDailyBankholidayRates(rates) {
+            var rate = $.getJsonObject(rates, { "feeRateId": feeRateId, "closingDate": null, "dayPremium": 3, "timePremium": 0 });
+            $("#dailyBankholidayRateId").val(rate.id);
+            $("#dailyBankholidayRateAmt").val(rate.rateAmount > 0 ? rate.rateAmount : "");
+            $("#dailyBankholidayRate_LastEffectiveDate").text("from " + $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate)));
+        }
+        function saveRate() {
+            feeRateData = $.getJsonObject(feeData.feeRates, { "id": feeRateId, "rateMethod": rateMethod });
+            if ($.isEmptyObject(feeRateData)) {
+                feeData.feeRates.push(feeRateData);
+            }
+            switch (role) {
+                case "Hourly":// Defining Rate (Hourly) Object (FeeRate -> Rate)
+                    saveHourlyRate(feeRateData);
+                    break;
+                case "Daily":// Defining Rate (Daily) Object (FeeRate -> Rate)
+                    saveDailyRate(feeRateData);
+                    break;
+                case "Weekly": // Defining Rate (Weekly) Object (FeeRate -> Rate)
+                    saveWeeklyRate(feeRateData);
+                    break;
+                case "Monthly":// Defining Rate (Monthly) Object (FeeRate -> Rate)
+                    saveMonthlyRate(feeRateData);
+                    break;
+            }
+            $(".rate-setup-dialog").dialog("close");
+        }
+        $("#Rate_Save").click(function () {
+            switch (role) {
+                case "Weekly":
+                    configWeeklyRateValidationRules();
+                    break;
+                case "Monthly":
+                    configMonthlyRateValidationRules();
+                    break;
+                case "Daily":
+                    configDailyRateValidationRules();
+                    break;
+                case "Hourly":
+                    configHourlyRateValidationRules();
+                    break;
+            }
+            if (!validator.validate()) return;
+            saveRate();
+        });
+        $(".rate-setup-dialog").hide();
+        $(".rate-setup-dialog").dialog({
+            modal: true, resizable: false, minWidth: 700, height: 'auto', zindex: 1001, autoOpen: false,
+            position: { my: 'top', at: 'top+60' }
+        });
+        $('body').on('keypress', '.currency', $.currenciesOnly).on('blur', '.currency', function () { $(this).val($.formatCurrency($(this).val())) });
+        $('body').on('keypress', '.number', $.numbersOnly).on('blur', '.number', function () { $(this).val($.toNumber($(this).val())) });
+        $(".rateExit").click(function () { $(".rate-setup-dialog").dialog("close"); });
+        $(".rate-setup-dialog").on("dialogclose", function (event, ui) { clearForm(); });
+        $(".rate-setup-dialog").on("dialogopen", function (event, ui) {
+            feeRateId = $(".rate-setup-dialog").data("feeRateId");
+            rateId = $(".rate-setup-dialog").data("rateId");
+            role = $(".rate-setup-dialog").data("role");
+            feeData = $(".rate-setup-dialog").data("feeData");
+            $("#role").text(role);
+            var effectDate;
+            var minRateEffectDate;
+            var maxRateEffectDate;
+            switch (role) {
+                case "Weekly":
+                    rateMethod = 3;
+                    $("#WeeklyRate").show();
+                    break;
+                case "Monthly":
+                    rateMethod = 4;
+                    $("#MonthlyRate").show();
+                    break;
+                case "Daily":
+                    rateMethod = 2;
+                    $("#DailyRate").show();
+                    break;
+                case "Hourly":
+                    rateMethod = 1;
+                    $("#HourlyRate").show();
+                    $("#hourlyDayMaxHrs").text("(" + maxDayHours + " Hrs. Maximum)");
+                    $("#hourlyNightMaxHrs").text("(" + maxNightHours + " Hrs. Maximum)");
+                    break;
+            }
+            if (!$.isNullOrEmpty(feeRateId)) {
+                if (!$.isNullOrEmpty(feeData.feeRates)) {
+                    feeRateData = $.getJsonObject(feeData.feeRates, { "id": feeRateId, "rateMethod": rateMethod });
+                }
+                feeId = feeData.id;
+                minRateEffectDate = new Date(feeData.minEffectDate);
+                maxRateEffectDate = new Date(minRateEffectDate.getFullYear(), minRateEffectDate.getMonth() + 1, 1);
+                effectDate = new Date(minRateEffectDate) <= new Date() ? new Date() : new Date(minRateEffectDate);
+                setDefaultEffectiveDate(effectDate, minRateEffectDate, maxRateEffectDate);
+                if (!$.isNullOrEmpty(feeRateData)) {
+                    loadRates(feeRateData);
+                }
+            }
+            else {
+                if (feeData) {
+                    feeId = feeData.id;
+                    if ($.isNullOrEmpty(feeData.feeRates)) {
+                        $.extend(feeData, { feeRates: [] });
+                        feeRateId = "00000000-0000-0000-0000-000000000000";
+                    }
+                    feeRateData = null;
+                    if (feeData.feeRates.length == 0) {
+                        minRateEffectDate = new Date(feeData.minEffectDate);
+                        maxRateEffectDate = minRateEffectDate;
+                        effectDate = minRateEffectDate;
+                    }
+                    else {
+                        minRateEffectDate = new Date(feeData.minEffectDate);
+                        maxRateEffectDate = new Date(minRateEffectDate.getFullYear()+10, minRateEffectDate.getMonth(), 1);
+                        effectDate = minRateEffectDate;
+                    }
+                    setDefaultEffectiveDate(effectDate, minRateEffectDate, maxRateEffectDate);
+                    setRateAsNew(effectDate);
+                }
+                else { alert("Fee details has not been found! Please try again later."); }
+            }
+        });
+        $("#weeklyRate_EffectiveDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var effectDate = new Date($(this).datepicker("getDate"));
+            var maxDate = new Date($(this).datepicker("option", "maxDate"));
+            if (minDate > effectDate) {
+                alert("Minimum date should be " + $.toJsonDate(minDate)); $(this).datepicker("setDate", new Date(minDate)); $(this).focus();
+            }
+            else if (maxDate < effectDate) { alert("Today is the maximum date you can choose for effective date"); $(this).datepicker("setDate", new Date(minDate)); $(this).focus(); }
+            else { $("#Rate_Save").focus(); }
+        });
+        $("#hourlyRate_EffectiveDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var effectDate = new Date($(this).datepicker("getDate"));
+            var maxDate = new Date($(this).datepicker("option", "maxDate"));
+            if (minDate > effectDate) {
+                alert("Minimum date should be " + $.toJsonDate(minDate)); $(this).datepicker("setDate", new Date(minDate)); $(this).focus();
+            }
+            else if (maxDate < effectDate) { alert("The maximum date you can choose for effective date" + $.toJsonDate(maxDate)); $(this).datepicker("setDate", new Date()); $(this).focus(); }
+            else { $("#Rate_Save").focus(); }
+        });
+        $("#dailyRate_EffectiveDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var effectDate = new Date($(this).datepicker("getDate"));
+            var maxDate = new Date($(this).datepicker("option", "maxDate"));
+            if (minDate > effectDate) {
+                alert("Minimum date should be " + $.toJsonDate(minDate)); $(this).datepicker("setDate", new Date(minDate)); $(this).focus();
+            }
+            else if (maxDate < effectDate) { alert("The maximum date you can choose for effective date" + $.toJsonDate(maxDate)); $(this).datepicker("setDate", new Date()); $(this).focus(); }
+            else { $("#Rate_Save").focus(); }
+        });
+        $("#monthlyRate_EffectiveDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var effectDate = new Date($(this).datepicker("getDate"));
+            var maxDate = new Date($(this).datepicker("option", "maxDate"));
+            if (minDate > effectDate) {
+                alert("Minimum date should be " + $.toJsonDate(minDate)); $(this).datepicker("setDate", new Date(minDate)); $(this).focus();
+            }
+            else if (maxDate < effectDate) { alert("The maximum date you can choose for effective date" + $.toJsonDate(maxDate)); $(this).datepicker("setDate", new Date()); $(this).focus(); }
+            else { $("#Rate_Save").focus(); }
+        });
+    });
+</script>

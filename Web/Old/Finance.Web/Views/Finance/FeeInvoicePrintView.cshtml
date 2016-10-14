@@ -1,0 +1,238 @@
+﻿@using FinanceManagement.Web.Model;
+@model IEnumerable<FinanceManagement.Web.Model.InvoiceModel>
+@Styles.Render("~/Content/Invoice/Print")
+@*@Scripts.Render("~/bundles/PDF")*@
+
+
+<div id="preloader" style="z-index:999999">
+    <div id="spinner_container"><img id="spinner" src="~/Content/images/loading.gif" /></div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnPrintAll").click(function () {
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px", "margin": "0mm" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html moznomarginboxes mozdisallowselectionprint><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="/Content/Default/css/site.css" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="/Content/css/InvoicePrint.css" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write($("#invoicePrintView").html());
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        });
+        $("#btnPrint").click(function () {
+            alert("print");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html moznomarginboxes mozdisallowselectionprint><head><title>Invoices</title>');
+            printWindow.document.write('<link href="/Content/css/InvoicePrint.css" rel="stylesheet" type="text/css" />');
+            printWindow.document.write('</head><body >');
+            printWindow.document.write($("#invoicePrintView").html());
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        });
+    });
+</script>
+<div id="editor"></div>
+<div id="commands" style="margin-top:30px;">
+    <input type="button" value="Print All Invoices" id="btnPrintAll" />
+    <input type="button" value="Generate PDF" id="btnGeneratePDF" />
+</div>
+
+<div id="invoicePrintView">
+    @foreach (FinanceManagement.Web.Model.FeeInvoiceModel invoice in Model)
+    {
+        if (invoice != null)
+        {
+            <div class="page" id="@invoice.InvoiceNo">
+                <table id="tblInvoiceMain" style="width:100%;">
+                    <tr>
+                        <td style="width:50%;">
+                            FAMILY STAR LTD <br />
+                            Shirley View Nursing Home<br />
+                            23 Shirley Avenue<br />
+                            Cheam<br />
+                            Surrey<br />
+                            SM2 7QS<br />
+                            Tel. 020 8643 5680<br />
+                            Fax. 020 8642 7313<br />
+                        </td>
+                        <td style="width:50%;">
+                            <table border="0" style="border:none; text-align:left;float:right;">
+                                <tr style="">
+                                    <td style="border:none;">Invoice No</td>
+                                    <td style="border: none; padding-left: 10px;">@invoice.InvoiceNo</td>
+                                </tr>
+                                <tr style="padding-top:20px;">
+                                    <td style="border:none;">Invoice Date</td>
+                                    <td style="border: none; padding-left: 10px;">@string.Format("{0}", invoice.InvoiceDate.ToString("dd MMMM yyyy"))</td>
+                                </tr>
+                                <tr style="margin-top: 10px;">
+                                    <td style="border:none;">SVN</td>
+                                    <td style="border: none;padding-left:10px;">@string.Format("{0}", invoice.Customer.Ref)</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding-top:25px;vertical-align:top;">
+                            TO :<br />
+                            @if (invoice.Payer.FeeInvoiceBillingContact == null && invoice.Payer.FeeInvoiceDeliveryContact != null)
+                            {
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Business))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceDeliveryContact.Business </span> <br />
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Department))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceDeliveryContact.Department </span> <br />
+                                    }
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.ContactReference))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceDeliveryContact.ContactReference </span> <br />
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.FirstName) && !string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.LastName))
+                                {
+                                    <span> @string.Format("{0} {1}", invoice.Payer.FeeInvoiceDeliveryContact.Title, invoice.Payer.FeeInvoiceDeliveryContact.FullName) </span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Address))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>")</span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.PostCode))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceDeliveryContact.PostCode </span> <br />
+                                }
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.Business))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceBillingContact.Business </span> <br />
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.Department))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceBillingContact.Department </span> <br />
+                                    }
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.ContactReference))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceBillingContact.ContactReference </span> <br />
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.FirstName) && !string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.LastName))
+                                {
+                                    <span> @string.Format("{0} {1}", invoice.Payer.FeeInvoiceBillingContact.Title, invoice.Payer.FeeInvoiceBillingContact.FullName) </span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.Address))
+                                {
+                                    <span> @Html.Raw(invoice.Payer.FeeInvoiceBillingContact.Address.Replace(Environment.NewLine, "<br>"))</span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceBillingContact.PostCode))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceBillingContact.PostCode </span> <br />
+                                }
+                            }
+                        </td>
+                        <td style="padding-top: 25px; vertical-align: top;">
+                            @if (invoice.Payer.FeeInvoiceDeliveryContact != null)
+                            {
+                                <span>SHIP TO :</span> <br />
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Business))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceDeliveryContact.Business </span> <br />
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Department))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceDeliveryContact.Department </span> <br />
+                                    }
+                                    if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.ContactReference))
+                                    {
+                                        <span> @invoice.Payer.FeeInvoiceDeliveryContact.ContactReference </span> <br />
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.FirstName) && !string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.LastName))
+                                {
+                                    <span> @string.Format("{0} {1}", invoice.Payer.FeeInvoiceDeliveryContact.Title, invoice.Payer.FeeInvoiceDeliveryContact.FullName) </span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.Address))
+                                {
+                                    <span> @Html.Raw(invoice.Payer.FeeInvoiceDeliveryContact.Address.Replace(Environment.NewLine, "<br>"))</span> <br />
+                                }
+                                if (!string.IsNullOrEmpty(invoice.Payer.FeeInvoiceDeliveryContact.PostCode))
+                                {
+                                    <span> @invoice.Payer.FeeInvoiceDeliveryContact.PostCode </span> <br />
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding-top:25px;">
+                            Invoice for the provision of @string.Format("{0} for {1}", invoice is FeeInvoiceModel ? (invoice as FeeInvoiceModel).Fee.Name : string.Empty, invoice.Customer.PersonalInfo.FullName)
+                            <br />
+                            Date of Admission : @invoice.Customer.ActiveDate.ToString("dd MMMM yyyy")
+                        </td>
+                    </tr>
+                    @********************Invoice Details*********************************@
+                    <tr>
+                        <td colspan="2" style="padding-top:25px;">
+                            @{
+                                switch (invoice.InvoiceType)
+                                {
+                                    case InvoiceTypeModel.Fee:
+                                        if (Html.ViewData.ContainsKey("RatesShow")){Html.ViewData["RatesShow"] = false;}
+                                        else { Html.ViewData.Add("RatesShow", false);}
+                                        @Html.Partial("_FeeInvoiceDetail", invoice, new ViewDataDictionary(Html.ViewData));
+                                        break;
+                                    case InvoiceTypeModel.FNC:
+                                        @Html.Partial("_FNCInvoiceDetail", invoice, new ViewDataDictionary(Html.ViewData));
+                                        break;
+                                    case InvoiceTypeModel.Expenses:
+                                        @Html.Partial("_ExpensesInvoiceDetail", invoice, new ViewDataDictionary(Html.ViewData));
+                                        break;
+                                    case InvoiceTypeModel.Manual:
+                                        @Html.Partial("_ManualInvoiceDetail", invoice, new ViewDataDictionary(Html.ViewData));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        </td>
+                    </tr>
+                    @********************************************************************@
+                    <tfoot>
+                        <tr>
+                            <td style="padding-top:50px;">
+                                Payable to  FAMILY STAR LTD<br />
+                                Bank A/C No:38860568<br />
+                                Sort Code: 30-84-68
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="padding-top: 50px;">
+                                Business Registered No.5932651. Registered Office: 18 The Spinneys Bickley Kent BR1 2NU.
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+    }
+</div>
+<script>
+    $(window).load(function () {
+        $('#preloader').fadeOut(100, function () {
+            $('body').css('overflow', 'auto');
+            $(this).remove();
+        });
+    });
+</script>

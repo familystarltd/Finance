@@ -1,0 +1,62 @@
+﻿@model Finance.Web.Model.ContactModel
+@using Finance.Web.Helpers.ExtensionMethods
+@using Finance.Web.Models
+@Html.HiddenFor(model => model.Id)
+<div class="form-group">
+    @Html.LabelFor(model => model.Title, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-2">
+        @Html.DropDownListFor(model => model.Title, Model.Title.ToSelectList(addPleaseSelect: true, selectMsg: ""), new Dictionary<string, object> { { "data-val", @Model.EnableValidation }, { "class", "form-control" } })
+        @if (@Model.EnableValidation) { Html.ValidationMessageFor(model => model.Title); }
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.FirstName, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-8">
+        @Html.TextBoxFor(model => model.FirstName, new Dictionary<string, object> { { "data-val", @Model.EnableValidation }, { "class", "form-control" } })
+        @if (@Model.EnableValidation) { Html.ValidationMessageFor(model => model.FirstName); }
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.LastName, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-8">
+        @Html.TextBoxFor(model => model.LastName, new Dictionary<string, object> { { "data-val", @Model.EnableValidation }, { "class", "form-control" } })
+        @if (@Model.EnableValidation) { Html.ValidationMessageFor(model => model.LastName); }
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Gender, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-2">
+        @Html.DropDownListFor(model => model.Gender, Model.Gender.ToSelectList(addPleaseSelect: true, selectMsg: ""), new Dictionary<string, object> { { "data-val", @Model.EnableValidation }, { "class", "form-control" } })
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.ContactReference, "Contact Ref", new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-8">
+        @Html.TextBoxFor(model => model.ContactReference, new { @class = "form-control" })
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Address, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-8">
+        @Html.TextAreaFor(model => Model.Address, 8, 8, new { @class = "form-control" })
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.PostCode, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-6">
+        @Html.TextBoxFor(model => model.PostCode, new { @class = "form-control" })
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Telephone, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-6">
+        @Html.TextBoxFor(model => model.Telephone, new { @class = "form-control" })
+    </div>
+</div>
+<div class="form-group">
+    @Html.LabelFor(model => model.Email, new { @class = "col-md-3 control-label", style = "text-align: left;" })
+    <div class="col-md-6">
+        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Email)
+    </div>
+</div>

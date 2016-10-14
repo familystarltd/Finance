@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "AutoMapper": "5.1.1",
+    "NETStandard.Library": "1.6.0",
+    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0",
+    "Finance.Domain": "1.0.0-*",
+    "Finance.Web.Model": "1.0.0-*",
+    "System.Domain": "1.0.0-*",
+    "System.Infrastructure.CrossCutting": "1.0.0-*",
+    "System.Infrastructure.Crosscutting.Framework": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50"
+    }
+  }
+}

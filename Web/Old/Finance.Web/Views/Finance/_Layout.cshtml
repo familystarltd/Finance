@@ -1,0 +1,60 @@
+﻿@using Microsoft.AspNet.Identity
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE =edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.TitleHeader</title>
+    @Scripts.Render("~/bundles/Default/JS")
+    @Scripts.Render("~/bundles/Default/JS/Bootstrap")
+    @Scripts.Render("~/bundles/Default/JS/JQUERY-UI")
+    @Styles.Render("~/bundles/Finance/CSS")
+    @RenderSection("Scripts", required: false)
+    <script>
+        $(document).bind("contextmenu", function () {
+            return false;
+        });
+    </script>
+</head>
+<body style="background-color:#f8eec9;font-family:Arial, Helvetica, sans-serif;font-variant-numeric:normal;">
+    <div class="navbar navbar-default navbar-fixed-top main_header" role="navigation">
+        <div class="container-fluid" style="height:80px;">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href='@Url.Action("Index", "Home")'>
+                    <img src="/Content/Images/logo.png" />
+                </a>
+                <h1>
+                    @ViewBag.MainHeading
+                </h1>
+            </div>
+            <p style="float:right;color:#ffffff;"><strong>@{string userName = string.IsNullOrEmpty(User.Identity.GetUserName()) ? "Welcome Guest" : string.Format("You're logged in as - {0} ", User.Identity.GetUserName());} @userName </strong>.
+            @if (!string.IsNullOrEmpty(User.Identity.GetUserName()))
+            {<a href="@Url.Action("LogOff", "Account")" style="cursor:pointer;font-weight:bold;color:#ffffff;"><img src="~/Content/Images/exit.png" style="width: 24px; height: 24px; margin-right: 1px;" />[Logout]</a>}
+            </p>
+            <!--/.nav-collapse -->
+        </div>
+        <div class="navbar-collapse collapse" style="margin-top:0px;width:auto;float:right;margin-right:23px;">
+            @Html.Partial("_FinanceTopMenu")<div style="float:right;margin-left:3px;margin-top:10px;">
+                <a href="@Url.Action("Index", "Home", new { })" style="color:#ffffff;font-size:medium;margin:0px;padding:0px;cursor:pointer;border:none;text-decoration:none;">
+                    <img src="~/Content/images/home.png" style="width: 32px; height: 32px; margin-right: 1px;" />Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid" style="margin-top:115px;margin-right:23px;">
+        @RenderBody()
+    </div>
+    <hr>
+    <div class="container-fluid DoNotPrint">
+        <p>&copy; @DateTime.Now.Year <a href="#">Family Star Ltd</a></p>
+    </div>
+</body>
+</html>

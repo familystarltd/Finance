@@ -1,0 +1,513 @@
+﻿@Scripts.Render("~/bundles/app/Finance/Model/FinancialTransaction")
+<style>
+    table#receiptInvoice {
+        border: none;
+    }
+
+        table#receiptInvoice tr {
+            border: none;
+        }
+
+        table#receiptInvoice td {
+            border: none;
+        }
+
+        table#receiptInvoice th {
+            border: none;
+        }
+</style>
+<div class="receipt-create-dialog" id="receipt-create" title="Create Receipt" style="margin:0px;padding:0px; display:none;font-size:small;white-space:nowrap;">
+    <div id="Errorwrap" class="row" style="padding:0px;margin:0px; margin-bottom:5px;color:red;width:auto;height:auto;"></div>
+    <form id="receiptForm" class="form-inline" role="form" style="margin:0px;padding:0px;">
+        @Html.Partial("_PayerLookup", new ViewDataDictionary(Html.ViewData))
+        @Html.Partial("_CreditNoteLookup", new ViewDataDictionary(Html.ViewData))
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="ReceiptPayerName">Payer</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <input type="text" id="ReceiptPayerName" name="ReceiptPayerName" style="width: 270px; color: black;" class="receiptPayerName form-control" readonly="readonly" />
+                <button type="button" id="btnReceiptPayerNameLookup" class="btn btn-default" style="font-weight:bold;">...</button>
+                <label for="ReceiptDate">Date</label>
+                <input type="text" class="form-control" value="" id="ReceiptDate" name="ReceiptDate" style="width:150px;" />
+                <label for="txtReceiptRef">Ref</label>
+                <input type="text" id="txtReceiptRef" value="---NEW---" style="width: 100px; color: black;" class="form-control" readonly="readonly" />
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="ReceiptAmount">Amount</label>
+            </div>
+            <div class="form-group col-md-10 form-group">
+                <input type="text" class="form-control currency" value="" id="ReceiptAmount" name="ReceiptAmount" style="text-align:right;width:150px;" />
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="ReceiptPayMethod">Paid By</label>
+            </div>
+            <div class="form-group col-md-10 form-group">
+                <select id="ReceiptPayMethod" class="form-control"></select>
+                <label for="ReceiptCreditNote">Credit Note</label>
+                <input type="text" id="ReceiptCreditNote" style="width:150px;" class="ReceiptCreditNote form-control" readonly="readonly" />
+                <button type="button" id="btnReceiptCreditNoteLookup" class="btn btn-default" style="font-weight:bold;">...</button>
+                <label id="creditNoteCreditAvailable" style="color:red;font-size:small;"></label>
+                @*<input id="btnReceiptCreditNoteLookup" type="button" value="..." style="height:23px;font-weight:bold;" />*@
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="ReceiptPayRef">Reference</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <input type="text" class="form-control" value="" id="ReceiptPayRef" name="ReceiptPayRef" style="width:300px;" />
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="receiptPayInvoice">Invoices</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <table id="receiptInvoice" class="NoBorder" style="width: 98%;">
+                    <tr class="header">
+                        <th style="width:19%;">Invoice</th>
+                        <th style="width:13%;">Date</th>
+                        <th style="width:22%;text-align:right;">Total</th>
+                        <th style="width: 22%; text-align: right;">Due</th>
+                        <th style="width: 22%; text-align: right;">Receipt Amount</th>
+                    </tr>
+                </table>
+                <div style="height:150px;overflow-y:scroll;" class="content-sub">
+                    <table id="receiptInvoice" class="NoBorder" style="width: 100%;">
+                        <tbody id="tblBodyreceiptInvoices" class="content-sub"></tbody>
+                    </table>
+                </div>
+                <table id="receiptInvoice" class="NoBorder content-sub" style="width: 98%;">
+                    <tr>
+                        <td colspan="4" style="text-align: right;">Total Outstanding / Received:<input type="text" id="receiptInvoiceTotalDueAmount" disabled="disabled" style="font-weight:bold; width:130px;text-align:right;" /> </td>
+                        <td style="width: 19%; text-align: right;"><input type="text" id="receiptInvoiceAllocated" disabled="disabled" style="font-weight: bold; width: 130px; text-align: right;" /> </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="ReceiptDesc">Description</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <textarea cols="70" rows="3" class="form-control" id="ReceiptDesc" name="ReceiptDesc"></textarea>
+            </div>
+        </div>
+        <div class="row" style="margin:0px;padding:0px;">
+            <div class="col-md-offset-2 col-md-5" style="margin-top:15px;">
+                <input type="image" id="receiptSave" src="~/Content/Images/Save.png" style="width:32px;height:32px;" />
+                <input type="image" id="receiptReset" src="~/Content/images/reset.png" style="height:32px;width:32px;cursor:pointer;" />
+                <img src="~/Content/images/exit.png" id="exit" class="exit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+            </div>
+        </div>
+    </form>
+</div>
+@Html.Partial("_ReceiptView", new ViewDataDictionary(Html.ViewData))
+<script>
+    $(document).ready(function () {
+        //window.alert = function(title, message){
+        //    var myElementToShow = document.getElementById("someElementId");
+        //    myElementToShow.innerHTML = title + "</br>" + message;
+        //}
+        var DefaultReceiptMethod = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.BankTransfer) +'';
+        var CreditNoteReceiptMethod = @Html.Raw((int)FinanceManagement.Web.Model.ReceiptPayMethodModel.CreditNote) +'';
+        @{System.Text.StringBuilder sbGetInvoiceByPayerId = new System.Text.StringBuilder();
+            sbGetInvoiceByPayerId.Append("'");
+            sbGetInvoiceByPayerId.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbGetInvoiceByPayerId.Append("/FinanceApi/Invoices?PayerId=");
+            sbGetInvoiceByPayerId.Append("'");}
+        var getInvoicesByPayerUrl = @Html.Raw(sbGetInvoiceByPayerId.ToString()) + '';
+        @{System.Text.StringBuilder sbGetInvoiceByInvoice = new System.Text.StringBuilder();
+            sbGetInvoiceByInvoice.Append("'");
+            sbGetInvoiceByInvoice.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbGetInvoiceByInvoice.Append("/FinanceApi/Invoice?InvoiceNo=");
+            sbGetInvoiceByInvoice.Append("'");}
+        var getInvoiceUrl = @Html.Raw(sbGetInvoiceByInvoice.ToString()) + '';
+        @{System.Text.StringBuilder sbReceiptNew = new System.Text.StringBuilder();
+            sbReceiptNew.Append("'");
+            sbReceiptNew.Append(System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]);
+            sbReceiptNew.Append("/FinanceApi/Receipt");
+            sbReceiptNew.Append("'");}
+        var receiptNewUrl = @Html.Raw(sbReceiptNew.ToString()) +'';
+        var PayerName;
+        var PayerId;
+        var InvoiceId;
+        var receiptDate = new Date();
+        var MODE;
+        //var Receipt;
+        var CreditNote;
+        var Receipt_Rules;
+        var Receipt_Messages;
+        var Receipt_Validator;
+        function loadInvoicesForPayment() {
+            if ($.isNullOrEmpty(PayerId) && $.isNullOrEmpty(InvoiceId)) { return; }
+            var URL = getInvoicesByPayerUrl + PayerId + "&PayDate=" + $.datepicker.formatDate('yy-mm-dd', receiptDate) + "&PageIndex=0&PageSize=100"
+            clearCreditNote();
+            if (PayerId) {
+                // Get From Payer
+                var requestInvoice = $.ajax({
+                    type: "GET", url: URL, contentType: "application/json", datatype: "json",
+                    success: function (invoiceData) {
+                        if (!$.isNullOrEmpty(invoiceData)) {
+                            generateInvoices(invoiceData, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
+                        }
+                    }
+                });
+                requestInvoice.fail(function (jqxhr, textStatus, error) {
+                    alert("List of Invoice Request failed: " + textStatus);
+                });
+            }
+            else if (InvoiceId) {
+                // Get From Invoice
+                var URL = getInvoiceUrl + InvoiceId + "&PayDate=" + $.datepicker.formatDate('yy-mm-dd', receiptDate)
+                var requestInvoice = $.ajax({
+                    type: "GET", url: URL, contentType: "application/json", datatype: "json",
+                    success: function (invoiceData) {
+                        if (!$.isNullOrEmpty(invoiceData)) {
+                            loadInvoice(invoiceData);
+                        }
+                    }
+                });
+                requestInvoice.fail(function (jqxhr, textStatus, error) {
+                    alert("List of Invoice Request failed: " + textStatus);
+                });
+            }
+        }
+        function clearForm() {
+            Mode = "";
+            receiptDate = new Date();
+            PayerId = "";
+            PayerName = "";
+            InvoiceId = "";
+            $("#tblBodyreceiptInvoices").empty();
+            $("#ReceiptPayerName").val("");
+            $("#txtReceiptRef").val("---NEW---");
+            $("#ReceiptDate").val($.datepicker.formatDate('dd/mm/yy', receiptDate));
+            $("#ReceiptAmount").val("");
+            $("#ReceiptPayRef").val("");
+            $("#ReceiptDesc").val("");
+            $("#receiptInvoiceTotalDueAmount").val("");
+            $("#receiptInvoiceAllocated").val("");
+            $("#ReceiptPayMethod").val(DefaultReceiptMethod);
+            clearCreditNote();
+        }
+        function clearCreditNote() {
+            CreditNote = "";
+            $("#ReceiptCreditNote").val("");
+            $("#creditNoteCreditAvailable").text("");
+        }
+        $.validator.addMethod('regExp', function (value, element, param) {
+            return this.optional(element) || value.match(param); // Compare with regular expression
+        }, 'Please check your data.');
+        function configReceiptValidationRules() {
+            Receipt_Rules = {
+                ReceiptPayerName: { required: true },
+                ReceiptPayRef: { required: true },
+                ReceiptDesc: { required: true },
+                ReceiptPayMethod: { required: true },
+                ReceiptAmount: { required: true, regExp: "^\£?(?!0.00)(([0-9]{1,3},([0-9]{3},)*)[0-9]{3}|[0-9]{1,3})(\.[0-9]{2})?$" },
+                ReceiptDate: { required: true }
+            };
+            Receipt_Messages = {
+                ReceiptPayerName: { required: "Please select Payer for this receipt" },
+                ReceiptPayRef: { required: "Please enter payment ContactReference" },
+                ReceiptDesc: { required: "Please enter description" },
+                ReceiptPayMethod: { required: "Please select payment method" },
+                ReceiptAmount: { required: "Please enter amount", regExp: "Please enter valid amount" },
+                ReceiptDate: { required: "Please enter vaid date" }
+            };
+            $('#receiptForm').removeData('validator');
+            Receipt_Validator = new jQueryValidatorWrapper("receiptForm",
+                Receipt_Rules, Receipt_Messages, "Errorwrap");
+        }
+        function loadInvoice(InvoiceData) {
+            $("#tblBodyreceiptInvoices").empty();
+            if (InvoiceData) {
+                $("#ReceiptPayerName").val(InvoiceData.payer.name);
+                PayerId = InvoiceData.payer.id;
+                $("#tblBodyreceiptInvoices").append(generateInvoice(InvoiceData));
+                $("#ReceiptAmount").val($.formatCurrency(InvoiceData.dueAmount, "£"));
+                $("#receiptInvoiceTotalDueAmount").val($.formatCurrency(InvoiceData.dueAmount, "£"));
+            }
+        }
+        function generateInvoice(Invoice) {
+            var val;
+            if (!$.isNullOrEmpty(InvoiceId)) {
+                val = "value='" + $.formatCurrency(Invoice.dueAmount, "£") + "' ";
+                $("#receiptInvoiceAllocated").val($.formatCurrency(Invoice.dueAmount, "£"));
+                $("#ReceiptDesc").val("Receipt for Invoice " + InvoiceId);
+                $("#ReceiptPayRef").val(Invoice.payContactReference);
+            }
+            else {
+                val = "value='' "
+                $("#ReceiptDesc").val("");
+                $("#ReceiptPayRef").val("");
+
+            }
+            return "<tr>"
+                          +
+                          "<td style='width:19%;'> <a target='_blank' style='text-decoration:underline;width:19%;' href='/InvoiceSearchByNo?InvoiceNoSearch=" + Invoice.invoiceNo + "'>" + Invoice.invoiceNo + " </a></td>"
+                          +
+                          "<td style='width:13%;'>" + $.datepicker.formatDate('dd/mm/yy', new Date(Invoice.invoiceDate)) + "</td>"
+                          +
+                          "<td style='width:22%; text-align: right;'>" + $.formatCurrency(Invoice.amount, "£") + "</td>"
+                          +
+                          "<td style='width:22%; text-align:right;'>" + $.formatCurrency(Invoice.dueAmount, "£") + "</td>"
+
+                          + "<td style='width:22%; text-align:right;'>"
+                          + "<input type='text' class='currency invoiceReceiptAmount' id=''" + val + "' style='width:140px; text-align:right;margin-top:3px;'" + "data-app-id='" + Invoice.id + "' " + "data-app='" + $.formatCurrency(Invoice.dueAmount, "£") + "'/>"
+                          + "</td>"
+                          + "</tr>";
+        }
+        function generateInvoices(InvoiceData, Pagination) {
+            $("#tblBodyreceiptInvoices").empty();
+            if (InvoiceData) {
+                if (InvoiceData.length > 0) {
+                    var tableBody = "";
+                    var invoiceStatus = "";
+                    var totalInvoiceDueAmount = 0;
+                    for (var i = 0; i < InvoiceData.length; i++) {
+                        tableBody += generateInvoice(InvoiceData[i])
+                        totalInvoiceDueAmount = parseFloat(totalInvoiceDueAmount) + parseFloat($.toNumber(InvoiceData[i].dueAmount));
+                    }
+                    $("#receiptInvoiceTotalDueAmount").val($.formatCurrency(totalInvoiceDueAmount, "£"));
+
+                    if (tableBody != "") {
+                        $("#tblBodyreceiptInvoices").append(tableBody);
+                    }
+                    //Paging for Invoices
+                    if (Pagination) {
+                        if (!$.isNullOrEmpty(Pagination.PrevPageLink)) {
+                            $("#lnkInvoicePrev").attr('href', Pagination.PrevPageLink);
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 1);
+                            $("#lnkInvoicePrev").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoicePrev").removeAttr('href');
+                            $('#lnkInvoicePrev').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoicePrev").attr('style', "cursor:none;");
+                        }
+                        if (!$.isNullOrEmpty(Pagination.NextPageLink)) {
+                            $("#lnkInvoiceNext").attr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 1);
+                            $("#lnkInvoiceNext").attr('style', "cursor:pointer;");
+                        }
+                        else {
+                            $("#lnkInvoiceNext").removeAttr('href', Pagination.NextPageLink);
+                            $('#lnkInvoiceNext').stop().fadeTo('slow', 0.3);
+                            $("#lnkInvoiceNext").attr('style', "cursor:none;");
+                        }
+                        $("#lblTotalInvoices").text(Pagination.TotalCount);
+                        $("#lblCurrentTotalInvoices").text(InvoiceData.length);
+                        // Pagination.TotalPages
+                        if (Pagination.TotalPages > 0) {
+                            var pageLinks = "";
+                            for (var i = 0; i < Pagination.TotalPages; i++) {
+                                var page = i + 1;
+                                if (i == Pagination.PageIndex) {
+                                    pageLinks += "<u style= 'color:blue;font-weight:bold'>"
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                    pageLinks += "</u>"
+                                }
+                                else {
+                                    pageLinks += "<a onclick='javascript: return false;' style='margin: 5px;cursor:pointer;' class='Paging_ByIndex'  href= '" + Pagination.PageLink + "&pageIndex=" + i + "&pageSize=" + Pagination.PageSize + "'" + " data-app-id=''>" + "" + page + "</a>"
+                                }
+                            }
+                            tableBody += "</tr>";
+                            if (pageLinks != "") {
+                                $("#tblInvoicePagingNos").append(pageLinks);
+                            }
+                        }
+                    }
+                    else { $("#tblInvoicePagingNos").empty(); $("#lnkInvoicePrev").removeAttr('href'); $("#lnkInvoiceNext").removeAttr('href'); }
+                }
+                else { alert("Invoices have not been found! Please try again later.") }
+            }
+        }
+        function validateReceipt(receiptAmount, totalInvoiceReceiptAmount) {
+            if (!$.isNullOrEmpty(CreditNote)) {
+                if ($.toNumber(CreditNote.creditAvailable) < $.toNumber(totalInvoiceReceiptAmount)) {
+                    var msg = "Total receipt amount allocated to invoice should not be more than available credit in credit note"
+                    + '\n' + '\n' + "Total amount allocated to invoices : " + $.formatCurrency(totalInvoiceReceiptAmount, "£")
+                    + '\n' + "Credit available in credit note : " + $.formatCurrency(CreditNote.creditAvailable, "£");
+                    alert(msg);
+                    return false;
+                }
+                else if ($.toNumber(receiptAmount) != $.toNumber(totalInvoiceReceiptAmount)) {
+                    var msg = "The Total amount you have allocated to invoices (" + $.formatCurrency(receiptAmount, "£") + ") is not the same as the Amount of the receipt " + "(" + $.formatCurrency(receiptAmount, "£") + ")";
+                    + '\n' + '\n' + "Please allocate the exact receipt amount to Invoices by typing the amount received for each invoice in the Receipt Amount column."
+                    alert(msg);
+                    return false;
+                }
+            }
+            else if ($.toNumber(receiptAmount) < $.toNumber(totalInvoiceReceiptAmount)) {
+                var msg = "The Total amount you have allocated to invoices is (" + $.formatCurrency(totalInvoiceReceiptAmount, "£") + ") should be less than or equal to amount of the receipt " + "(" + $.formatCurrency(receiptAmount, "£") + ")"
+                + '\n' + '\n' + "Please allocate the exact receipt amount to Invoices by typing the amount received for each invoice in the Receipt Amount column."
+                alert(msg);
+                return false;
+            }
+            return true;
+        }
+        function createNewReceipt() {
+            var receipt = new Receipt();
+            var receiptAmount = $("#ReceiptAmount").val();
+            var totalAllocatedToInvoice = 0;
+            receipt.Id = "";
+            $("input[type=text].invoiceReceiptAmount").each(function () {
+                totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber($(this).val()));
+                var receiptInvoice = new ReceiptInvoice();
+                receiptInvoice.id = "";
+                receiptInvoice.invoiceId = $(this).attr("data-app-id");
+                var amountReceived = parseFloat($.toNumber($(this).val()));
+                receiptInvoice.amountReceived = amountReceived;
+                if (amountReceived > 0) { receipt.receiptInvoices.push(receiptInvoice); }
+            });
+            if (receipt.receiptInvoices.length == 0) { alert("Atleast one invoice should be allocated to this receipt"); return; }
+            if (!validateReceipt(receiptAmount, totalAllocatedToInvoice)) return;
+            receipt.id = "";
+            receipt.payerId = PayerId;
+            var processedDate = $.datepicker.formatDate('yy-mm-dd', $("#ReceiptDate").datepicker("getDate"));
+            receipt.processedDate = processedDate;
+            receipt.amount = $.toNumber($("#ReceiptAmount").val());
+            receipt.ContactReference = $("#ReceiptPayRef").val();
+            receipt.description = $("#ReceiptDesc").val();
+            receipt.paymentMethod = $("#ReceiptPayMethod").val();
+            $.ajax({
+                type: "POST", url: receiptNewUrl, dataType: "json", data: JSON.stringify(receipt), contentType: "application/json",
+                success: function (ReceiptNo) {
+                    if (!$.isNullOrEmpty(ReceiptNo)) {
+                        //var receiptData = $.extend(true, new Receipt(), data);
+                        $(".receipt-view-dialog").data("ReceiptNo", ReceiptNo);
+                        $(".receipt-create-dialog").dialog("close");
+                        $(".receipt-view-dialog").data("Mode", "ADDED");
+                        $(".receipt-view-dialog").dialog("open");
+                    } else { alert("New Receipt has not been created! Please try again later."); }
+                },
+                error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); }
+            }).fail(function (jqXHR, textStatus) { alert("Request failed: " + textStatus); });
+        }
+        $('body').on('change', '.invoiceReceiptAmount', function (e) {
+            var dueAmount = $.toNumber($(this).attr("data-app"));
+            var receiptAmount = $.toNumber($(this).val());
+            if (receiptAmount > dueAmount) {
+                var msg = "The Total amount you have allocated to invoice is (" + $.formatCurrency(receiptAmount, "£") + ") should be less than or equal to due amount of the invoice " + "(" + $.formatCurrency(dueAmount, "£") + ")"
+                + '\n' + '\n' + "Please allocate the exact receipt amount to Invoices by typing the amount received for invoice in the Receipt Amount column."
+                alert(msg);
+                $(this).val($.formatCurrency(0, "£"));
+                return;
+            }
+            var totalAllocatedToInvoice = 0;
+            $("input[type=text].invoiceReceiptAmount").each(function () {
+                totalAllocatedToInvoice = parseFloat(totalAllocatedToInvoice) + parseFloat($.toNumber($(this).val()));
+            });
+            $("#receiptInvoiceAllocated").val($.formatCurrency(totalAllocatedToInvoice, "£"));
+        });
+        $('body').on('keypress', '.currency', $.currenciesOnly).on('blur', '.currency', function () { $(this).val($.formatCurrency($(this).val(), "£")) });
+        $("input[type=text].currency").on('keypress', $.currenciesOnly).on('blur', function () { $(this).val($.formatCurrency($(this).val(), "£")) });
+        $(".receipt-create-dialog").dialog({ modal: true, resizable: false, width: 'auto', height: 'auto', autoOpen: false });
+        $(".receipt-create-dialog").on("dialogopen", function (event, ui) {
+            $("#tblBodyreceiptInvoices").empty();
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".receipt-create-dialog").dialog("moveToTop");
+            $(".receipt-create-dialog").data("PayerName");
+            MODE = $(".receipt-create-dialog").data("Mode");
+            var receiptDate = new Date();
+            $("#ReceiptDate").val($.datepicker.formatDate('dd/mm/yy', receiptDate));
+            $("#ReceiptDate").datepicker("setDate", receiptDate);
+            PayerId = $(".receipt-create-dialog").data("PayerId");
+            InvoiceId = $(".receipt-create-dialog").data("InvoiceId");
+            if (!$.isNullOrEmpty(PayerId) || !$.isNullOrEmpty(InvoiceId)) {
+                loadInvoicesForPayment();
+            }
+        });
+        $(".receipt-create-dialog").on("dialogclose", function (event, ui) { clearForm(); });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) {
+            if ($(".payer-lookup-dialog").data("Parent") == "Create_Receipt") {
+                $(".payer-lookup-dialog").data("Parent", null);
+                $(".receiptPayerName").val($(".payer-lookup-dialog").data("payerName"));
+                PayerId = ($(".payer-lookup-dialog").data("payerId"));
+                loadInvoicesForPayment();
+            }
+        });
+        $(".creditNote-lookup-dialog").on("dialogclose", function (event, ui) {
+            CreditNote = $(".creditNote-lookup-dialog").data("CreditNote");
+            if (!$.isNullOrEmpty(CreditNote)) {
+                $("#ReceiptCreditNote").val(CreditNote.creditNoteNo);
+                $("#creditNoteCreditAvailable").text("Credit available: " + $.formatCurrency(CreditNote.creditAvailable, "£"));
+                $("#ReceiptPayMethod").val(CreditNoteReceiptMethod);
+                $("#ReceiptPayRef").val("Paid by Credit Note " + CreditNote.creditNoteNo);
+                var amount = $("#ReceiptAmount").val();
+                if ($.toNumber(amount) <= 0) {
+                    $("#ReceiptAmount").val($.formatCurrency(CreditNote.creditAvailable, "£"));
+                }
+            }
+        });
+        $("#ReceiptPayMethod").change(function () {
+            var selectedtext = $("#ReceiptPayMethod option:selected").html();
+            var creditSelected = CreditNoteReceiptMethod;
+            if (this.value != creditSelected) { clearCreditNote(); }
+            $("#ReceiptPayRef").val("");
+        });
+        $("#btnReceiptPayerNameLookup").click(function (e) {
+            $(".payer-lookup-dialog").data("Parent", "Create_Receipt");
+            $(".payer-lookup-dialog").dialog("open");
+        });
+        $("#btnReceiptCreditNoteLookup").click(function (e) {
+            if ($.isNullOrEmpty(PayerId)) {
+                alert("Please select Payer for this receipt");
+                return;
+            }
+            else if ($.isNullOrEmpty(receiptDate)) {
+                alert("Please enter date");
+                $("#ReceiptDate").focus();
+                return;
+            }
+            $(".creditNote-lookup-dialog").data("PayerId", PayerId);
+            $(".creditNote-lookup-dialog").data("PayDate", $.datepicker.formatDate('yy-mm-dd', receiptDate));
+            $(".creditNote-lookup-dialog").data("Parent", "Create_Receipt");
+            $(".creditNote-lookup-dialog").data("CreditNote", null);
+            $(".creditNote-lookup-dialog").dialog("open");
+        });
+        $('#ReceiptPayerName').on('change', function (e) {
+            alert($(".payer-lookup-dialog").data("payerId"));
+        });
+        var PayMethod = @Html.Raw(Html.ConvertEnumToJson(typeof(FinanceManagement.Web.Model.ReceiptPayMethodModel)))
+        $('#ReceiptPayMethod').empty();// clear options
+        $(PayMethod).each(function () { $("<option />", { val: this.id, text: this.name }).appendTo('#ReceiptPayMethod'); });
+        $("#ReceiptDate").datepicker({ dateFormat: 'dd/mm/yy', autoClose: true }).on("change", function (e) {
+            receiptDate = $(this).datepicker("getDate");
+            $(this).datepicker("setDate", receiptDate);
+            $('#ReceiptDate').datepicker("hide");
+            $("#ReceiptAmount").focus();
+            loadInvoicesForPayment();
+        });
+        $("#receiptSave").click(function (e) {
+            e.preventDefault();
+            configReceiptValidationRules();
+            if (!Receipt_Validator.validate()) return;
+            switch (MODE) {
+                case "New":
+                case "NEW":
+                    createNewReceipt()
+                    break;
+                case "Edit":
+                case "EDIT":
+                    alert("To Update Receipt please contact I.T Support ");
+                    break;
+                case "Delete":
+                case "DELETE":
+                    alert("Delete");
+                    break;
+
+            }
+        });
+        $("#receiptReset").click(function (e) { e.preventDefault(); clearForm(); });
+        $("#exit").click(function () { clearForm(); $(".receipt-create-dialog").dialog("close"); });
+    })
+</script>

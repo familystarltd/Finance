@@ -1,0 +1,266 @@
+﻿@model Finance.Web.Model.InvoiceViewModel
+<h2>Fee Invoice</h2>
+<style>
+    table, tr, th, td {
+        border: none;
+    }
+</style>
+@Html.Partial("_DataLoader")
+@Html.Partial("_CustomerLookup", new ViewDataDictionary(Html.ViewData))
+@Html.Partial("_PayerLookup", new ViewDataDictionary(Html.ViewData))
+@Html.Partial("_Invoice", new ViewDataDictionary(Html.ViewData))
+<div class="row" style="">
+    <div class="col-md-3">
+        @using (Html.BeginForm("FeeInvoiceSearchByNo", "Finance", FormMethod.Get, new { @class = "form-inline", enctype = "multipart/form-data" }))
+        {
+        <div class="form-group">
+            <label for="InvoiceNoSearch">Invoice No</label>
+            @Html.TextBox("InvoiceNoSearch", string.Empty, new { @class = "form-control", style = "color:black;width:180px;" })
+            <input type="image" id="getInvoiceByInvoiceNo" src="~/images/search.png" style="height:32px;cursor:pointer;vertical-align:bottom;" />
+        </div>
+        }
+    </div>
+    <div class="col-md-9">
+        @using (Html.BeginForm("FeeInvoiceSearch", "Finance", FormMethod.Get, new { @class = "form-inline", enctype = "multipart/form-data" }))
+        {
+        <div class="row" style="margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="PayerName">Payer</label>
+            </div>
+            <div class="col-md-5 form-group">
+                @Html.TextBoxFor(d => d.PayerName, string.Empty, new { @class = "payerName form-control", @readonly = "readonly", style = "color:black;width:300px;" })
+                <input id="btnPayerNameLookup" type="button" value="..." class="btn btn-default" style="font-weight:bold;" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="CustomerName">Customer</label>
+            </div>
+            <div class="col-md-10 form-group">
+                @Html.TextBoxFor(d => d.CustomerName, string.Empty, new { @class = "customerName form-control", @readonly = "readonly", style = "color:black;width:300px;" })
+                <input id="btnCustomerNameLookup" type="button" value="..." class="btn btn-default" style="font-weight:bold;" />
+                Or&nbsp;&nbsp;Ref&nbsp;:&nbsp;@Html.TextBoxFor(d => d.CustomerNo, new { @class = "customerName form-control" })
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:5px;">
+            <div class="col-md-2">
+                <label for="InvoiceProcessedFromDate">From Date</label>
+            </div>
+            <div class="col-md-10 form-group">
+                <input type="text" name="InvoiceProcessedFromMonth" id="InvoiceProcessedFromMonth" class="monthPicker form-control" style="color:black;width:130px;" />
+                @*@Html.TextBoxFor(d => d.InvoiceProcessedFromDate, new { @class = "monthPicker form-control", style = "color:black;width:130px;" })*@
+                @Html.HiddenFor(d => d.InvoiceProcessedFromDate)
+                <label for="InvoiceProcessedToDate">To Date</label>
+                <input type="text" name="InvoiceProcessedToMonth" id="InvoiceProcessedToMonth" class="monthPicker form-control" style="color:black;width:130px;" />
+                @*@Html.TextBoxFor(d => d.InvoiceProcessedToDate, new { @class = "monthPicker form-control", style = "color:black;width:130px;" })*@
+                @Html.HiddenFor(d => d.InvoiceProcessedToDate)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-10 form-group">
+                @Html.HiddenFor(d => d.IsPdfPrint)
+                <input type="image" id="invoiceSearch" src="~/images/search.png" style="height:48px;cursor:pointer;padding-top:5px;" />
+                <input type="image" id="invoicePrintPDF" src="~/images/pdf.gif" style="height:48px;cursor:pointer;padding-top:5px;" />
+                <input type="image" id="receiptSearchReset" src="~/images/reset.png" style="height:48px;cursor:pointer;padding-top:5px;" />
+                <input type="image" id="addInvoice" src="~/images/add-plus.png" style="height:48px;cursor:pointer;padding-top:5px;" />
+            </div>
+        </div>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        @if (Model.Invoices != null && Model.Invoices.Count() > 0)
+        {
+            <table style="width:100%;border:1px solid black;font-weight:bold;">
+                <thead>
+                    <tr>
+                        <td colspan="8" style="text-align:right;">
+                            <a href="@Url.Action("PrintFeeInvoiceSearchPDF", "Finance", Model)" style="float:right;">
+                                <img src="~/images/pdf.gif" class="ico-sm" style="float:right;cursor:pointer;" />
+                            </a>
+                        </td>
+                    </tr>
+                    <tr style="color:white;background-color:black;">
+                        <th></th>
+                        <th>Invoice No</th>
+                        <th>Invoice Type</th>
+                        <th>Date</th>
+                        <th style="width:30%;">Payer</th>
+                        <th>Customer</th>
+                        <th style="text-align:right;">Total</th>
+                        <th style="text-align:right;">Due</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Finance.Web.Model.InvoiceModel invoice in Model.Invoices)
+                {
+                        <tr style="border-bottom:1px solid black;">
+                            <td>
+                                @if (invoice.InvoiceType == Finance.Web.Model.InvoiceTypeModel.Manual && (invoice.ReceiptInvoices == null || invoice.ReceiptInvoices.Count == 0))
+                            {
+                            <img class='invoiceSearchInvoiceEdit' src='~/images/edit.png' style='width: 16px; height: 16px;cursor:pointer;' data-app-id='@invoice.InvoiceNo' />
+                            }
+                            </td>
+                            <td style="vertical-align:top;">@invoice.InvoiceNo</td>
+                            <td style="vertical-align:top;">@invoice.Discriminator</td>
+                            <td style="vertical-align:top;">@invoice.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                            <td style="vertical-align: top; padding-bottom: 5px;">
+                                @invoice.Payer.Name
+                                @if (invoice.ReceiptInvoices != null && invoice.ReceiptInvoices.Count > 0)
+                            {
+                            <table style="width: 100%; margin-bottom: 10px; font-weight: normal; border: 1px solid darkgreen;">
+                                <tr style="color:white;background-color:darkgreen;">
+                                    <th style="width:60%;">Receipt</th>
+                                    <th style="width:10%;">Date</th>
+                                    <th style="width:30%; text-align:right;">Amount</th>
+                                </tr>
+                                @foreach (Finance.Web.Model.ReceiptInvoiceModel receiptInvoice in invoice.ReceiptInvoices)
+                                    {
+                                    <tr>
+                                        <td>@receiptInvoice.Receipt.ReceiptNo</td>
+                                        <td>@receiptInvoice.Receipt.ProcessedDate.ToString("dd/MM/yyyy")</td>
+                                        <td style="text-align:right;">@string.Format("{0:c}", receiptInvoice.AmountReceived)</td>
+                                    </tr>
+                                    }
+                                <tr style="font-weight: bold; border: 1px solid darkgreen;">
+                                    <td colspan="2" style="text-align:left;vertical-align:top;">
+                                        Total
+                                    </td>
+                                    <td style="text-align:right;vertical-align:top;">
+                                        @string.Format("{0:c}", invoice.ReceiptInvoices.Sum(r => r.AmountReceived))
+                                    </td>
+                                </tr>
+                            </table>
+                            }
+                                @if (invoice.BadDebt != null && invoice.BadDebt.Amount > 0)
+                            {
+                            <table style="width: 100%; font-weight: normal; border: 1px solid darkred; ">
+                                <tr style="color:white;background-color:darkred;">
+                                    <th style="width:60%;">Bad Debt</th>
+                                    <th style="width:10%;">Date</th>
+                                    <th style="text-align: right; width: 30%;">Amount</th>
+                                </tr>
+
+                                <tr>
+                                    <td><p>@invoice.BadDebt.Description</p></td>
+                                    <td>@invoice.BadDebt.ProcessedDate</td>
+                                    <td>@invoice.BadDebt.Amount</td>
+                                </tr>
+
+                            </table>
+                            }
+                            </td>
+                            <td style="vertical-align:top;">@invoice.Customer.PersonalInfo.FullName</td>
+                            <td style="text-align: right; vertical-align: top;">@string.Format("{0:c}", invoice.Amount)</td>
+                            <td style="text-align: right; vertical-align: top;">@string.Format("{0:c}", invoice.DueAmount)</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">
+                            @{ Html.ViewData.TemplateInfo.HtmlFieldPrefix = "Pagination"; }
+                            @Html.Partial("_PaginationFormSubmit", Model.Pagination, new ViewDataDictionary(Html.ViewData))
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var dateToday = new Date();
+        var dateNextMonth = new Date();
+        dateNextMonth.setMonth(dateNextMonth.getMonth() + 1);
+        var yrRange = dateToday.getFullYear() + ":" + dateNextMonth.getFullYear();
+        $("#InvoiceProcessedFromMonth").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy-MM",
+            showButtonPanel: true,
+            changeYear: true,
+            currentText: "This Month",
+            beforeShow: function (input) {
+                setTimeout(function () {
+                    $(input).datepicker("widget").find(".ui-datepicker-current").hide();
+                }, 1)
+            },
+            onClose: function (dateText, inst) {
+                var month = $(".ui-datepicker-month :selected").val();
+                var year = $(".ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('yy-MM', new Date(year, month, 1)));
+                $("#InvoiceProcessedFromDate").val($.datepicker.formatDate('yy-mm-dd', new Date(year, month, 1)))
+            }
+        }).focus(function () {
+            $(".ui-datepicker-calendar").hide();
+        }).keyup(function (e) {
+            if (e.keyCode == 8 || e.keyCode == 46) {
+                $.datepicker._clearDate(this);
+                $(this).val("");
+                $("#InvoiceProcessedFromDate").val("")
+            }
+        });
+        $("#InvoiceProcessedToMonth").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy-MM",
+            showButtonPanel: true,
+            changeYear: true,
+            currentText: "This Month",
+            beforeShow: function (input) {
+                setTimeout(function () {
+                    $(input).datepicker("widget").find(".ui-datepicker-current").hide();
+                }, 1)
+            },
+            onClose: function (dateText, inst) {
+                var month = $(".ui-datepicker-month :selected").val();
+                var year = $(".ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('yy-MM', new Date(year, month, 1)));
+                $("#InvoiceProcessedToDate").val($.datepicker.formatDate('yy-mm-dd', new Date(year, month, 1)))
+            }
+        }).focus(function () {
+            $(".ui-datepicker-calendar").hide();
+        }).keyup(function (e) {
+            if (e.keyCode == 8 || e.keyCode == 46) {
+                $.datepicker._clearDate(this);
+                $(this).val("");
+                $("#InvoiceProcessedToDate").val("");
+            }
+        });
+        $("#addInvoice").click(function (e) {
+            e.preventDefault();
+            $(".invoice-dialog").data("Mode", "NEW");
+            $(".invoice-dialog").dialog("open");
+        });
+        $("#btnCustomerNameLookup").click(function (e) {
+            $(".customer-lookup-dialog").dialog("open");
+        });
+        $(".customer-lookup-dialog").on("dialogclose", function (event, ui) {
+            $(".customerName").val($(".customer-lookup-dialog").data("customerName"));
+        });
+        $("#btnPayerNameLookup").click(function (e) {
+            $(".payer-lookup-dialog").dialog("open");
+        });
+        $(".payer-lookup-dialog").on("dialogclose", function (event, ui) {
+            $(".payerName").val($(".payer-lookup-dialog").data("payerName"));
+        });
+        $('body').on('click', '.invoiceSearchInvoiceEdit', function (e) {
+            e.preventDefault();
+            var invoiceNo = $(this).attr("data-app-id");
+            if (!$.isEmptyObject(invoiceNo)) {
+                $(".invoice-dialog").data("InvoiceNo", invoiceNo);
+                $(".invoice-dialog").data("Mode", "EDIT");
+                $(".invoice-dialog").dialog("open");
+            }
+        });
+        $(".invoice-dialog").on("dialogclose", function (event, ui) {
+            location.reload();
+        });
+        $("#invoicePrintPDF").click(function (e) {
+            $("#IsPdfPrint").val("true");
+            IsProgressable = false;
+        });
+    });
+</script>

@@ -1,0 +1,312 @@
+﻿@using Finance.Web.Helpers.ExtensionMethods
+@model FinanceManagement.Web.Model.DashboardViewModel
+@Scripts.Render("~/bundles/Jquery/Print")
+@Scripts.Render("~/bundles/jquery/validation")
+<div style="border: 0px solid #a6c9e2;">
+    <table style="border:none;">
+        <tr style="border:none;">
+            <td style="border:none;">
+                <h3>
+                    <img src="~/Content/Images/dashboard.png" style="width:64px;height:64px;margin-right:5px;" />Dashboard - <select id="selBusiness" style="margin-right: 10px;color:#000000;">
+                        @foreach (FinanceManagement.Web.Model.BusinessModel comapny in Model.Businesses)
+                        {
+                            <option value="@comapny.Name">@comapny.Name</option>
+                        }
+                    </select>
+                </h3>
+            </td>
+            <td style="border:none;padding-top:10px;">
+                <form id="businessForm">
+                    @Html.HiddenFor(d => d.BusinessName)
+                    <input type="image" id="getCustomersByBusiness" src="~/Content/images/load.png" style="height:28px;cursor:pointer;" />
+                </form>
+            </td>
+        </tr>
+    </table>
+</div>
+@Html.Partial("_DataLoader")
+@Html.Partial("_FeeInvoiceList", new ViewDataDictionary(Html.ViewData))
+<div class="row" style="margin-left: 0px; padding-left: 0px; border: 0px solid #a6c9e2;position:relative;">
+    <div class="col-md-12" style="margin-left:0px;padding-left:0px;">
+        @if (!Model.IsBankHolidayFileExists)
+        {
+            <div id="divCustomerswithoutFees" class="ui-state-error ui-corner-all" style="font-size:x-small;margin-bottom:5px;min-height:30px;">
+                <label for="fileUpload" style="float:left;">
+                    Select Bank holiday File to Upload:
+                </label> <input id="fileUpload" type="file" style="width:300px;float:left;margin-right:3px;" /><input id="btnUploadFile" type="button" value="Upload File" style="float:left;margin-right:3px;" />
+                <span style="float:left;">
+                    To download bank holidays<a target="_blank" href="https://www.gov.uk/bank-holidays" style="font-size:small;color:red;font-weight:bold;"> click here </a>
+                </span>
+                <br /><span id="lblError" style="color: red;font-weight:bold;"></span>
+            </div>
+        }
+        @if (Model.CustomersWithoutFees.Count() > 0)
+        {
+            <div id="divCustomerswithoutFees" class="ui-state-error ui-corner-all" style="font-size:x-small;color:red;margin-bottom:5px;">
+                <p>
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+                    Following customers <span style="font-weight:bold;">(@Model.CustomersWithoutFees.Count())</span> are not having Fees please create new fees for them
+                </p>
+                @foreach (FinanceManagement.Web.Model.CustomerModel customer in Model.CustomersWithoutFees)
+                {
+                    <h3 style="font-size:x-small;margin:0px;padding:0px;margin-bottom:1px;font-weight:bold;">
+                        <a href="@Url.Action("CustomerFee", "Finance", new { CustomerId = customer.Id })" style="margin: 5px; padding: 0px;color:red;">
+                            @customer.PersonalInfo.FullName
+                        </a>
+                    </h3>
+                }
+            </div>
+        }
+        <table border="1" style="width:100%;font-size:small;" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr style="vertical-align:top;margin:0px;padding:0px;font-weight:bold;font-size:medium;">
+                    <td colspan="4" class="header">
+                        <div style="margin:0px;padding:0px;float:left;vertical-align:top;margin-left:3px;margin-top:3px;">
+                            @using (Html.BeginForm("Invoices", "Finance", FormMethod.Get, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.TextBoxFor(d => d.InvoiceNoSearch, new { @class = "search-textbox", placeholder = "Invoice No", style = "color:black;width:199px;margin:0px;padding:0px;float:left;" })
+                                <input type="image" id="getInvoiceByInvoiceNo" src="~/Content/images/search.png" style="height:38px;cursor:pointer;margin-left:-1px;" />
+                            }
+                        </div>
+                        <div style="margin:0px;padding:0px;float:left;margin-left:5px;">
+                            @if (Model.CustomersWithoutFees == null || Model.CustomersWithoutFees.Count() <= 0)
+                            {
+                            <form id="invoiceGenerationForm">
+                                Invoice Processed Date @Html.TextBoxFor(d => d.InvoiceProcessedDate, new { @class = "monthPicker", style = "color:black;width:180px;" })
+                                <input type="image" id="invoiceProcess" src="~/Content/images/generate.png" style="height:28px;cursor:pointer;padding-top:5px;" />
+                            </form>
+                            }
+                        </div>
+                        <div style="margin:0px;padding:0px;float:right;">
+                            <a onclick="javascript: return false;" class="Unpaid_Invoices text-alert" style="cursor: pointer; margin: 0px; padding: 0px;color:red;text-decoration:underline;" data-app-id="">
+                                Unpaid Invoices:@Model.NoOfUnPaidInvoices
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="content" style="font-weight:900;vertical-align:top;font-size:medium;">
+                    <td style="min-width:300px">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <span style="float:left;">Customer</span>
+                                <div class="dropdown" style="margin-left:3px;float:left;">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" style="margin:0px;padding:0px;cursor:pointer;border:none;text-decoration:none;">
+                                        <img src="~/Content/images/pdf.gif" class="ico-xs" style="margin-right: 1px;" /><span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                                        <li>
+                                            <a href='@Url.RouteUrl("CustomersWithFeesPDF",null)' id="customerFeesPdf">Customers with Fees</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href='@Url.HttpRouteUrl("CustomerListPDF",null)' id="customerListPdf">Customer List</a></li>
+                                    </ul>
+                                </div>
+                                <a href="@Url.Action("NewCustomer", "Finance")" style="margin:0px;padding:0px;"><span class="ui-icon ui-icon-plusthick" style="zoom:1.5;margin-top:1px;"></span></a>
+                            </div>
+                        </div>                        
+                    </td>
+                    <td style="width:70px;text-align:center;">
+                        Active
+                    </td>
+                    <td style="padding-left: 10px;vertical-align:top;width:68%;">
+                        <div class="row" style="width:100%;margin:0px;padding:0px;">
+                            <div class="col-md-7" style="margin:0px;padding:0px;">Fee</div>
+                            <div class="col-md-5" style="margin:0px;padding:0px;">
+                                <span style="float:left;">Funding</span> <a href="@Url.Action("Payer", "Finance", new { Id = Guid.Empty })" class="" style="float:left;border:0px;text-decoration:none;"><span style="zoom:1.5;margin-top:-2px;" class="ui-icon ui-icon-plusthick"></span></a>
+                                <a href="@Url.Action("Payer", "Finance")" style=""><span style="zoom:1.5;margin-top:-2px;" class="ui-icon ui-icon-note"></span> </a>
+                            </div>
+
+                        </div>
+                    </td>
+                    <td style="text-align:right;">
+                        Account
+                    </td>
+                </tr>
+            </thead>
+            <tbody class="content-sub" style="font-size:small;vertical-align:top;font-weight:bold;">
+                @if (Model.Customers != null && Model.Customers.Count() > 0)
+                {
+                    foreach (FinanceManagement.Web.Model.CustomerModel customer in Model.Customers)
+                    {
+                        <tr>
+                            <td style="font-weight:bold;">
+                                @Html.Partial("_CustomerMenu", customer, new ViewDataDictionary(Html.ViewData))
+                            </td>
+                            <td>
+                                <span>@customer.ActiveDate.ToString("dd/MM/yyyy")</span>
+                            </td>
+                            @if (customer.Fees != null && customer.Fees.Count() > 0)
+                            {
+                                <td style="font-size:small;">
+                                    @foreach (FinanceManagement.Web.Model.FeeModel fee in customer.Fees)
+                                    {
+                                        <div class="row" style="width:100%;margin:0px;padding:0px;">
+                                            <div class="col-md-7" style="margin:0px;padding:0px;font-size:small;">@Html.Partial("_FeeDisplayOnDashboard", fee, new ViewDataDictionary(Html.ViewData))</div>
+                                            <div class="col-md-5" style="margin:0px;padding:0px;">
+                                                @fee.Payer.Name
+                                            </div>                                    
+                                        </div>
+                                    }
+                                    
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <a href="@Url.Action("CustomerFee", "Finance", new { CustomerId = customer.Id })"><span style="zoom:1.5;margin-top:0px;background-color:red;" class="ui-icon ui-icon-plusthick"></span> </a>
+                                </td>
+                            }
+                            <td>
+                                <table style="width:100%;border:none;font-weight:900;">
+                                    <tr><td style="text-align: right; border: none;padding-right:15px;">Invoice:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits)</td></tr>
+                                    <tr style="color:darkgreen;border-bottom:1px solid #000000;"><td style="text-align: right; border: none; padding-right: 15px; ">Received:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Credits)</td></tr>
+                                    <tr style="color:red;"><td style="text-align: right; border: none; padding-right: 15px; ">Due:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits - customer.Credits)</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" style="text-align:center;">
+                            <a href="@Url.Action("NewCustomer", "Resident")"><h5 style="float:left;margin-right:3px;">Create New Customer <span class="ui-icon ui-icon-plusthick"></span></h5> </a>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        @using (Html.BeginForm("Index", "Finance", FormMethod.Get, new { enctype = "multipart/form-data" }))
+        {
+            @Html.Partial("_PaginationFormSubmit", Model.CustomerPagination, new ViewDataDictionary(Html.ViewData) { TemplateInfo = new System.Web.Mvc.TemplateInfo { HtmlFieldPrefix = "CustomerPagination" } })
+        }
+    </div>
+</div>
+<script>
+    var getUnpaidInvoiceUrl = @Html.Raw(string.Format("'{0}/FinanceApi/Invoices?IsPaid=false&pageIndex=0&pageSize=25'", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]));
+    var processFeeInvoiceUrl = @Html.Raw(string.Format("'{0}/FinanceApi/ProcessFeeInvoice?invoiceProcessedDate='", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]));
+    var getNewInvoiceUrl = @Html.Raw(string.Format("'{0}/FinanceApi/Invoices?ProcessedDate='", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]));
+    var sbGetFileUploadUrl = @Html.Raw(string.Format("'{0}/FinanceApi/UploadBankHolidayFile'", System.Configuration.ConfigurationManager.AppSettings["FinanceAPIService"]));
+    var dateToday = new Date();
+    var dateNextMonth = new Date();
+    dateNextMonth.setMonth(dateNextMonth.getMonth() + 1);
+    var yrRange = "2007" + ":" + dateNextMonth.getFullYear();
+    var maxDate = $.datepicker.parseDate("dd/mm/yy", '@string.Format("{0}", !Model.InvoiceProcessedMaxDate.HasValue ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).ToString("dd/MM/yyyy") : Model.InvoiceProcessedMaxDate.Value.ToString("dd/MM/yyyy"))');
+    var minDate = $.datepicker.parseDate("dd/mm/yy", '@string.Format("{0}", !Model.InvoiceProcessedMaxDate.HasValue ? new DateTime(2016, 1, 1).ToString("dd/MM/yyyy") : Model.InvoiceProcessedMaxDate.Value.AddMonths(1).ToString("dd/MM/yyyy"))');
+    $(document).ready(function () {        
+        $(".monthPicker").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "yy-MM",
+            showButtonPanel: true,
+            changeYear: true,
+            currentText: "This Month",
+            yearRange: yrRange,
+            maxDate: minDate,
+            minDate: minDate,
+            onChangeMonthYear: function (year, month, inst) {
+                $(this).val($.datepicker.formatDate('yy-MM', new Date(year, month - 1, 1)));
+            },
+            beforeShow: function (input) {
+                setTimeout(function () {
+                    $(input).datepicker("widget").find(".ui-datepicker-current").hide();
+                }, 1)
+            },
+            onClose: function (dateText, inst) {
+                var month = $(".ui-datepicker-month :selected").val();
+                var year = $(".ui-datepicker-year :selected").val();
+                $(this).val($.datepicker.formatDate('yy-MM', new Date(year, month, 1)));
+            }
+        }).focus(function () {
+            $(".ui-datepicker-calendar").hide();
+        }).keyup(function (e) {
+            if (e.keyCode == 8 || e.keyCode == 46) {
+                $.datepicker._clearDate(this);
+                $(this).val("");
+            }
+        }).bind('input propertychange', function () { if (this.value == "") { $.datepicker._clearDate(this);$(this).val("");}});
+        $("#getCustomersByBusiness").click(function () {
+            var business = $("#selBusiness").val();
+            $("#BusinessName").val(business);
+        });
+        $(".Unpaid_Invoices").click(function (e) {
+            var requestInvoice = $.ajax({
+                type: "GET",
+                url: getUnpaidInvoiceUrl,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (invoiceData) {
+                    if (!$.isNullOrEmpty(invoiceData)) {
+                        $(".fee-invoice-dialog").dialog('option', 'title', "Unpaid Invoices");
+                        $(".fee-invoice-dialog")
+                            .data("Pagination", JSON.parse(requestInvoice.getResponseHeader('X-Pagination')))
+                            .data("InvoiceData", invoiceData)
+                            .data("URL", getUnpaidInvoiceUrl)
+                            .data("Title", "Unpaid Invoices")
+                            .dialog("open");
+                    }
+                }
+            });
+            requestInvoice.fail(function (jqxhr, textStatus, error) {
+                alert("List of Invoice Request failed: " + textStatus);
+            });
+        });
+        $(".Paid_Invoices").click(function (e) { $(".fee-invoice-dialog").data("feeId", feeId).dialog("open"); });
+        $(".UnPaid_Invoices").click(function (e) { $(".fee-invoice-dialog").data("feeId", feeId).dialog("open"); });
+        $("#invoiceProcess").click(function (e) {
+            e.preventDefault();
+            var processedDate = $('#InvoiceProcessedDate').datepicker('getDate');
+            if ($.isNullOrEmpty(processedDate)) {
+                alert("Please select Processed Date");
+            }
+            else {
+                $.ajax({
+                    type: "GET", url: processFeeInvoiceUrl + $.toJsonDate(processedDate), contentType: "application/json", datatype: "json",
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status == 200) {
+                            var NewInvoiceUrl = getNewInvoiceUrl + $.toJsonDate(processedDate) + "&pageIndex=0&pageSize=30";
+                            if (NewInvoiceUrl) {
+                                var requestInvoice = $.getJSON(NewInvoiceUrl, function (invoices) {
+                                    $(".fee-invoice-dialog").dialog('option', 'title', "Processed Invoices");
+                                    $(".fee-invoice-dialog")
+                                        .data("Pagination", JSON.parse(requestInvoice.getResponseHeader('X-Pagination')))
+                                        .data("InvoiceData", invoices)
+                                        .data("URL", NewInvoiceUrl)
+                                        .dialog("open");
+                                }).fail(function ()
+                                { alert("List of Invoice Request failed! Please try again later. "); })
+                            }
+                            //location.reload();
+                        } else { alert(xhr.status); }
+                    },
+                    error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); },
+                });
+            }
+        })
+        $("#btnUploadFile").click(function ValidateExtension(e) {
+            var allowedFiles = [".ics", ".ICS"];
+            var fileUpload = document.getElementById("fileUpload");
+            var lblError = document.getElementById("lblError");
+            var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles.join('|') + ")$");
+            if (!regex.test(fileUpload.value.toLowerCase())) {
+                lblError.innerHTML = "Please upload files having extensions: <b>" + allowedFiles.join(', ') + "</b> only.";
+                return false;
+            }
+            lblError.innerHTML = "";
+            var Data = new FormData();
+            var files = $("#fileUpload").get(0).files;
+            // Add the uploaded image content to the form data collection
+            if (files.length > 0) {
+                Data.append("BankHoliday", files[0]);
+            }
+            // Make Ajax request with the contentType = false, and procesDate = false
+            $.ajax({
+                type: "POST", url: getFileUploadUrl, data: Data, contentType: false, processData: false,
+                success: function (data) { location.reload(); },
+                error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); },
+            });
+            return true;
+        });
+    });
+</script>

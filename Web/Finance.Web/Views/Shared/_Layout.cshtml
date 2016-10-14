@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Finance.Web</title>
+    <environment names="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link href="~/lib/jqueri-ui/themes/black-tie/jquery-ui.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="~/css/style.css" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    </environment>
+    @*<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>*@
+    <script src='~/lib/tinymce/tinymce.min.js'></script>
+</head>
+<body>
+    <environment names="Development">
+        <script src="~/lib/jquery/dist/jquery.js" asp-append-version="true"></script>
+        <script src="~/lib/jqueri-ui/jquery-ui.js" asp-append-version="true"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js" asp-append-version="true"></script>
+        <script src="~/App/extension.js" asp-append-version="true"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @*<script src='~/lib/tinymce/tiny_mce.js'></script>*@
+
+    </environment>
+    <environment names="Staging,Production">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal">
+        </script>
+        <script src="~/lib/jqueri-ui/jquery-ui.js" asp-append-version="true"></script>
+        <script src="~/App/extension.js" asp-append-version="true"></script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+    <div class="navbar navbar-default navbar-fixed-top main_header" role="navigation">
+        <div class="container-fluid" style="height:80px;">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href='@Url.Action("Index", "Home")'>
+                    <img src="~/images/logo.png" />
+                </a>
+                <h1>
+                    @ViewBag.MainHeading
+                </h1>
+            </div>
+            <p style="float:right;color:#ffffff;">
+                <strong>@{string userName = string.IsNullOrEmpty(User.Identity.Name) ? "Welcome Guest" : string.Format("You're logged in as - {0} ", User.Identity.Name);} @userName </strong>.
+                @if (!string.IsNullOrEmpty(User.Identity.Name))
+            {<a href="@Url.Action("LogOff", "Account")" style="cursor:pointer;font-weight:bold;color:#ffffff;"><img src="~/images/exit.png" style="width: 24px; height: 24px; margin-right: 1px;" />[Logout]</a>}
+            </p>
+            <!--/.nav-collapse -->
+        </div>
+        <div class="navbar-collapse collapse" style="margin-top:0px;width:auto;float:right;margin-right:23px;">
+            @Html.Partial("_FinanceTopMenu")<div style="float:right;margin-left:3px;margin-top:10px;">
+                <a href="@Url.Action("Index", "Home", new { })" style="color:#ffffff;font-size:medium;margin:0px;padding:0px;cursor:pointer;border:none;text-decoration:none;">
+                    <img src="~/images/home.png" style="width: 32px; height: 32px; margin-right: 1px;" />Home
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="margin-top:115px;margin-right:23px;">
+        @RenderBody()
+    </div>
+    <hr>
+    <div class="container-fluid DoNotPrint">
+        <p>&copy; @DateTime.Now.Year <a href="#">Family Star Ltd</a></p>
+    </div>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

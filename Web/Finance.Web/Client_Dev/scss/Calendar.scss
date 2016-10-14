@@ -1,0 +1,9 @@
+﻿.Calendar th, .Calendar td { border: 1px solid #000; }
+.Calendar thead { background-color:#1aa5a6; }
+.Calendar td {min-height:70px; vertical-align: top;margin:0px;padding:0px;width:14%;  }
+span.date{font-weight:bold;margin:0px;float:left;margin-left:-10px;}
+.Calendar div.topContent{float:left;width:106%;margin:0px;padding:0px; margin-top:-10px;}
+.Calendar div{float:left;width:100%;}
+td .day {overflow:hidden; margin-top: 0;font-size:10px; margin-left:-10px;}
+.Calendar tbody .weekend { background-color:#f9f0f0; }
+.Calendar tbody .next, .Calendar tbody .previous { background-color:#dff0d8;font-weight:normal; }

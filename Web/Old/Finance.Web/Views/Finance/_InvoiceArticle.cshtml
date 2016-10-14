@@ -1,0 +1,42 @@
+﻿@model Finance.Web.Models.HtmlEditor
+@Html.Partial("_InvoiceArticleTemplateLookup")
+<div class="invoiceArticle-dialog" style="display:none;" id="invoiceArticle" title="Invoice Article">
+    <b style="margin-right:3px;">Invoice Article</b><button type="button" id="btnInvoiceArticleTemplateLookup" class="btn btn-default" style="font-weight:bold;cursor:pointer;margin-right:5px;width:40px;height:32px;vertical-align:top;">...</button><input type="image" id="invoiceArticleOK" src="~/Content/Images/Save.png" style="width:32px;height:32px;" /><br />
+    <div style="height:400px;">
+        @Html.EditorFor(model => model.Editor)
+        @Html.ValidationMessageFor(model => model.Editor)
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $.loadHtmlEditor();
+        $(document).on('focusin', function (e) {if ($(e.target).closest(".mce-window, .moxman-window").length) {e.stopImmediatePropagation();}});
+        $(".invoiceArticle-dialog").dialog({ modal: true, resizable: false, width: 950, height: 500, autoOpen: false });
+        $(".invoiceArticle-dialog").on("dialogopen", function (event, ui) {
+            $("#tblBodyreceiptInvoices").empty();
+            $(".ui-dialog").css('zIndex', 999999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".invoiceArticle-dialog").dialog("moveToTop");
+            var articleId = $(".invoiceArticle-dialog").data("ArticleId");
+            if (articleId != 0) { 
+                tinyMCE.activeEditor.setContent($(".invoiceArticle-dialog").data("Article"));
+            }
+            else {
+                tinyMCE.activeEditor.setContent("");
+            }
+            $(".invoiceArticle-dialog").data("Article", "");
+        });
+        $("#invoiceArticleOK").on("click", function (e) {
+            $(".invoiceArticle-dialog").data("Article", tinyMCE.activeEditor.getContent());
+            $(".invoiceArticle-dialog").dialog("close");
+        });
+        $("#btnInvoiceArticleTemplateLookup").on("click", function () {
+            $(".invoice-article-template-lookup-dialog").dialog("open");
+        });
+        $(".invoice-article-template-lookup-dialog").on("dialogclose", function (event, ui) {
+            $(".invoiceArticle-dialog").dialog("moveToTop");
+            var template = $(".invoice-article-template-lookup-dialog").data("InvoiceArticleTemplate");
+            if (!$.isNullOrEmpty(template)) { tinyMCE.get("Editor_Editor").setContent(template); }
+        });
+    });
+</script>

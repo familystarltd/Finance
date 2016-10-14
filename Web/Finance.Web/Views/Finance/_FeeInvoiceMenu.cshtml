@@ -1,0 +1,29 @@
+﻿@model Finance.Web.Model.FeeInvoiceModel
+@{var namelink = Html.ViewData["class"] == null ? "" : Html.ViewData["class"];}
+<ul class="nav navbar-nav" style="font-weight: bold; margin: 0px; padding: 0px;margin-left:5px;">
+    <li class="dropdown" style="margin: 0px; padding: 0px;">
+        <a onclick="javascript: return false;" class="dropdown-toggle @namelink" data-toggle="dropdown" style="font-size:medium;margin:0px;padding:0px;cursor:pointer;">@Model.InvoiceNo <b class="caret"></b></a>
+        <ul class="dropdown-menu menu" role="menu" style="margin: 0px; padding: 0px;right:0;left:0;top:-130px;">
+            <li>
+                <a href="@Url.Action("View", "Finance", new { invoiceNo = Model.InvoiceNo })" style="margin: 5px; padding: 0px;">
+                    <img src="~/images/fee_invoice.png" style="width: 16px; height: 16px;" />View Invoice
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Receipt", "Finance", new { invoiceNo = Model.InvoiceNo })" style="margin: 5px; padding: 0px;">
+                    <img src="~/images/%c2%a3.png" style="width: 16px; height: 16px;" />Receipt
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("CreditNote", "Finance", new { invoiceNo = Model.InvoiceNo })" style="margin: 5px; padding: 0px;">
+                    <img src="~/images/edit.png" style="width: 16px; height: 16px;" />Credit Note
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("CustomerFee", "Finance", new { invoiceNo = Model.InvoiceNo })" style="margin: 5px; padding: 0px;">
+                    <img src="~/images/fee_setup.png" style="width: 16px; height: 16px;" />Debit Note
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>

@@ -1,0 +1,125 @@
+﻿@model Finance.Web.Models.HtmlEditor
+<div class="invoice-article-template-dialog" id="invoice-article-template-dialog" title="Invoice Article Template" style="display: none;">
+    <div class="row">
+        <div class="col-md-1">
+            <label for="InvoiceArticleTemplateName">Name</label>
+        </div>
+        <div class="col-md-11">
+            <input type="text" id="InvoiceArticleTemplateName" name="InvoiceArticleTemplateName" style="width: 300px; color: black;" class="form-control" />
+            <input type="hidden" id="InvoiceArticleTemplateId" />
+        </div>
+    </div>
+    <div class="row" style="">
+        <div class="col-md-1">
+            Template
+        </div>
+        <div class="col-md-11">
+            @Html.EditorFor(model => model.ArticleTemplate)
+            @Html.ValidationMessageFor(model => model.ArticleTemplate)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-offset-1 col-md-11">
+            <input type="image" id="invoiceArticleTemplateSave" src="~/images/Save.png" style="width:32px;height:32px;" />
+            <input type="image" id="invoiceArticleTemplateReset" src="~/images/reset.png" style="height:32px;width:32px;cursor:pointer;" />
+            <img src="~/images/exit.png" id="invoiceArticleTemplateExit" class="invoiceArticleTemplateExit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#ArticleTemplate').html("");
+        tinymce.init({
+            selector: '#ArticleTemplate',
+            height: "100%", width: "100%"
+        });
+        @{System.Text.StringBuilder sbUpdateInvoiceArticleTemplate = new System.Text.StringBuilder();
+          sbUpdateInvoiceArticleTemplate.Append("'");
+          sbUpdateInvoiceArticleTemplate.Append(ViewBag.FinanceApiService);
+          sbUpdateInvoiceArticleTemplate.Append("/FinanceApi/InvoiceArticleTemplate");
+          sbUpdateInvoiceArticleTemplate.Append("'");}
+        var updateInvoiceArticleTemplate =   @Html.Raw(sbUpdateInvoiceArticleTemplate.ToString()) +'';
+        @{System.Text.StringBuilder sbGetInvoiceArticleTemplate = new System.Text.StringBuilder();
+          sbGetInvoiceArticleTemplate.Append("'");
+          sbGetInvoiceArticleTemplate.Append(ViewBag.FinanceApiService);
+          sbGetInvoiceArticleTemplate.Append("/FinanceApi/InvoiceArticleTemplates/");
+          sbGetInvoiceArticleTemplate.Append("'");}
+        var getInvoiceArticleTemplateUrl =   @Html.Raw(sbGetInvoiceArticleTemplate.ToString()) +'';
+        InvoiceArticleTemplate = {};// Create empty JSON invoice object
+        var defaultInvoiceArticleTemplateId = "@Guid.Empty";
+        function clearInvoiceArticleTemplateForm() {
+            $("#InvoiceArticleTemplateName").val("");
+            $("#InvoiceArticleTemplateId").val(defaultInvoiceArticleTemplateId);
+            tinyMCE.get("ArticleTemplate").setContent("");
+            InvoiceArticleTemplate = {};// Create empty JSON invoice object
+        }
+        function loadArticleTemplate(Template) {
+            if (!$.isNullOrEmpty(Template)) {
+                $("#InvoiceArticleTemplateName").val(Template.name);
+                $("#InvoiceArticleTemplateId").val(Template.id);
+                tinyMCE.get("ArticleTemplate").setContent(Template.articleTemplate);
+            }
+        }
+        function loadInvoiceArticleTemplate(TemplateId) {
+            var URL = getInvoiceArticleTemplateUrl + TemplateId;
+            var requestInvoiceArticle = $.ajax({
+                type: "GET",
+                url: URL,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (invoiceArticle) {
+                    if (!$.isNullOrEmpty(invoiceArticle)) {
+                        loadArticleTemplate(invoiceArticle);
+                    }
+                }
+            });
+            requestInvoiceArticle.fail(function (jqxhr, textStatus, error) {
+                alert("List of InvoiceArticles Request failed: " + textStatus);
+            });
+        }
+        $(".invoice-article-template-dialog").dialog({ modal: true, resizable: false, width: 1000, height: 500, zindex: 30000, autoOpen: false, position: { my: 'top', at: 'top+160' } });
+        $(".invoice-article-template-dialog").on("dialogopen", function (event, ui) {
+            $(".ui-dialog").css('zIndex', 99999999);
+            $('.ui-widget-overlay').css('zIndex', 102);
+            $(".invoice-article-template-dialog").dialog("moveToTop");
+            clearInvoiceArticleTemplateForm();
+            var InvoiceArticleTemplateId = $(".invoice-article-template-dialog").data("InvoiceArticleTemplateId");
+            if (!$.isNullOrEmpty(InvoiceArticleTemplateId)) {
+                loadInvoiceArticleTemplate(InvoiceArticleTemplateId);
+            }
+            else{$("#InvoiceArticleTemplateId").val(defaultInvoiceArticleTemplateId);}
+            $("#InvoiceArticleTemplateName").focus();
+        });
+        $(".invoice-article-template-dialog").on("dialogclose", function (event, ui) { clearInvoiceArticleTemplateForm(); });
+        $("#invoiceArticleTemplateSave").on("click", function (e) {
+            e.preventDefault();
+            var name = $.trim($("#InvoiceArticleTemplateName").val());
+            var template = $.trim(tinyMCE.get("ArticleTemplate").getContent());
+            var Id = $("#InvoiceArticleTemplateId").val();
+            if ($.isNullOrEmpty(name)) {
+                alert("Please enter template name.");
+                $("#InvoiceArticleTemplateName").focus();
+            }
+            else if ($.isNullOrEmpty(template)) {
+                alert("Please enter template.");
+                $("#ArticleTemplate.ArticleTemplate").focus();
+            }
+            else {
+                InvoiceArticleTemplate["id"] = Id;
+                InvoiceArticleTemplate["name"] = name;
+                InvoiceArticleTemplate["articleTemplate"] = template;
+                $.ajax({
+                    type: "POST", url: updateInvoiceArticleTemplate, dataType: "json", data: JSON.stringify(InvoiceArticleTemplate), contentType: "application/json",
+                    success: function (Template) {
+                        if (!$.isNullOrEmpty(Template)) {
+                            //window.location = '/FeeInvoiceSearchByNo?InvoiceNoSearch=' + Invoice.invoiceNo;
+                            $(".invoice-article-template-dialog").data("Template", Template);
+                            $(".invoice-article-template-dialog").dialog("close");
+                        } else { alert("Template has not been updated! Please try again later."); }
+                    },
+                    error: function (xhr) { var jsonResponse = JSON.parse(xhr.responseText); alert(jsonResponse.message + " : " + jsonResponse.exceptionMessage); }
+                }).fail(function (jqXHR, textStatus) { alert("Request failed: " + textStatus); });
+            }
+        })
+    });
+</script>
