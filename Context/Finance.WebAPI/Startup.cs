@@ -32,6 +32,14 @@ namespace Finance.WebAPI
             //services.AddOptions();
             //Add cors built in support. 
             services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFinanceFamilyStarLtdOrigin",
+                    builder => builder
+                    .WithOrigins("http://finance.familystarltd.com")
+                    .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+            });
+
             services.AddMvcCore().AddApiExplorer();
             //Add MVC for supporting WebApi requests
             #region MVC Add services.AddMvc()

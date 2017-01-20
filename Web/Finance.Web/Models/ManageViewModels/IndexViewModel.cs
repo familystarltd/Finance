@@ -12,10 +12,13 @@ namespace Finance.Web.Models.ManageViewModels
 
         public IList<UserLoginInfo> Logins { get; set; }
 
+        public IList<ApplicationUser> Users { get; set; }
+
         public string PhoneNumber { get; set; }
 
         public bool TwoFactor { get; set; }
 
         public bool BrowserRemembered { get; set; }
+        public string UserName { get; internal set; }
     }
 }

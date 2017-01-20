@@ -8,11 +8,6 @@
     using Finance.Domain.Aggregates.FeeAgg;
     using System.ComponentModel;
 
-
-
-    // UK Bank Holidays
-    //https://www.gov.uk/bank-holidays.json
-
     /// <summary>
     /// Invoice for Fee
     /// </summary>

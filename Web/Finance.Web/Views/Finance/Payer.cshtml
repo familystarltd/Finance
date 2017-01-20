@@ -49,11 +49,10 @@
                             </td>
                             <td>
                                 <a style="text-decoration:none;font-weight:bold;cursor:pointer;" href="@Url.Action("Payer", "Finance", new { Id = payer.Id })"> <img alt="edit-payer" src="~/images/edit.png" style="width:24px;height:24px;" /> </a>
-                                @if (payer.Fees.Count() <= 0)
+                                @*@if (payer.Fees.Count() <= 0)
                                 {
                                     <img id="payerDelete" class="payerDelete" alt="delete-payer" src="~/images/delete.png" style="width:24px;height:24px;cursor:pointer;" />
-                                    @*<input type="image" id="payerDelete" class="payerDelete" data-app-id="@payer.Id" value="delete" style="width:24px;height:24px;" alt="delete-block bed" src="~/images/delete.png" />*@
-                                }
+                                }*@
                             </td>                            
                         </tr>
                     }

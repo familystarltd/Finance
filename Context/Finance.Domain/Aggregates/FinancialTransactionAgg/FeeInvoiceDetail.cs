@@ -5,11 +5,8 @@
     using System.ComponentModel;
     using System.Domain;
 
-    // UK Bank Holidays
-    //https://www.gov.uk/bank-holidays.json
-
     /// <summary>
-    /// Fee for the Customer
+    /// Fee Invoice details
     /// </summary>
     public class FeeInvoiceDetail : InvoiceDetail
     {

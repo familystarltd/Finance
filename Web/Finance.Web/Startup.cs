@@ -39,6 +39,7 @@ namespace Finance.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             services.AddOptions();
             services.AddCors();
             services.AddMvcCore().AddApiExplorer().AddJsonFormatters(a => a.ContractResolver = new CamelCasePropertyNamesContractResolver());
@@ -57,7 +58,12 @@ namespace Finance.Web
             });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Add framework services.
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, IdentityRole>(
+                user =>
+                {
+                    user.Password.RequireNonAlphanumeric = false;
+                }
+                ).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             string connection = Configuration.GetConnectionString("DefaultConnection");
             if (connection.ToLower().Contains("FileName".ToLower()))
             {
@@ -101,9 +107,6 @@ namespace Finance.Web
 
             app.UseStaticFiles();
             app.UseIdentity();
-
-            // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

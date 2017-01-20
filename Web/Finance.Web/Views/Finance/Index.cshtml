@@ -95,13 +95,13 @@
                     </td>
                 </tr>
             </thead>
-            <tbody class="content-sub" style="font-size:small;vertical-align:top;font-weight:bold;">
+            <tbody class="content-sub" style="font-size:small;vertical-align:top;">
                 @if (Model.Customers != null && Model.Customers.Count() > 0)
                 {
                     foreach (Finance.Web.Model.CustomerModel customer in Model.Customers)
                     {
                 <tr>
-                    <td style="font-weight:bold;">
+                    <td style="font-size:small;">
                         @Html.Partial("_CustomerMenu", customer, new ViewDataDictionary(Html.ViewData))
                     </td>
                     @*<td>
@@ -129,7 +129,7 @@
                             </td>
                             }
                     <td>
-                        <table style="width:100%;border:none;font-weight:900;">
+                        <table style="width:100%;border:none;font-weight:900;font-size:small;">
                             <tr><td style="text-align: right; border: none;padding-right:15px;">Invoice:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits)</td></tr>
                             <tr style="color:darkgreen;border-bottom:1px solid #000000;"><td style="text-align: right; border: none; padding-right: 15px; ">Received:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Credits)</td></tr>
                             <tr style="color:red;"><td style="text-align: right; border: none; padding-right: 15px; ">Due:</td><td style="text-align: right; border: none;">@string.Format("{0:c}", customer.Debits - customer.Credits)</td></tr>

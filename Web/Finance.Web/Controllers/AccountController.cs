@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Presentation.WebAPIProxy.Serialization;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class AuthorizeIntranetRequirement : IAuthorizationRequirement
 {
@@ -119,6 +120,10 @@ namespace Finance.Web.Controllers
     //    }
     //}
     //[AuthorizeIntranet(Roles = "Administrator")]
+#if (!DEBUG)
+    [Authorize(Roles = "Administrator, Manager,User")]
+#endif
+    //[Authorize(Roles = "Administrator, Manager,User")]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -144,6 +149,40 @@ namespace Finance.Web.Controllers
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
+        public async Task<IActionResult> Index(ManageMessageId? message = null,string UserName=null)
+        {
+            ViewData["StatusMessage"] =
+                message == ManageMessageId.ChangePasswordSuccess ? string.Format("{0} password has been changed.", string.IsNullOrEmpty(UserName)?"Your": UserName)
+                : message == ManageMessageId.SetPasswordSuccess ? string.Format("{0} password has been set.", string.IsNullOrEmpty(UserName) ? "Your" : UserName)
+                : message == ManageMessageId.SetTwoFactorSuccess ? string.Format("{0} two-factor authentication provider has been set.", string.IsNullOrEmpty(UserName) ? "Your" : UserName)
+                : message == ManageMessageId.Error ? "An error has occurred."
+                : message == ManageMessageId.AddPhoneSuccess ? string.Format("{0} phone number was added.", string.IsNullOrEmpty(UserName) ? "Your" : UserName)
+                : message == ManageMessageId.RemovePhoneSuccess ? string.Format("{0} phone number was removed.", string.IsNullOrEmpty(UserName) ? "Your" : UserName)
+                : message == ManageMessageId.RemoveUser ? string.Format("User {0} was removed.", string.IsNullOrEmpty(UserName) ? "" : UserName)
+                : message == ManageMessageId.AddUser ? string.Format("User {0} was Added.", string.IsNullOrEmpty(UserName) ? "" : UserName)
+                : "";
+            IList<ApplicationUser> Users = _userManager.Users.ToList();
+            if (Users == null || Users.Count == 0)
+            {
+                return View("Register");
+            }
+            return View(Users);
+        }
+        public async Task<IActionResult> Delete(string UserName)
+        {
+            var user = await GetCurrentUserAsync(UserName);
+            if (user == null)
+            {
+                return View("Error");
+            }
+            var result = await _userManager.DeleteAsync(await _userManager.FindByNameAsync(UserName));
+            ManageMessageId message = ManageMessageId.Error;
+            if (result.Succeeded)
+            {
+                message = ManageMessageId.RemoveUser;
+            }
+            return RedirectToAction(nameof(Index), "Account", new { Message = message, UserName = UserName });
+        }
         //
         // GET: /Account/Login
         [HttpGet]
@@ -199,7 +238,11 @@ namespace Finance.Web.Controllers
         public IActionResult Register(string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            RegisterViewModel model = new Models.AccountViewModels.RegisterViewModel();
+            model.Roles = new List<RoleList>();
+            foreach (IdentityRole Role in _roleManager.Roles)
+                model.Roles.Add(new RoleList { Name = Role.Name, IsChecked = false });
+            return View(model);
         }
 
         //
@@ -207,24 +250,40 @@ namespace Finance.Web.Controllers
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model,string[] Roles, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
+                var roleResult = await _userManager.AddToRolesAsync(user, Roles);
+                if (result.Succeeded && roleResult.Succeeded)
                 {
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                     // Send an email with this link
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
                     //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
                     //    $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation(3, "User created a new account with password.");
+                    
+                    // Automatic email confirmation
+                    var emailCode = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var emailResult = await _userManager.ConfirmEmailAsync(user, emailCode);
+                    if (emailResult.Succeeded)
+                    {
+                        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                        await _emailSender.SendEmailAsync(model.Email, "Reset Password",
+                            $"Your User Name : <b>{user.UserName}<b/> <br/> Please reset your password by <a href='{callbackUrl}'>clicking here</a>");
+                        //await _signInManager.SignInAsync(user, isPersistent: false);
+                        _logger.LogInformation(3, "User created a new account with password.");
+                        return RedirectToAction(nameof(Index), "Account", new { Message = ManageMessageId.AddUser, UserName = user.UserName });
+                    }
                     return RedirectToLocal(returnUrl);
+                }
+                else
+                {
+                   await _userManager.DeleteAsync(user);
                 }
                 AddErrors(result);
             }
@@ -367,20 +426,18 @@ namespace Finance.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(model.Email);
+                var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
                     return View("ForgotPasswordConfirmation");
                 }
-
-                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 // Send an email with this link
-                //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                //var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                //await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                //   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
-                //return View("ForgotPasswordConfirmation");
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                await _emailSender.SendEmailAsync(model.Email, "Reset Password",
+                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+                return View("ForgotPasswordConfirmation");
             }
 
             // If we got this far, something failed, redisplay form
@@ -422,7 +479,7 @@ namespace Finance.Web.Controllers
             {
                 return View(model);
             }
-            var user = await _userManager.FindByNameAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
@@ -557,9 +614,10 @@ namespace Finance.Web.Controllers
             }
         }
 
-        private Task<ApplicationUser> GetCurrentUserAsync()
+        private Task<ApplicationUser> GetCurrentUserAsync(string UserName)
         {
-            return _userManager.GetUserAsync(HttpContext.User);
+            return _userManager.FindByNameAsync(UserName);
+            //return _userManager.GetUserAsync(HttpContext.User);
         }
 
         private IActionResult RedirectToLocal(string returnUrl)
@@ -575,5 +633,18 @@ namespace Finance.Web.Controllers
         }
 
         #endregion
+    }
+    public enum ManageMessageId
+    {
+        AddPhoneSuccess,
+        AddLoginSuccess,
+        ChangePasswordSuccess,
+        SetTwoFactorSuccess,
+        SetPasswordSuccess,
+        RemoveLoginSuccess,
+        RemovePhoneSuccess,
+        Error,
+        RemoveUser,
+        AddUser
     }
 }

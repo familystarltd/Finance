@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Domain;
 using System.Linq;
 using System.Text;
@@ -76,10 +77,10 @@ namespace Finance.Domain.Aggregates.FinancialTransactionAgg
         public bool IsManual { get; set; }
         public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; }
         public virtual ICollection<ReceiptInvoice> ReceiptInvoices { get; set; }
-        public virtual ICollection<CreditNote> CreditNotes { get; set; }        
+        public virtual ICollection<CreditNote> CreditNotes { get; set; }
         public virtual ICollection<InvoiceAdjustment> Adjustments { get; set; }
-        //public Guid? BadDebtId { get; set; }
-        //public virtual BadDebt BadDebt { get; set; }
+        public Guid? BadDebtId { get; set; }
+        public virtual BadDebt BadDebt { get; set; }
         public DateTime? LogDate { get; set; }
 
         #region CALCULATED FIELDS
@@ -137,6 +138,34 @@ namespace Finance.Domain.Aggregates.FinancialTransactionAgg
             {
                 decimal amountReceipt = (this.ReceiptInvoices == null || this.ReceiptInvoices.Count <= 0 ? 0 : this.ReceiptInvoices.Sum(r => r.Receipt.TransactionStatus == FinancialTransactionAgg.TransactionStatus.Void ? 0 :  r.AmountReceived));
                 return TotalWithVAT - (AdvancePayment + amountReceipt);// + (this.BadDebt == null ? 0 : BadDebt.Amount));
+            }
+        }
+        #endregion
+    }
+    public class InvoiceDetail : Entity
+    {
+        public Guid InvoiceId { get; set; }
+        public Invoice invoice;
+        public virtual Invoice Invoice { get { if (invoice != null) { invoice.InvoiceDetails = null; } return invoice; } set { invoice = value; } }
+        public string Article { get; set; }
+
+        [DefaultValue(20), Range(0.00, 100, ErrorMessage = "VAT must be a % between 0 and 100")]
+        public decimal VAT { get; set; }
+        public decimal Total { get; set; }
+        #region CALCULATED FIELDS
+        public decimal VATAmount
+        {
+            get
+            {
+                return TotalPlusVAT - Total;
+            }
+        }
+
+        public decimal TotalPlusVAT
+        {
+            get
+            {
+                return Total * (1 + VAT / 100);
             }
         }
         #endregion

@@ -29,7 +29,6 @@
             else { e.preventDefault(); }
             formValid = true;
         });
-
         $(document).ajaxSend(function () { $('#spinner').show(); });
         $(document).ajaxStop(function () { $('#spinner').hide(); });
         $(document).ajaxError(function () { $('#spinner').hide(); });

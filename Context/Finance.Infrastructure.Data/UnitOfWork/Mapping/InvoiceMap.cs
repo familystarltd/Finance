@@ -11,7 +11,9 @@ namespace Finance.Infrastructure.Data.UnitOfWork.Mapping
         public override void Map(EntityTypeBuilder<InvoiceDetail> b)
         {
             b.HasKey(fi => fi.Id);
-            b.HasDiscriminator<string>("Discriminator").HasValue<FeeInvoiceDetail>("FeeInvoiceDetail");
+            b.HasDiscriminator<string>("Discriminator")
+                .HasValue<FeeInvoiceDetail>("FeeInvoiceDetail")
+                .HasValue<FNCInvoiceDetail>("FNCInvoiceDetail");
             b.ToTable("InvoiceDetail");
         }
     }

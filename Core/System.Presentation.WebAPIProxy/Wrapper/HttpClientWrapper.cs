@@ -8,6 +8,7 @@ using System.Net;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 
 namespace System.Presentation.WebAPIProxy
 {
@@ -51,10 +52,14 @@ namespace System.Presentation.WebAPIProxy
                 {
                     httpContext.Request.Cookies.ToList().ForEach(key => AddHeader(key.Key, httpContext.Request.Cookies[key.Key]));
                 }
-                //if (httpContext.Response != null && httpContext.Response.Cookies != null)
-                //{
-                //    httpContext.Response.co.Cookies.ToList().ForEach(key => AddHeader(key, httpContext.Response.Cookies[key].Value));
-                //}
+                if (httpContext.Response != null && httpContext.Response.Headers != null)
+                {
+                    StringValues values = new StringValues();
+                    if(httpContext.Response.Headers.TryGetValue("FINANCE-BUSINESS", out values))
+                    {
+                        AddHeader("FINANCE-BUSINESS", values.FirstOrDefault());
+                    }
+                }
             }
         }
         protected HttpClient Client()

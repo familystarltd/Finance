@@ -55,15 +55,17 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
+    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.1",
+    "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.1",
+    "Microsoft.EntityFrameworkCore.Sqlite": "1.0.1",
+    //"Rotativa.MVC": "2.0.3",
     "Finance.Web.Model": "1.0.0-*",
     "Finance.WebAPIProxy": "1.0.0-*",
     "System.DistributedServices": "1.0.0-*",
     "System.Infrastructure.Data": "1.0.0-*",
     "System.Infrastructure.Crosscutting.Framework": "1.0.0-*",
     "System.Presentation.WebAPIProxy": "1.0.0-*",
-    "Microsoft.EntityFrameworkCore.Sqlite": "1.0.1",
-    "Microsoft.AspNetCore.Mvc.WebApiCompatShim": "1.0.1",
-    "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.1"
+    "MailKit": "1.10.1"
   },
   "frameworks": {
     "netcoreapp1.0": {
@@ -72,6 +74,7 @@
         "portable-net45+win8"
       ]
     }
+    //,"net452": {}
   },
   "buildOptions": {
     "emitEntryPoint": true,

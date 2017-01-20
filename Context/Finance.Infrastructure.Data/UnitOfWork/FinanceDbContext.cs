@@ -46,6 +46,9 @@
         DbSet<Fee> Fees { get; set; }
         DbSet<FeeRate> FeeRates { get; set; }
         DbSet<Rate> Rates { get; set; }
+        DbSet<FNC> FNCs { get; set; }
+        DbSet<FNCCustomer> FNCCustomers { get; set; }
+        DbSet<FNCRate> FNCRates { get; set; }
         DbSet<Expense> Expenses { get; set; }
         DbSet<Disbursement> Disbursements { get; set; }
         DbSet<FinancialTransaction> FinancialTransactions { get; set; }
@@ -57,6 +60,7 @@
         DbSet<Receipt> Receipts { get; set; }
         //DbSet<ReceiptInvoice> ReceiptInvoices { get; set; }
         DbSet<CreditNote> CreditNotes { get; set; }
+        DbSet<BadDebt> BadDebts { get; set; }
         #endregion
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
     }
@@ -75,7 +79,6 @@
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-
             #region NOT SUPPORTED YET BY ENTITY FRAMEWORK CORE (26/05/2016) --- HAVE TO BE CHANGED
             //    //The Lazy Loading property enables loading the sub-objects of model up front
             //    this.Configuration.ProxyCreationEnabled = false;
@@ -95,7 +98,6 @@
             //    Database.SetInitializer(new MigrateDatabaseToLatestVersion<FinanceContext, FinanceContextDBConfiguration>(useSuppliedContext:true));
             #endregion
             optionsBuilder.EnableSensitiveDataLogging();
-
             if (ConnectionString.Contains("FileName"))// SQLite
             {
                 optionsBuilder.UseSqlite(ConnectionString);
@@ -265,12 +267,16 @@
         public DbSet<HourlyRate> HourlyRate { get; set; }
         public DbSet<DailyRate> DailyRate { get; set; }
         public DbSet<MonthlyRate> MonthlyRate { get; set; }
+        public DbSet<FNC> FNCs { get; set; }
+        public DbSet<FNCCustomer> FNCCustomers { get; set; }
+        public DbSet<FNCRate> FNCRates { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Disbursement> Disbursements { get; set; }
         public DbSet<InvoiceArticleTemplate> InvoiceArticleTemplates { get; set; }
         public DbSet<Receipt> Receipts { get; set; }
         //public DbSet<ReceiptInvoice> ReceiptInvoices { get; set; }
         public DbSet<CreditNote> CreditNotes { get; set; }
+        public DbSet<BadDebt> BadDebts { get; set; }
         #endregion
     }
 

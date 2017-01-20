@@ -420,7 +420,7 @@ namespace Finance.Web.Controllers
 
         #region PDF INVOICES
         [Route("PrintPDFFeeInvoices")]
-        public ActionResult PrintPDFFeeInvoices(string InvoiceNoSearch)
+        public IActionResult PrintPDFFeeInvoices(string InvoiceNoSearch)
         {
             if (string.IsNullOrEmpty(InvoiceNoSearch))
                 return RedirectToAction("Index");
@@ -429,6 +429,8 @@ namespace Finance.Web.Controllers
                 IEnumerable<InvoiceModel> invoices = proxy.GetInvoices(InvoiceNoSearch);
                 if (invoices != null && invoices.Count() > 0)
                 {
+                    //opt.FormatterMappings.SetMediaTypeMappingForFormat("pdf", new MediaTypeHeaderValue("application/pdf"));
+                    return Content("FeeInvoicePrint", "application/pdf");
                     //return new Rotativa.MVC.ViewAsPdf("FeeInvoicePrint", invoices)
                     //{
                     //    FileName = string.Format("Invoice_{0}.pdf", InvoiceNoSearch),

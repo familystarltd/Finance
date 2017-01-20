@@ -53,6 +53,7 @@ namespace Finance.Web
             Business.Departments = null;
             string json = _serializer.Serialize<Business>(Business);
             HttpContext.Response.Cookies.Append("FINANCE-BUSINESS", json);
+            HttpContext.Response.Headers.Append("FINANCE-BUSINESS", json);
         }
         Business GetBusiness(string businessName)
         {

@@ -7,11 +7,6 @@ namespace Finance.Web.Model
 {
     public class RateModel
     {
-        //FeeRateModel _FeeRate;
-        public RateModel()
-        {
-            //FeeRate = new FeeRateModel();
-        }
         /// <summary>
         /// Id for the Rate Detail model which is Unique Identifier
         /// </summary>

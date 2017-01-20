@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -27,5 +28,12 @@ namespace Finance.Web.Models.AccountViewModels
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        public ICollection<RoleList> Roles { get; set; }
+    }
+    public class RoleList
+    {
+        public string Name { get; set; }
+        public bool IsChecked { get; set; }
     }
 }

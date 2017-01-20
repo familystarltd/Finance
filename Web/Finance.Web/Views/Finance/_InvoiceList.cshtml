@@ -90,14 +90,15 @@
                     type: "GET",
                     url: URL,
                     cache:false,
+                    crossDomain: true,
                     contentType: "application/json",
                     datatype: "json",
                     success: function (invoiceData) {
                         loadInvoices(invoiceData, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
                     }
                 });
-                requestInvoice.fail(function (jqxhr, textStatus, error) {
-                    alert("List of Invoice Request failed: " + textStatus);
+                requestInvoice.error(function (jqxhr, textStatus, error) {
+                    clearInvoiceForm(); $("#invoiceListMsg").text(error + "\n List of Invoice Request failed: " + textStatus + "\n" + requestInvoice.getResponseHeader('Content-Type') + "\n" + requestInvoice.responseText);
                 }).always(function(jqxhr){$("#invoiceListLoader").hide();});
             }
         }
@@ -233,7 +234,7 @@
                 var requestInvoice = $.getJSON(url, function (invoices) {
                     loadInvoices(invoices, JSON.parse(requestInvoice.getResponseHeader('X-Pagination')));
                 }).fail(function ()
-                { alert("List of Invoice Request failed! Please try again later. "); })
+                { alert("List of Invoice Request failed! Please try again later."); })
             }
         });
         $('body').on('click', 'a.New_Receipt', function (e) {

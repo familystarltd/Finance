@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Finance.Domain.Aggregates.FinancialTransactionAgg
 {
-    //public class BadDebt : FinancialTransaction
-    //{
-    //    public override FinancialTransactionType FinancialTransactionType
-    //    {
-    //        get { return FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
-    //        set { value = FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
-    //    }
-    //    public Guid? InvoiceId { get; set; }
-    //    public virtual Invoice Invoice { get; set; }
-    //}
+    public class BadDebt : FinancialTransaction
+    {
+        public override FinancialTransactionType FinancialTransactionType
+        {
+            get { return FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
+            set { value = FinancialTransactionAgg.FinancialTransactionType.BadDebt; }
+        }
+        //public Guid? InvoiceId { get; set; }
+        public virtual Invoice Invoice { get; set; }
+    }
 }

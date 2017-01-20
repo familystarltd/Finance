@@ -22,7 +22,8 @@ namespace Finance.Domain.Aggregates.FinancialTransactionAgg
         BillableExpenseInvoice = 2,
         Receipt = 3,
         CreditNote = 4,
-        BadDebt = 5
+        BadDebt = 5,
+        FNCInvoice = 6
     }
     /// <summary>
     /// Debits increase Expenditure, Assets, Dividends (and Credits decrease them)
@@ -78,6 +79,8 @@ namespace Finance.Domain.Aggregates.FinancialTransactionAgg
                 {
                     case FinancialTransactionType.FeeInvoice:
                         return "Fee Invoice";
+                    case FinancialTransactionType.FNCInvoice:
+                        return "FNC  Invoice";
                     case FinancialTransactionType.BillableExpenseInvoice:
                         return "Disbursements Invoice";
                     case FinancialTransactionType.Receipt:

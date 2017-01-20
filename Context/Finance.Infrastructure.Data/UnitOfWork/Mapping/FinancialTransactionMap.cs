@@ -11,7 +11,11 @@ namespace Finance.Infrastructure.Data.UnitOfWork.Mapping
         public override void Map(EntityTypeBuilder<FinancialTransaction> b)
         {
             b.HasKey(trans => trans.Id);
-            b.HasDiscriminator<string>("Discriminator").HasValue<FeeInvoice>("Fee").HasValue<CreditNote>("Credit Note");
+            b.HasDiscriminator<string>("Discriminator")
+                .HasValue<FeeInvoice>("Fee")
+                .HasValue<FNCInvoice>("FNC")
+                .HasValue<CreditNote>("Credit Note")
+                .HasValue<BadDebt>("BadDebt");
             b.ToTable("FinancialTransactions");
         }
     }

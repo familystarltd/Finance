@@ -18,6 +18,7 @@ namespace Finance.Application.Service.MappingProfile
         public DomainToViewModelMapper()
         {
             CreateMap<Contact, ContactModel>().ForMember(model => model.PictureRawPhoto, mc => mc.MapFrom(c => c.Photo));
+            CreateMap<Fee, FeeModel>().ReverseMap();
             CreateMap<Rate, RateModel>();//.Include<WeeklyRate, RateModel>().Include<HourlyRate, RateModel>().Include<MonthlyRate, RateModel>().Include<DailyRate, RateModel>();
             CreateMap<WeeklyRate, RateModel>()
                 .ForMember(wr => wr.RateMethod, mc => mc.UseValue(Web.Model.RateMethod.Weekly))
@@ -37,6 +38,9 @@ namespace Finance.Application.Service.MappingProfile
                 .ForMember(wr => wr.NoOfHours, rm => rm.Ignore())
                 .ForMember(wr => wr.TotalRate, rm => rm.Ignore());
             CreateMap<HourlyRate, RateModel>().ForMember(wr => wr.RateMethod, mc => mc.UseValue(Web.Model.RateMethod.Hourly));
+            CreateMap<FNC, FNCModel>().ReverseMap();
+            CreateMap<FNCCustomer, FNCCustomerModel>().ReverseMap();
+            CreateMap<FNCRate, FNCRateModel>().ReverseMap();
             CreateMap<FinancialTransaction, FinancialTransactionModel>().ForMember(tran => tran.FinancialTransactionType, opt => opt.Ignore())
                 .Include<FeeInvoice, FeeInvoiceModel>()
                 .Include<Invoice, InvoiceModel>().Include<Receipt, ReceiptModel>().Include<CreditNote, CreditNoteModel>();
@@ -46,10 +50,11 @@ namespace Finance.Application.Service.MappingProfile
             CreateMap<FeeInvoiceDetail, FeeInvoiceDetailModel>().ReverseMap();
             CreateMap<Invoice, InvoiceModel>().Include<FeeInvoice, FeeInvoiceModel>();
             CreateMap<InvoiceDetail, InvoiceDetailModel>().Include<FeeInvoiceDetail, FeeInvoiceDetailModel>();
+            CreateMap<FNCInvoice, FNCInvoiceModel>().ReverseMap();
+            CreateMap<FNCInvoiceDetail, FNCInvoiceDetailModel>().ReverseMap();
             CreateMap<Business, BusinessModel>().ReverseMap();
             CreateMap<Customer, CustomerModel>().ReverseMap();
             CreateMap<Payer, PayerModel>().ReverseMap();
-            CreateMap<Fee, FeeModel>().ReverseMap();
             CreateMap<FeeRate, FeeRateModel>().ReverseMap();
             CreateMap<InvoiceArticleTemplate, InvoiceArticleTemplateModel>().ReverseMap();
             CreateMap<InvoiceAdjustment, InvoiceAdjustmentModel>().ReverseMap();

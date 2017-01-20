@@ -12,7 +12,10 @@ using Finance.Web.Services;
 
 namespace Finance.Web.Controllers
 {
-    [Authorize]
+#if (!DEBUG)
+    [Authorize(Roles = "Administrator, Manager,User")]
+#endif
+    //[Authorize(Roles = "Administrator, Manager,User")]
     public class ManageController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -38,7 +41,7 @@ namespace Finance.Web.Controllers
         //
         // GET: /Manage/Index
         [HttpGet]
-        public async Task<IActionResult> Index(ManageMessageId? message = null)
+        public async Task<IActionResult> Index(ManageMessageId? message = null,string UserName=null)
         {
             ViewData["StatusMessage"] =
                 message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
@@ -48,14 +51,14 @@ namespace Finance.Web.Controllers
                 : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
                 : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
                 : "";
-
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user == null)
             {
                 return View("Error");
             }
             var model = new IndexViewModel
             {
+                UserName = UserName,
                 HasPassword = await _userManager.HasPasswordAsync(user),
                 PhoneNumber = await _userManager.GetPhoneNumberAsync(user),
                 TwoFactor = await _userManager.GetTwoFactorEnabledAsync(user),
@@ -69,10 +72,10 @@ namespace Finance.Web.Controllers
         // POST: /Manage/RemoveLogin
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel account)
+        public async Task<IActionResult> RemoveLogin(RemoveLoginViewModel account, string UserName = null)
         {
             ManageMessageId? message = ManageMessageId.Error;
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user != null)
             {
                 var result = await _userManager.RemoveLoginAsync(user, account.LoginProvider, account.ProviderKey);
@@ -96,14 +99,14 @@ namespace Finance.Web.Controllers
         // POST: /Manage/AddPhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
+        public async Task<IActionResult> AddPhoneNumber(AddPhoneNumberViewModel model,string UserName=null)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
             // Generate the token and send it
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user == null)
             {
                 return View("Error");
@@ -117,9 +120,9 @@ namespace Finance.Web.Controllers
         // POST: /Manage/EnableTwoFactorAuthentication
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EnableTwoFactorAuthentication()
+        public async Task<IActionResult> EnableTwoFactorAuthentication(string UserName = null)
         {
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user != null)
             {
                 await _userManager.SetTwoFactorEnabledAsync(user, true);
@@ -133,9 +136,9 @@ namespace Finance.Web.Controllers
         // POST: /Manage/DisableTwoFactorAuthentication
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisableTwoFactorAuthentication()
+        public async Task<IActionResult> DisableTwoFactorAuthentication(string UserName = null)
         {
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user != null)
             {
                 await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -148,9 +151,9 @@ namespace Finance.Web.Controllers
         //
         // GET: /Manage/VerifyPhoneNumber
         [HttpGet]
-        public async Task<IActionResult> VerifyPhoneNumber(string phoneNumber)
+        public async Task<IActionResult> VerifyPhoneNumber(string phoneNumber, string UserName = null)
         {
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user == null)
             {
                 return View("Error");
@@ -164,13 +167,13 @@ namespace Finance.Web.Controllers
         // POST: /Manage/VerifyPhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyPhoneNumber(VerifyPhoneNumberViewModel model)
+        public async Task<IActionResult> VerifyPhoneNumber(VerifyPhoneNumberViewModel model, string UserName = null)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user != null)
             {
                 var result = await _userManager.ChangePhoneNumberAsync(user, model.PhoneNumber, model.Code);
@@ -189,9 +192,9 @@ namespace Finance.Web.Controllers
         // POST: /Manage/RemovePhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemovePhoneNumber()
+        public async Task<IActionResult> RemovePhoneNumber(string UserName = null)
         {
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName );
             if (user != null)
             {
                 var result = await _userManager.SetPhoneNumberAsync(user, null);
@@ -216,13 +219,13 @@ namespace Finance.Web.Controllers
         // POST: /Manage/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model, string UserName = null)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user != null)
             {
                 var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -241,9 +244,12 @@ namespace Finance.Web.Controllers
         //
         // GET: /Manage/SetPassword
         [HttpGet]
-        public IActionResult SetPassword()
+        public IActionResult SetPassword(string UserName = null)
         {
-            return View();
+            SetPasswordViewModel model = new Models.ManageViewModels.SetPasswordViewModel();
+            model.UserName = UserName;
+            var user = GetCurrentUserAsync(UserName);
+            return View(model);
         }
 
         //
@@ -257,14 +263,15 @@ namespace Finance.Web.Controllers
                 return View(model);
             }
 
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(model.UserName);
             if (user != null)
             {
-                var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, code, model.NewPassword);//_userManager.AddPasswordAsync(user, model.NewPassword);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.SetPasswordSuccess });
+                    //await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction(nameof(Index), "Account", new { Message = ManageMessageId.SetPasswordSuccess, UserName = model.UserName });
                 }
                 AddErrors(result);
                 return View(model);
@@ -274,21 +281,21 @@ namespace Finance.Web.Controllers
 
         //GET: /Manage/ManageLogins
         [HttpGet]
-        public async Task<IActionResult> ManageLogins(ManageMessageId? message = null)
+        public async Task<IActionResult> ManageLogins(ManageMessageId? message = null,string UserName= null)
         {
             ViewData["StatusMessage"] =
                 message == ManageMessageId.RemoveLoginSuccess ? "The external login was removed."
                 : message == ManageMessageId.AddLoginSuccess ? "The external login was added."
                 : message == ManageMessageId.Error ? "An error has occurred."
                 : "";
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user == null)
             {
                 return View("Error");
             }
             var userLogins = await _userManager.GetLoginsAsync(user);
             var otherLogins = _signInManager.GetExternalAuthenticationSchemes().Where(auth => userLogins.All(ul => auth.AuthenticationScheme != ul.LoginProvider)).ToList();
-            ViewData["ShowRemoveButton"] = user.PasswordHash != null || userLogins.Count > 1;
+            ViewData["ShowRemoveButton"] = user.PasswordHash != null || user.Logins.Count > 1;
             return View(new ManageLoginsViewModel
             {
                 CurrentLogins = userLogins,
@@ -311,9 +318,9 @@ namespace Finance.Web.Controllers
         //
         // GET: /Manage/LinkLoginCallback
         [HttpGet]
-        public async Task<ActionResult> LinkLoginCallback()
+        public async Task<ActionResult> LinkLoginCallback(string UserName = null)
         {
-            var user = await GetCurrentUserAsync();
+            var user = await GetCurrentUserAsync(UserName);
             if (user == null)
             {
                 return View("Error");
@@ -350,9 +357,10 @@ namespace Finance.Web.Controllers
             Error
         }
 
-        private Task<ApplicationUser> GetCurrentUserAsync()
+        private Task<ApplicationUser> GetCurrentUserAsync(string UserName)
         {
-            return _userManager.GetUserAsync(HttpContext.User);
+            return _userManager.FindByNameAsync(UserName);
+            //return _userManager.GetUserAsync(HttpContext.User);
         }
 
         #endregion

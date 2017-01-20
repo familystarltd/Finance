@@ -1,0 +1,551 @@
+﻿@*@Html.Partial("_Rate", new ViewDataDictionary(Html.ViewData));*@
+@using Finance.Web;
+<style>
+    .ui-autocomplete
+{
+    position:absolute;
+    cursor:default;
+    z-index:1000000 !important
+}
+</style>
+<div class="fnc-setup-dialog" id="fnc-setup" title="FNC Setup" style="display: none;padding:0px;margin:0px;overflow-x:hidden;overflow-y:unset;">
+    <h4 style="margin-top:0px;"><img src="~/images/fnc_setup.png" style="width:32px;height:32px;" />FNC Setup for <span id="fnc_CustomerName" style="font-weight:bold;text-decoration:underline;" /></h4>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+            Description
+        </div>
+        <div class="col-md-8">
+            <input type="text" class="form-control" value="" id="fnc_Name" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+            Pay Reference
+        </div>
+        <div class="col-md-8">
+            <input type="text" class="form-control" value="" id="fnc_PayRef" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+            Payer
+        </div>
+        <div class="col-md-8">
+            <input type="hidden" id="PayerValueControlId" />
+            @Html.Partial("_PayerLoader", new  { ParentId = "#fnc-setup" })
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+            Payment Term
+        </div>
+        <div class="col-md-3">
+            @*@Html.DropDownListFor(model => model..Gender, Model.ResidentInfo.Gender.ToSelectList(addPleaseSelect: true, selectMsg: "---Gender---"), new { @class = "form-control", style = "text-align: left;width:150px;" })*@
+            <select id="fnc_PaymentTerm" class="form-control"></select>
+        </div>
+        <div class="col-md-6">
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-5">
+                    Effective Date
+                </div>
+                <div class="col-md-1">
+                    <input type="text" class="form-control" value="" id="fnc_EffectiveDate" style="width: 130px;" />
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:5px;">
+                <div class="col-md-5">
+                    Closing Date
+                </div>
+                <div class="col-md-1">
+                    <input type="text" class="form-control" value="" id="fnc_ClosingDate" style="width: 130px;" />
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Customer Rates*@
+    <div class="row" style="border: 1px solid #baaa5a;margin:0px;padding:0px; margin-bottom:5px;width:100%;">
+        <div class="header" style="font-size:medium;font-weight:bold;width:100%;">
+            <img src="~/images/rate.png" style="width:32px;height:32px;" /> Rates
+        </div>
+        <div class="content-sub" style="overflow-y:auto; height:275px;font-size:medium;">
+            <div class="col-md-12" id="listRates">
+                <div class="row" id="divWeeklyRates" style="border-bottom: 1px solid rgba(217, 217, 217, 1);margin-bottom:3px;">
+                    <div class="col-md-3">
+                        <b style="text-decoration:underline;">Weekly Rate</b>
+                    </div>
+                    <div class="col-md-6">
+                        <span id="weeklyRateDisplay"></span>
+                    </div>
+                    <div class="col-md-3" style="text-align:right;">
+                        <img class="Rate_Add" data-role="Weekly" data-app-id="@Model.Id" id="weeklyRateAdd" alt="weeklyRateAdd" src="~/images/add-plus.png" style="width: 24px; height: 24px; cursor: pointer;" />
+                    </div>
+                </div>
+                <div class="row" id="divHourlyRates" style="border-bottom: 1px solid rgba(217, 217, 217, 1); margin-bottom: 3px;">
+                    <div class="col-md-3">
+                        <b style="text-decoration:underline;">Hourly Rate</b>
+                    </div>
+                    <div class="col-md-6">
+                        <span id="hourlyRateDisplay"></span>
+                    </div>
+                    <div class="col-md-3" style="text-align:right;">
+                        <img class="Rate_Add" data-role="Hourly" data-app-id="@Model.Id" id="hourlyRateAdd" alt="hourlyRateAdd" src="~/images/add-plus.png" style="width: 24px; height: 24px; cursor: pointer; " />
+                        <img class="Rate_Edit" data-role="Hourly" id="hourlyRateEdit" src="~/images/edit.png" alt="hourlyRateEdit" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px; cursor: pointer; " />
+                        <img class="Rate_History" data-role="Hourly" id="hourlyRateHistory" src="~/images/history.png" alt="hourlyRateHistory" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px;" />
+                    </div>
+                </div>
+                <div class="row" id="divDailyRates" style="border-bottom: 1px solid rgba(217, 217, 217, 1); margin-bottom: 3px;">
+                    <div class="col-md-3">
+                        <b style="text-decoration:underline;">Daily Rate</b>
+                    </div>
+                    <div class="col-md-6">
+                        <span id="dailyRateDisplay"></span>
+                    </div>
+                    <div class="col-md-3" style="text-align:right;">
+                        <img class="Rate_Add" data-role="Daily" data-app-id="@Model.Id" id="dailyRateAdd" alt="dailyRateAdd" src="~/images/add-plus.png" style="width: 24px; height: 24px; cursor: pointer; " />
+                        <img class="Rate_Edit" data-role="Daily" id="dailyRateEdit" src="~/images/edit.png" alt="dailyRateEdit" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px;" />
+                        <img class="Rate_History" data-role="Daily" id="dailyRateHistory" src="~/images/history.png" alt="dailyRatehistory" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px;" />
+                    </div>
+                </div>
+                <div class="row" id="divMonthlyRates" style="border-bottom: 1px solid rgba(217, 217, 217, 1);">
+                    <div class="col-md-3">
+                        <b style="text-decoration:underline;">Monthly Rate</b>
+                    </div>
+                    <div class="col-md-6">
+                        <span id="monthlyRateDisplay"></span>
+                    </div>
+                    <div class="col-md-3" style="text-align:right;">
+                        <img class="Rate_Add" data-role="Monthly" data-app-id="@Model.Id" id="monthlyRateAdd" alt="monthlyRateAdd" src="~/images/add-plus.png" style="width: 24px; height: 24px; cursor: pointer;" />
+                        <img class="Rate_Edit" data-role="Monthly" id="monthlyRateEdit" src="~/images/edit.png" alt="MonthlyRateEdit" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px; " />
+                        <img class="Rate_History" data-role="Monthly" id="monthlyRateHistory" src="~/images/history.png" alt="MonthlyRatehistory" style="width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px; " />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12" id="saveFNCMsg" style="display:none;">
+                <h3> Please click save button to continue..............</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-2" style="">
+            <input type="image" id="fncSave" src="~/images/Save.png" style="width:32px;height:32px;" />
+            <img src="~/images/exit.png" id="exit" class="exit" style="width: 32px; height: 32px; cursor: pointer; margin: 0px; padding: 0px; margin-top: -22px;" />
+        </div>
+    </div>
+</div>
+<script>
+    var getFNCUrl = @Html.Raw(string.Format("'{0}/FinanceApi/FNCs/'", ViewBag.FinanceApiService));
+    var getCustomerUrl =@Html.Raw(string.Format("'{0}/FinanceApi/Customers/'", ViewBag.FinanceApiService));
+    var fncSaveUrl = @Html.Raw(string.Format("'{0}/FinanceApi/FNC'", ViewBag.FinanceApiService))
+    var PaymentTerms = @Html.Raw(Html.ConvertEnumToJson(typeof(Finance.Web.Model.PaymentTerm)))
+    $(document).ready(function () {
+        var fncsData; // collection of FNCs for each customer
+        var fncData; // single FNC (include fnc data and collection of fnc rates)
+        var fncId;
+        var customerId;
+        function loadFNCData() {
+            fncId = $(".fnc-setup-dialog").data("fncId");
+            customerId = $(".fnc-setup-dialog").data("customerId");            
+            $('#fnc_PaymentTerm').empty();// clear options
+            $(PaymentTerms).each(function () { $("<option />", { val: this.id, text: this.name }).appendTo('#fnc_PaymentTerm'); });
+            if (!$.isNullOrEmpty(fncId)) {
+                loadFNCDataByFNC(fncId);
+            }
+            else if (!$.isNullOrEmpty(customerId)) {
+                loadFNCDataByCustomer(customerId);
+            }
+        }
+        function loadFNCDataByFNC(fncId){
+            var requestCustomer = $.ajax({
+                type: "GET",
+                url: getFNCUrl + fncId,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (fncData) {
+                    if (!$.isNullOrEmpty(fncData)) {
+                        fncData.minEffectDate = new Date(fncData.maxFNCSetupDate).addDays(1);
+                        $("#fnc_CustomerName").text((!$.isNullOrEmpty(fncData.customer.personalInfo.fullName) ? fncData.customer.personalInfo.fullName : ""));
+                        $("#fnc_Name").val(!$.isNullOrEmpty(fncData.name) ? fncData.name : "");
+                        $("#fnc_PayRef").val(!$.isNullOrEmpty(fncData.payContactReference) ? fncData.payContactReference : "");
+                        $("#weeklyRate_EffectiveDate").val();
+                        $("#fnc_EffectiveDate").val((!$.isNullOrEmpty(fncData.effectiveDate) ? $.datepicker.formatDate('dd/mm/yy', new Date(fncData.effectiveDate)) : ""));
+                        $("#PayerName").val(!$.isNullOrEmpty(fncData.payer.name) ? fncData.payer.name : "");
+                        $("#PayerValueControlId").val(!$.isNullOrEmpty(fncData.payerId) ? fncData.payerId : "");
+                        $('#fnc_PaymentTerm').val(!$.isNullOrEmpty(fncData.paymentTerm) ? fncData.paymentTerm : "");
+                        customerId = !$.isNullOrEmpty(fncData.customerId) ? fncData.customerId : ""
+                        $("#fnc_ClosingDate").val((!$.isNullOrEmpty(fncData.closingDate) ? $.datepicker.formatDate('dd/mm/yy', new Date(fncData.closingDate)) : ""));
+                        var date = new Date();
+                        if (!$.isNullOrEmpty(fncData.closingDate)) {
+                            $("#fnc_ClosingDate").prop("disabled", true);
+                        }
+                        else {
+                            $("#fnc_ClosingDate").prop("disabled", false);
+                            $("#fnc_ClosingDate").datepicker("option", "minDate", new Date(date.getFullYear(), date.getMonth(), 1));
+                        }
+                        loadWeeklyFNCRates(fncData.fncRates);
+                        loadHourlyFNCRates(fncData.fncRates);
+                        loadDailyFNCRates(fncData.fncRates);
+                        loadMonthlyFNCRates(fncData.fncRates);
+                        if ($.isNullOrEmpty(fncsData)) {
+                            fncsData = [];
+                            fncsData.push(fncData);
+                        }
+                        $("#fnc_EffectiveDate").prop("disabled", true);
+                        $("#fnc_Name").prop("disabled", true);
+                        $("#PayerName").prop("disabled", true);
+                        $('#fnc_PaymentTerm').prop("disabled", true);
+                    }
+                    else { alert("FNC details has not been found!"); closeFNCDialog();return; }
+                    if ($.isNullOrEmpty(fncData.closingDate))
+                        $("#fncSave").show();
+                    else
+                        $("#fncSave").hide();
+                }
+            });
+            requestCustomer.fail(function (jqxhr, textStatus, error) {
+                alert("Customer FNC Request failed: " + textStatus);
+                closeFNCDialog();
+            });
+        }
+        function loadFNCDataByCustomer(customerId){
+            var requestCustomer = $.ajax({
+                type: "GET",
+                url: getCustomerUrl + customerId,
+                contentType: "application/json",
+                datatype: "json",
+                success: function (customerData) {
+                    if (customerData) {
+                        fncsData = customerData.fncs;
+                        fncId = "00000000-0000-0000-0000-000000000000";
+                        if (fncsData && fncsData.length == 0) {
+                            var dat = new Date(); 
+                            //if(!$.isNullOrEmpty(customerData.maxFNCSetupDate))
+                            //{
+                            //    $("#fnc_EffectiveDate").prop("disabled", true);
+                            //}
+                            var minEffectDate = !$.isNullOrEmpty(customerData.maxFNCSetupDate) ? customerData.maxFNCSetupDate : new Date();
+                            $("#fnc_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date(minEffectDate)));
+                            $("#fnc_EffectiveDate").datepicker("option", "minDate", new Date(minEffectDate));
+                            $("#fnc_EffectiveDate").datepicker("option", "maxDate",new Date(new Date(dat).setMonth(dat.getMonth()+12)));
+                            $("#fnc_ClosingDate").val("");
+                            $("#fnc_ClosingDate").prop("disabled", true);
+                            fncsData = [];
+                            fncData={};
+                            fncData["minEffectDate"] = new Date(minEffectDate);
+                        }
+                        else {
+                            fncsData = [];
+                            var date = new Date(customerData.maxFNCSetupDate);
+                            minEffectDate = date.addDays(1);
+                            fncData={};
+                            fncData["minEffectDate"] = new Date(minEffectDate);
+                            $("#fnc_EffectiveDate").val($.datepicker.formatDate('dd/mm/yy', new Date()));
+                            $("#fnc_EffectiveDate").datepicker("option", "minDate", new Date(minEffectDate));
+                            $("#fnc_ClosingDate").val("");
+                            $("#fnc_ClosingDate").prop("disabled", true);
+                        }
+                        $("#fnc_CustomerName").text((!$.isNullOrEmpty(customerData.personalInfo.fullName) ? customerData.personalInfo.fullName : ""));
+                    }
+                    else { alert("Customer has not been found!"); closeFNCDialog(); }
+                    $("#fncSave").show();
+                }
+            });
+            requestCustomer.fail(function (jqxhr, textStatus, error) { alert("Customer FNC Request failed: " + textStatus); closeFNCDialog(); });
+        }
+        function setFNCData(){
+            if(validateFNCInfo())
+            {
+                $("#saveFNCMsg").hide();
+                fncData = $.getJsonObject(fncsData, { "id": fncId });
+                if ($.isEmptyObject(fncData)) {
+                    fncsData.push(fncData);
+                }
+                fncData["id"] = fncId;
+                fncData["name"] = $("#fnc_Name").val();
+                fncData["payerId"] = $("#PayerValueControlId").val();
+                fncData["payContactReference"] = $("#fnc_PayRef").val();
+                fncData["customerId"] = customerId;
+                fncData["paymentTerm"] = $('#fnc_PaymentTerm').val();
+                fncData["effectiveDate"] = $.toJsonDate($("#fnc_EffectiveDate").datepicker("getDate"));
+                if ($.isNullOrEmpty($("#fnc_ClosingDate").val()))
+                    fncData["ClosingDate"] = null;
+                else
+                    fncData["ClosingDate"] = $.toJsonDate($("#fnc_ClosingDate").datepicker("getDate"));
+                fncData["minEffectDate"]=$.toJsonDate($("#fnc_EffectiveDate").datepicker("getDate"));
+                return true;
+            }
+            return false;
+        }
+        function validateFNCInfo() {
+            if (!$("#fnc_Name").val()) {
+                alert("Please enter Name of FNC");
+                $("#fnc_Name").focus();
+            }
+            else if (!$("#PayerValueControlId").val()) {
+                $("#PayerName").val("");
+                alert("Please enter payer for this fnc");
+                $("#PayerName").focus();
+            }
+            else if (!$("#fnc_EffectiveDate").val()) {
+                alert("Please enter valid effective");
+                $("#fnc_EffectiveDate").focus();
+            }
+            else{
+                return true;
+            }
+            return false;
+        }
+        function loadHourlyFNCRates(fncRates) {
+            // Get by RateMethod where rate method is 1 for weeklyRate
+            var fncRate = $.getJsonObject(fncRates, { "rateMethod": 1 });
+            $("#hourlyRateDisplay").empty();
+            if (fncRate && !$.isEmptyObject(fncRate)) {
+                $("#hourlyRateAdd").hide();
+                var content;
+                content = '<p>' + fncRate.rateDescription + '</p>';
+                if (fncRate.rates && !$.isEmptyObject(fncRate.rates)) {
+                    $.each(fncRate.rates, function (r, rate) {
+                        if (rate.rateAmount > 0) {
+                            content += '<p style = "font-size:xx-small"><u>';
+                            switch (rate.dayPremium) {
+                                case 1:
+                                    content += 'Weekday';
+                                    break;
+                                case 2:
+                                    content += 'Weekend';
+                                    break;
+                                case 3:
+                                    content += 'Bankholiday';
+                                    break;
+                            }
+                            switch (rate.timePremium) {
+                                case 1:
+                                    content += ' - Day</u> for <b>' + rate.noOfHours
+                                    break;
+                                case 2:
+                                    content += ' - Night</u> for <b>' + rate.noOfHours;
+                                    break;
+                            }
+                            content += ' hours</b> at the rate of ';
+                            content += '<b>£' + rate.rateAmount + '</b> per hour, as at from ';
+                            content += $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate));
+                            content += '</p>';
+                        }
+                    });
+                }
+                if (content) {
+                    $(content).appendTo("#hourlyRateDisplay");
+                    $("#hourlyRateEdit").attr("data-app-id", fncRate.id);
+                    $("#hourlyRateHistory").unbind("click");
+                    $("#hourlyRateHistory").bind('click', function () { alert('History of Rates'); });
+                }
+            }
+        }
+        function loadDailyFNCRates(fncRates) {
+            // Get by RateMethod where rate method is 2 for DailyRate
+            var fncRate = $.getJsonObject(fncRates, { "rateMethod": 2 });
+            $("#dailyRateDisplay").empty();
+            if (fncRate && !$.isEmptyObject(fncRate)) {
+                $("#dailyRateAdd").hide();
+                var content;
+                content = '<p>' + fncRate.rateDescription + '</p>';
+                if (fncRate.rates && !$.isEmptyObject(fncRate.rates)) {
+                    $.each(fncRate.rates, function (r, rate) {
+                        if (rate.rateAmount > 0) {
+                            content += '<p style = "font-size:xx-small"><u>';
+                            switch (rate.dayPremium) {
+                                case 1:
+                                    content += 'Weekday';
+                                    break;
+                                case 2:
+                                    content += 'Weekend';
+                                    break;
+                                case 3:
+                                    content += 'Bankholiday';
+                                    break;
+                            }
+                            content += '</u> at the rate of ';
+                            content += '<b>£' + rate.rateAmount + '</b> per day, as at from ';
+                            content += $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate));
+                            content += '</p>';
+                        }
+                    });
+                }
+                if (content) {
+                    $(content).appendTo("#dailyRateDisplay");
+                    $("#dailyRateEdit").attr("data-app-id", fncRate.id);
+                    $("#dailyRateHistory").unbind("click");
+                    $("#dailyRateHistory").bind('click', function () { alert('History of Rates'); });
+                }
+            }
+        }
+        function loadWeeklyFNCRates(fncRates) {
+            // Get by RateMethod where rate method is 3 for weeklyRate
+            var fncRates = $.getJsonObjects(fncRates, { "rateMethod": 3 });
+            $("#weeklyRateDisplay").empty();
+            if (fncRates && !$.isEmptyObject(fncRates)) {
+                //$("#weeklyRateAdd").hide();
+                var content="";
+                var rateId;
+                $.each(fncRates, function (fr, fncRate) {
+                    content += '<p>' + fncRate.rateDescription
+                        + '<img class="Rate_Edit" data-role="Weekly"' + ' data-app-id="' + fncRate.id + '" src="/images/edit.png" id="weeklyRateEdit" alt="weeklyRateEdit" style="float:right;width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px;" />'
+                        + '<img class="Rate_History" data-role="Weekly"' + ' data-app-id="' + fncRate.id + '" src="/images/history.png" id="weeklyRateHistory" alt="weeklyRatehistory" style="float:right;width: 24px; height: 24px; cursor: pointer; margin: 0px; padding: 0px; margin-top: 0px;" />'
+                        + '</p>';
+                    if (fncRate.rates && !$.isEmptyObject(fncRate.rates)) {
+                        $.each(fncRate.rates, function (r, rate) {
+                            if (!$.isEmptyObject(rate.closingDate)) {
+                                content += '<p style="text-decoration: line-through; color:red;font-size:xx-small;">';
+                            }
+                            else {
+                                content += '<p style = "font-size:xx-small">';
+                            }
+                            content += '£' + rate.rateAmount + ' as at from ';
+                            content += $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate));
+                            content += '</p>';
+                        });
+                    }
+                });
+                if (content) {
+                    $(content).appendTo("#weeklyRateDisplay");
+                    $("#weeklyRateHistory").unbind('click');
+                    $("#weeklyRateHistory").bind('click', function () { alert('History of Rates'); });
+                    //$(document).on('click', '#weeklyRateHistory', function () { alert('History of Rates'); });
+                }
+            }
+        }
+        function loadMonthlyFNCRates(fncRates) {
+            // Get by RateMethod where rate method is 4 for weeklyRate
+            var fncRate = $.getJsonObject(fncRates, { "rateMethod": 4 });
+            $("#monthlyRateDisplay").empty();
+            if (fncRate && !$.isEmptyObject(fncRate)) {
+                $("#monthlyRateAdd").hide();
+                var content;
+                content = '<p>' + fncRate.rateDescription + '</p>';
+                if (fncRate.rates && !$.isEmptyObject(fncRate.rates)) {
+                    $.each(fncRate.rates, function (r, rate) {
+                        if (!$.isEmptyObject(rate.closingDate)) {
+                            content += '<p style="text-decoration: line-through; color:red;font-size:xx-small;">';
+                        }
+                        else {
+                            content += '<p style = "font-size:xx-small">';
+                        }
+                        content += '£' + rate.rateAmount + ' as at from ';
+                        content += $.datepicker.formatDate('dd/mm/yy', new Date(rate.effectiveDate));
+                        content += '</p>';
+                    });
+                }
+                if (content) {
+                    $(content).appendTo("#monthlyRateDisplay");
+                    $("#monthlyRateEdit").attr("data-app-id", fncRate.id);
+                    $("#monthlyRateHistory").unbind("click");
+                    $("#monthlyRateHistory").bind('click', function () { alert('History of Rates'); });
+                }
+            }
+        }
+        function closeFNCDialog() {
+            clearFNCForm();
+            $.clearForm($(".fnc-setup-dialog")); $(".ui-dialog-content").dialog("close");
+        }
+        function clearFNCForm() {
+            fncId = null;
+            customerId = null;
+            fncData = null;
+            fncsData = null;
+            $.clearForm($(".fnc-setup-dialog"));
+            $(".fnc-setup-dialog").data("fncId", null);
+            $(".fnc-setup-dialog").data("customerId", null);
+            $("#fnc_EffectiveDate").prop("disabled", false);
+            $("#fnc_ClosingDate").prop("disabled", true);
+            $("#fnc_Name").prop("disabled", false);
+            $("#fnc_PayRef").prop("disabled", false);
+            $("#PayerName").prop("disabled", false);
+            $('#fnc_PaymentTerm').prop("disabled", false);
+            $("#weeklyRateAdd").show(); // Show element
+            $("#listRates").show();
+            $("#saveFNCMsg").hide();
+            $("#hourlyRateDisplay").empty();
+            $("#dailyRateDisplay").empty();
+            $("#weeklyRateDisplay").empty();
+            $("#monthlyRateDisplay").empty();
+        }
+        $("#fncSave").click(function (event) {
+            if (setFNCData()) {
+                if ($.isNullOrEmpty(fncData.fncRates) || fncData.fncRates.length ==0){
+                    alert("FNC should have atleast one type of Rate");
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: fncSaveUrl,
+                    dataType: "json",
+                    data: JSON.stringify(fncData),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (!$.isNullOrEmpty(data)) {location.reload();}
+                        else {alert("FNC has not been saved. Please try again later.");}
+                    }
+                }).fail(function (jqXHR, textStatus) {alert("FNC has not been saved. Please contact I.T Administrator.");});
+            }
+        });
+        $(".Rate_Add").click(function (e) {
+            if (setFNCData()) {
+                var role = $(this).attr("data-role"); $(".rate-setup-dialog").data({"role": role, "fncData": fncData }).dialog("open");
+            }
+        });
+        $(".exit").click(function () { closeFNCDialog(); });
+        $("#fnc_EffectiveDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).datepicker().on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var minEffectDate = new Date($(this).datepicker("getDate"));
+            var maxDate = new Date($(this).datepicker("option", "maxDate"));
+            //alert(minDate + "    -----   " + maxDate);
+            if (minDate >= minEffectDate) {
+                $(this).datepicker("setDate", new Date());
+                $(this).focus();
+            }
+            else if (maxDate < minEffectDate) { alert("Today is the maximum date you can choose for effective date"); $(this).datepicker("setDate", new Date()); $(this).focus(); }
+            else { $("#fncSave").focus(); }
+        });
+        $("#fnc_ClosingDate").datepicker({dateFormat: 'dd/mm/yy',autoClose: true}).datepicker("setDate", new Date()).on("change", function (e) {
+            var minDate = new Date($(this).datepicker("option", "minDate"));
+            var closeDate = new Date($(this).datepicker("getDate"));
+            var minEffectDate = new Date($(this).datepicker("getDate"));
+            if (closeDate == minEffectDate) {
+                alert("Close Date cannot be same as effective Date. Please change date");
+            }
+            else if (minDate >= closeDate) {
+                $(this).datepicker("setDate", new Date());
+                $(this).focus();
+            }
+            else { $("#fncSave").focus(); }
+        });
+        $(document).on('click', ".Rate_Edit", function (e) {
+            if (setFNCData()) { 
+                var FNCRateId = $(this).attr("data-app-id");
+                if (!$.isNullOrEmpty(FNCRateId)) {
+                    var role = $(this).attr("data-role");
+                    $(".rate-setup-dialog").data({ "fncRateId": FNCRateId, "role": role, "fncData": fncData }).dialog("open");
+                }
+            }
+        });
+        $(".fnc-setup-dialog").on("dialogopen", function (event, ui) {
+            $('.ui-dialog').css('z-index', 10000); $('.ui-widget-overlay').css('z-index', 102);
+            loadFNCData();
+        });
+        $(".fnc-setup-dialog").dialog({ modal: true, resizable: false, width: 750, height: 655, autoOpen: false });
+        $(".fnc-setup-dialog").on("dialogclose", function (event, ui) { clearFNCForm(); });
+        $(".rate-setup-dialog").on("dialogclose", function (event, ui) {
+            var fncData = $(".rate-setup-dialog").data("fncData");
+            loadHourlyFNCRates(fncData.fncRates);
+            loadWeeklyFNCRates(fncData.fncRates);
+            loadDailyFNCRates(fncData.fncRates);
+            loadMonthlyFNCRates(fncData.fncRates);
+            $("#addRates").hide();
+            if (!$.isNullOrEmpty(fncData.fncRates) && fncData.fncRates.length >0){
+                $("#saveFNCMsg").show();
+            }
+            else{
+                $("#saveFNCMsg").hide();
+            }
+        });
+    });
+</script>

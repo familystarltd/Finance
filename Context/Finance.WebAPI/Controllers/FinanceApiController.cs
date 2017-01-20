@@ -18,10 +18,12 @@ using System.Net.Http.Formatting;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Cors;
 
 namespace Finance.WebAPI.Controllers
 {
     [Route("FinanceApi")]
+    [EnableCors("AllowFinanceFamilyStarLtdOrigin")]
     public class FinanceApiController : ApiController
     {
         public override ResponseMessageResult ResponseMessage(HttpResponseMessage response)
@@ -642,7 +644,7 @@ namespace Finance.WebAPI.Controllers
         }
         #endregion
 
-        #region INVOICE
+        #region FEE INVOICE
         [HttpGet]
         [Route("ProcessFeeInvoice", Name = "ProcessFeeInvoice")]
         public HttpResponseMessage ProcessFeeInvoice(DateTime invoiceProcessedDate)
@@ -876,13 +878,15 @@ namespace Finance.WebAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.InnerException != null ? ex.InnerException : ex);
             }
         }
+        [HttpGet]
         [Route("Invoices", Name = "PaidInvoices")]
         public HttpResponseMessage GetInvoices(bool IsPaid, int pageIndex, int pageSize)
         {
             try
             {
-                IEnumerable<InvoiceModel> invoices;
+                IEnumerable<InvoiceModel> invoices = new List<InvoiceModel>();
                 int TotalRowCount = 0;
+                return Request.CreateResponse(HttpStatusCode.OK, invoices);
                 invoices = this._InvoiceAppService.GetInvoices(IsPaid, null, null, pageIndex, pageSize, out TotalRowCount);
                 var urlHelper = new UrlHelper(this.ActionContext);
                 this.ActionContext.HttpContext.Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(
@@ -901,7 +905,7 @@ namespace Finance.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.InnerException != null ? ex.InnerException : ex);
+                return Request.CreateErrorResponse(HttpStatusCode.ExpectationFailed, ex.InnerException != null ? ex.InnerException : ex);
             }
         }
 
@@ -975,6 +979,10 @@ namespace Finance.WebAPI.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex.InnerException != null ? ex.InnerException : ex);
             }
         }
+
+        #endregion
+
+        #region FNC INVOICE
 
         #endregion
 
