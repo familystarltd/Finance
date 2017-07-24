@@ -65,7 +65,7 @@ else
 {
     using (Html.BeginForm("Payer", "Finance", FormMethod.Post, new { @id = "payerform", @class = "form-horizontal", @role = "form" }))
     {
-        Model.PersonalContact.EnableValidation = true;
+        //Model.PersonalContact.EnableValidation = true;
         @Html.ValidationSummary(true)
         @Html.HiddenFor(model => Model.Id)
         <div id="tabs" style="font-size:small;">
@@ -94,18 +94,18 @@ else
                 </div>
             </div>
             <ul>
-                <li>
+                @*<li>
                     <a onclick="return false;" href="#tabs-payer">
                         @if (Model.Id != Guid.Empty)
                         {@Model.Name}
                         else
                         {<span>New Payer</span>}
                     </a>
-                </li>
+                </li>*@
                 <li><a onclick="return false;" href="#tabs-FeeInvoiceContact">Fee Invoice Contact</a></li>
                 <li><a onclick="return false;" href="#tabs-ExpensesInvoiceContact">Expenses Invoice Contact</a></li>
             </ul>
-            <div id="tabs-payer" style="">
+            @*<div id="tabs-payer" style="">
                 <div class="row form-group">
                     <div class="col-md-9">
                         <section id="PersonalContact">
@@ -114,7 +114,7 @@ else
                         </section>
                     </div>
                 </div>
-            </div>
+            </div>*@
             <div id="tabs-FeeInvoiceContact" style="">
                 <div class="row form-group">
                     <div class="col-md-6">

@@ -7,7 +7,7 @@
         <tr style="border:none;">
             <td style="border:none;">
                 <h3>
-                    <img src="~/images/dashboard.png" style="width:64px;height:64px;margin-right:5px;" />Dashboard - <select id="selBusiness" style="margin-right: 10px;color:#000000;">
+                    <img src="~/images/dashboard.png" style="width:32px;height:32px;margin-right:5px;" />Dashboard - <select id="selBusiness" style="margin-right: 10px;color:#000000;">
                         @foreach (Finance.Web.Model.BusinessModel comapny in Model.Businesses)
                         {
                             <option value="@comapny.Name">@comapny.Name</option>
@@ -26,6 +26,9 @@
 </div>
 @*@Html.Partial("_DataLoader")*@
 @*@Html.Partial("_FeeInvoiceList", new ViewDataDictionary(Html.ViewData))*@
+@*<div class="row bankContents" style="margin-left:0px;padding-left:0px;">
+
+</div>*@
 <div class="row" style="margin-left: 0px; padding-left: 0px; border: 0px solid #a6c9e2;position:relative;">
     <div class="col-md-6" style="margin-left:0px;padding-left:0px;">
         @if (!Model.IsBankHolidayFileExists)
@@ -189,9 +192,6 @@
             </tbody>
         </table>
 </div>
-    @*<div class="col-md-3 bankContents" style="margin-left:0px;padding-left:0px;">
-
-    </div>*@
 </div>
 <script>
     var getUnpaidInvoiceUrl = @Html.Raw(string.Format("'{0}/FinanceApi/Invoices?IsPaid=false&pageIndex=0&pageSize=25'", ViewBag.FinanceApiService));

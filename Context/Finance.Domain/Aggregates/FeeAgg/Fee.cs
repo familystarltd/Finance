@@ -33,6 +33,7 @@
         /// </summary>
         public Guid CustomerId { get; set; }
         public Customer Customer { get; set; }
+        public string CustomerAccountRef { get; set; }
         /// <summary>
         /// Get or Set the associated Payer for this fee
         /// </summary>

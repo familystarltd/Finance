@@ -1,4 +1,4 @@
-﻿@Html.Partial("_Rate", new ViewDataDictionary(Html.ViewData));
+﻿@Html.Partial("_Rate", new ViewDataDictionary(Html.ViewData))
 @using Finance.Web;
 <style>
     .ui-autocomplete
@@ -20,10 +20,10 @@
     </div>
     <div class="row" style="margin-bottom:5px;">
         <div class="col-md-3">
-            Pay Reference
+            Account Ref
         </div>
         <div class="col-md-8">
-            <input type="text" class="form-control" value="" id="fee_PayRef" />
+            <input type="text" class="form-control" value="" id="fee_AccountRef" />
         </div>
     </div>
     <div class="row" style="margin-bottom:5px;">
@@ -33,6 +33,14 @@
         <div class="col-md-8">
             <input type="hidden" id="PayerValueControlId" />
             @Html.Partial("_PayerLoader", new  { ParentId = "#fee-setup" })
+        </div>
+    </div>
+    <div class="row" style="margin-bottom:5px;">
+        <div class="col-md-3">
+            Pay Reference
+        </div>
+        <div class="col-md-8">
+            <input type="text" class="form-control" value="" id="fee_PayRef" />
         </div>
     </div>
     <div class="row" style="margin-bottom:5px;">
@@ -165,6 +173,7 @@
                         $("#fee_CustomerName").text((!$.isNullOrEmpty(feeData.customer.personalInfo.fullName) ? feeData.customer.personalInfo.fullName : ""));
                         $("#fee_Name").val(!$.isNullOrEmpty(feeData.name) ? feeData.name : "");
                         $("#fee_PayRef").val(!$.isNullOrEmpty(feeData.payContactReference) ? feeData.payContactReference : "");
+                        $("#fee_AccountRef").val(!$.isNullOrEmpty(feeData.customerAccountRef) ? feeData.customerAccountRef : "");
                         $("#weeklyRate_EffectiveDate").val();
                         $("#fee_EffectiveDate").val((!$.isNullOrEmpty(feeData.effectiveDate) ? $.datepicker.formatDate('dd/mm/yy', new Date(feeData.effectiveDate)) : ""));
                         $("#PayerName").val(!$.isNullOrEmpty(feeData.payer.name) ? feeData.payer.name : "");
@@ -262,6 +271,7 @@
                 feeData["name"] = $("#fee_Name").val();
                 feeData["payerId"] = $("#PayerValueControlId").val();
                 feeData["payContactReference"] = $("#fee_PayRef").val();
+                feeData["customerAccountRef"] = $("#fee_AccountRef").val();
                 feeData["customerId"] = customerId;
                 feeData["paymentTerm"] = $('#fee_PaymentTerm').val();
                 feeData["effectiveDate"] = $.toJsonDate($("#fee_EffectiveDate").datepicker("getDate"));
@@ -457,6 +467,7 @@
             $("#fee_ClosingDate").prop("disabled", true);
             $("#fee_Name").prop("disabled", false);
             $("#fee_PayRef").prop("disabled", false);
+            $("#fee_AccountRef").prop("disabled", false);
             $("#PayerName").prop("disabled", false);
             $('#fee_PaymentTerm').prop("disabled", false);
             $("#weeklyRateAdd").show(); // Show element

@@ -42,54 +42,44 @@
         @*<script src='~/lib/tinymce/tiny_mce.js'></script>*@
     </environment>
     <script>
-            $(document).ready(function () {
-                $(document).bind("contextmenu", function () {
-                    return false;
-                });
-                $.ajax({
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("FINANCE-BUSINESS", $.getCookie("FINANCE-BUSINESS"));
-                    }
-                });
+        $(document).ready(function () {
+            $(document).bind("contextmenu", function () {
+                return false;
             });
+            $.ajax({
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("FINANCE-BUSINESS", $.getCookie("FINANCE-BUSINESS"));
+                }
+            });
+        });
     </script>
-    <div class="navbar navbar-default navbar-fixed-top main_header" role="navigation">
-        <div class="container-fluid" style="height:80px;">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href='@Url.Action("Index", "Home")'>
-                    <img src="~/images/logo.png" />
-                </a>
-                <h1>
-                    @ViewBag.MainHeading
-                </h1>
-            </div>
-            <p style="float:right;color:#ffffff;">
-                <strong>@{string userName = string.IsNullOrEmpty(User.Identity.Name) ? "Welcome Guest" : string.Format("You're logged in as - {0} ", User.Identity.Name);} @userName </strong>.
-                @if (!string.IsNullOrEmpty(User.Identity.Name))
-            {<a href="@Url.Action("LogOff", "Account")" style="cursor:pointer;font-weight:bold;color:#ffffff;"><img src="~/images/exit.png" style="width: 24px; height: 24px; margin-right: 1px;" />[Logout]</a>}
-            </p>
-            <!--/.nav-collapse -->
-        </div>
-        <div class="navbar-collapse collapse" style="margin-top:0px;width:auto;float:right;margin-right:23px;">
-            @Html.Partial("_HomeTopMenu")
-            @if (ViewBag.IsBusinessExists != null && ViewBag.IsBusinessExists)
-            {
-                <div>@Html.Partial("_FinanceTopMenu")</div>
-                <div style="float:right;margin-left:3px;margin-top:10px;">
-                    <a href="@Url.Action("Index", "Home", new { })" style="color:#ffffff;font-size:medium;margin:0px;padding:0px;cursor:pointer;border:none;text-decoration:none;">
-                        <img src="~/images/home.png" style="width: 32px; height: 32px; margin-right: 1px;" />Home
+    <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse main_header" style="width:100%;">
+        <div class="container" style="margin:0px;padding:0px;width:100%;">
+            <div class="row">
+                <div class="col-lg-2">
+                    <a class="navbar-brand" href='@Url.Action("Index", "Home")'>
+                        <img src="~/images/logo.png" />
                     </a>
                 </div>
-            }
+                <div class="col-lg-6">
+                    <h3>
+                        @ViewBag.MainHeading
+                    </h3>
+                </div>
+                    <div class="col-lg-4">
+                        <p style="float:right;color:#ffffff;">
+                            <strong>@{string userName = string.IsNullOrEmpty(User.Identity.Name) ? "Welcome Guest" : string.Format("You're logged in as - {0} ", User.Identity.Name);} @userName </strong>.
+                            @if (!string.IsNullOrEmpty(User.Identity.Name))
+            {<a href="@Url.Action("LogOff", "Account")" style="cursor:pointer;font-weight:bold;color:#ffffff;"><img src="~/images/exit.png" style="width: 24px; height: 24px; margin-right: 1px;" />[Logout]</a>}
+                        </p>
+                    </div>
+                </div>
+            <div class="navbar-collapse collapse" style="margin-top:0px;width:auto;float:right;margin-right:23px;">
+                @Html.Partial("_FinanceTopMenu")
+            </div>
         </div>
-    </div>
-    <div class="container-fluid" style="margin-top:115px;margin-right:23px;">
+    </nav>
+    <div class="row container" style="margin:0px;padding:0px;width:100%;margin-top:-15px;">
         @RenderBody()
     </div>
     <hr>

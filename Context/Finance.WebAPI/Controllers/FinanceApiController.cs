@@ -884,9 +884,8 @@ namespace Finance.WebAPI.Controllers
         {
             try
             {
-                IEnumerable<InvoiceModel> invoices = new List<InvoiceModel>();
+                IEnumerable<InvoiceModel> invoices;
                 int TotalRowCount = 0;
-                return Request.CreateResponse(HttpStatusCode.OK, invoices);
                 invoices = this._InvoiceAppService.GetInvoices(IsPaid, null, null, pageIndex, pageSize, out TotalRowCount);
                 var urlHelper = new UrlHelper(this.ActionContext);
                 this.ActionContext.HttpContext.Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(

@@ -149,7 +149,7 @@ namespace Finance.Web.Controllers
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        public async Task<IActionResult> Index(ManageMessageId? message = null,string UserName=null)
+        public IActionResult Index(ManageMessageId? message = null,string UserName=null)
         {
             ViewData["StatusMessage"] =
                 message == ManageMessageId.ChangePasswordSuccess ? string.Format("{0} password has been changed.", string.IsNullOrEmpty(UserName)?"Your": UserName)
@@ -160,6 +160,7 @@ namespace Finance.Web.Controllers
                 : message == ManageMessageId.RemovePhoneSuccess ? string.Format("{0} phone number was removed.", string.IsNullOrEmpty(UserName) ? "Your" : UserName)
                 : message == ManageMessageId.RemoveUser ? string.Format("User {0} was removed.", string.IsNullOrEmpty(UserName) ? "" : UserName)
                 : message == ManageMessageId.AddUser ? string.Format("User {0} was Added.", string.IsNullOrEmpty(UserName) ? "" : UserName)
+                : message == ManageMessageId.ReSendResetPasswordSuccess ? string.Format("Re send reset password code of User {0} was sent.", string.IsNullOrEmpty(UserName) ? "" : UserName)
                 : "";
             IList<ApplicationUser> Users = _userManager.Users.ToList();
             if (Users == null || Users.Count == 0)
@@ -488,12 +489,23 @@ namespace Finance.Web.Controllers
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
+                await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction(nameof(AccountController.ResetPasswordConfirmation), "Account");
             }
             AddErrors(result);
             return View();
         }
-
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ReSendResetPassword(string UserName)
+        {
+            ApplicationUser user = await GetCurrentUserAsync(UserName);
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+            await _emailSender.SendEmailAsync(user.NormalizedEmail, "Reset Password",
+                $"Your User Name : <b>{user.UserName}<b/> <br/> Please reset your password by <a href='{callbackUrl}'>clicking here</a>");
+            return RedirectToAction(nameof(Index), "Account", new { Message = ManageMessageId.ReSendResetPasswordSuccess, UserName = user.UserName });
+        }
         //
         // GET: /Account/ResetPasswordConfirmation
         [HttpGet]
@@ -645,6 +657,7 @@ namespace Finance.Web.Controllers
         RemovePhoneSuccess,
         Error,
         RemoveUser,
-        AddUser
+        AddUser,
+        ReSendResetPasswordSuccess
     }
 }

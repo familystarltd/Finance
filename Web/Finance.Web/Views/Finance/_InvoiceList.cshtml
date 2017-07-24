@@ -222,9 +222,9 @@
                     }
                     else { $("#tblInvoicePagingNos").empty(); $("#lnkInvoicePrev").removeAttr('href'); $("#lnkInvoiceNext").removeAttr('href'); }
                 }
-                else { clearInvoiceForm(); $("#invoiceListMsg").text("Invoices have not been found! Please try again later.") }
+                else { clearInvoiceForm(); $("#invoiceListMsg").text("Unpaid Invoices have not been found!") }
             }
-            else { clearInvoiceForm(); $("#invoiceListMsg").text("Invoices have not been found! Please try again later.") }
+            else { clearInvoiceForm(); $("#invoiceListMsg").text("Unpaid Invoices have not been found!") }
         }
         $('body').on('click', 'a.Paging_ByIndex', function (e) {
             e.preventDefault();

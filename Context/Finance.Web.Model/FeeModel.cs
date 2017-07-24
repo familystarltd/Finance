@@ -39,6 +39,7 @@ namespace Finance.Web.Model
         /// </summary>
         public Guid CustomerId { get; set; }
         public CustomerModel Customer { get; set; }
+        public string CustomerAccountRef { get; set; }
         /// <summary>
         /// Get or Set the associated Payer for this fee
         /// </summary>

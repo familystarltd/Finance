@@ -10,7 +10,7 @@ using Finance.WebAPIProxy.Proxies;
 using Finance.Web.Model;
 using Finance.Web.Models;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Finance.Web.Controllers
 {
@@ -20,13 +20,11 @@ namespace Finance.Web.Controllers
     //[Authorize(Roles = "Administrator, Manager,User")]
     public class FinanceController : BaseController<Business>
     {
-        #region INIT
-        //protected override void OnActionExecuted(ActionExecutedContext filterContext)
-        //{
-        //    base.OnActionExecuted(filterContext);
-        //    ViewBag.MainHeading = string.Format("{0}{1}", "Finance Management", this.Business == null ? string.Empty : string.Format(" - {0}", this.Business.Name));
-        //}
-        #endregion
+        public override void OnActionExecuted(ActionExecutedContext context)
+        {
+            base.OnActionExecuted(context);
+            ViewBag.MainHeading = string.Format("{0}{1}", "Finance Management", this.Business == null ? string.Empty : string.Format(" - {0}", this.Business.Name));
+        }
 
         #region CTOR
         public FinanceController(BusinessService businessService, IOptions<AppSettings> appSettings) : base(businessService, appSettings)
@@ -41,7 +39,6 @@ namespace Finance.Web.Controllers
             deseralizeSettings.Converters.Add(new FinancialTransactionModelConverter());
             //deseralizeSettings.Converters.Add(new InvoiceDetailModelConverter());
             _serializer = new JsonNetSerialization(deseralizeSettings);
-            ViewBag.MainHeading = "Finance Management";
         }
         #endregion
 

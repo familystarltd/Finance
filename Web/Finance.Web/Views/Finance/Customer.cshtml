@@ -49,6 +49,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label for="customerRef" class="control-label col-sm-2">Active Date</label>
+                                <div class="col-md-9">
+                                    @Html.TextBoxFor(cus => cus.ActiveDate, new { name = "CustActiveDate", id = "CustActiveDate", @class = "form-control cus-start-date", style = "color:black;width:199px;" })
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label for="Title" class="control-label col-sm-2">Title</label>
                                 <div class="col-md-9">
                                     @Html.DropDownListFor(model => model.PersonalInfo.Title, Model.PersonalInfo.Title.ToSelectList(addPleaseSelect: true, selectMsg: ""), new { @class = "form-control", style = "text-align: left;width:84px;" })
@@ -106,10 +112,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="PostCode" class="control-label col-sm-1">Post Code</label>
+                        @*<label for="PostCode" class="control-label col-sm-1">Post Code</label>
                         <div class="col-sm-2">
                             @Html.TextBoxFor(cus => cus.PersonalInfo.PostCode, new { @class = "form-control", style = "color:black;" })
-                        </div>
+                        </div>*@
                         <label for="Address" class="control-label col-sm-1">Telephone</label>
                         <div class="col-sm-3">
                             @Html.TextBoxFor(cus => cus.PersonalInfo.Telephone, new { @class = "form-control", style = "color:black;" })
